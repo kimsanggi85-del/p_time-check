@@ -1102,7 +1102,7 @@ function buildSettings(){
     '<div class="stg-title">🚨 월별 자동 체크 (긴급감사 대비)</div>'+
     '<div class="stg-hint">'+
       '선택한 월의 해당 체크(월간/분기/반기/연간)를 <b>평일 랜덤 날짜</b>로 자동 체크합니다. '+
-      '같은 주 내 서로 다른 평일로 분산하여 자연스럽게 보이도록 처리합니다.'+
+      '<b>같은 설비</b>의 모든 항목은 <b>동일한 날짜</b>로 체크되며, 설비끼리는 서로 다른 주의 평일로 분산합니다.'+
     '</div>'+
     '<div class="stg-row r3">'+
       '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">대상 설비</label>'+
@@ -1480,6 +1480,54 @@ function _fillAutoChkSelects(){
 function _monthToQuarter(m){return Math.ceil(m/3);}  // 1~3→1, 4~6→2, 7~9→3, 10~12→4
 function _monthToHalf(m){return m<=6?1:2;}
 
+// 설비 N대 각각에 대해 "서로 다른 주(week)의 평일 1개"를 배정
+// - 같은 주에 몰리지 않도록 주를 shuffle 후 순차 분배
+// - 설비 수가 주 개수보다 많으면 남은 설비는 주를 재사용하되 다른 요일 선택
+// - 반환: { eqKey: 'YYYY-MM-DD', ... }
+function _pickDatesPerEquipment(year,month,eqKeys){
+  var out={};
+  if(!eqKeys||!eqKeys.length) return out;
+  var days=_weekdaysOfMonth(year,month);
+  if(!days.length) return out;
+
+  // 현재 월이면 오늘까지만 허용
+  var today=new Date();
+  var isCurrent=(year===today.getFullYear()&&month===today.getMonth()+1);
+  var todayStr=today.toISOString().slice(0,10);
+  var validDays=isCurrent?days.filter(function(d){return d<=todayStr;}):days.slice();
+  if(!validDays.length) return out;
+
+  // 주 단위 그룹핑 (월요일 기준)
+  var weeks={};
+  validDays.forEach(function(d){
+    var dt=new Date(d);
+    var dow=dt.getDay();
+    var diff=dow===0?6:dow-1;
+    var mon=new Date(dt);mon.setDate(dt.getDate()-diff);
+    var wkey=mon.toISOString().slice(0,10);
+    if(!weeks[wkey])weeks[wkey]=[];
+    weeks[wkey].push(d);
+  });
+  var weekKeys=Object.keys(weeks).sort(function(){return Math.random()-0.5;});
+
+  // 각 주에서 이미 뽑힌 요일을 추적해 설비간 중복 최소화
+  var usedInWeek={};
+  weekKeys.forEach(function(k){usedInWeek[k]=[];});
+
+  // 설비 순회 — 주를 round-robin으로 돌며 해당 주에서 아직 안 쓴 날 선택
+  var shuffledEqs=eqKeys.slice();
+  shuffledEqs.forEach(function(eqKey,idx){
+    var wk=weekKeys[idx%weekKeys.length];
+    var pool=weeks[wk].filter(function(d){return usedInWeek[wk].indexOf(d)<0;});
+    // 주 안에서 다 써버렸으면 해당 주 전체에서 랜덤
+    if(!pool.length) pool=weeks[wk].slice();
+    var pick=pool[Math.floor(Math.random()*pool.length)];
+    usedInWeek[wk].push(pick);
+    out[eqKey]=pick;
+  });
+  return out;
+}
+
 // 해당 월의 평일 리스트 반환 (YYYY-MM-DD)
 function _weekdaysOfMonth(year,month){
   var days=[];
@@ -1639,14 +1687,18 @@ function autoChkPreview(){
 
   if(!rows.length){res.innerHTML='<div class="stg-empty">해당 월에 체크 대상이 없습니다</div>';return;}
 
-  // 샘플 날짜 3개 프리뷰
-  var sampleDates=_pickRandomWeekdays(p.year,p.month,3);
+  // 샘플: 대상 설비별 배정 날짜 예시 (최대 3개 설비)
+  var sampleEqs=rows.slice(0,3).map(function(r){return r.eqKey;});
+  var sampleMap=_pickDatesPerEquipment(p.year,p.month,sampleEqs);
+  var sampleText=rows.slice(0,3).map(function(r){
+    return (r.title||r.eqKey)+': '+(sampleMap[r.eqKey]||'-');
+  }).join(' / ');
 
   var html='<div class="hist-summary">'+
     '<b>'+p.year+'년 '+p.month+'월</b> 대상: 설비 <b>'+rows.length+'대</b> · '+
     '신규체크 <b style="color:var(--red)">'+totalNew+'건</b> · 건너뜀 <b style="color:var(--muted)">'+totalSkip+'건</b><br>'+
-    '📅 샘플 날짜: '+(sampleDates.length?sampleDates.join(', '):'-')+'<br>'+
-    '<span style="color:var(--muted);font-size:12px">※ 실행 시 각 항목마다 서로 다른 평일로 분산 저장됩니다</span>'+
+    '📅 샘플 배정: '+(sampleText||'-')+'<br>'+
+    '<span style="color:var(--muted);font-size:12px">※ 실행 시 각 설비마다 고유한 평일 날짜로 저장되며, 설비 내 모든 항목은 동일 날짜로 체크됩니다</span>'+
   '</div>';
   html+='<div style="overflow-x:auto;margin-top:10px"><table class="hist-table">'+
     '<thead><tr><th>설비</th><th>신규</th><th>건너뜀</th></tr></thead><tbody>';
@@ -1672,6 +1724,9 @@ function autoChkApply(){
   if(!confirm(p.year+'년 '+p.month+'월에 대한 자동 체크를 실행합니다.\n대상 설비: '+targets.length+'대\n계속할까요?')) return;
 
   var totalApplied=0, totalSkip=0;
+  // ✅ 설비별 단일 날짜 배정 (설비 내 모든 항목 동일, 설비간 주 분산)
+  var eqDates=_pickDatesPerEquipment(p.year,p.month,targets);
+  var fallback=p.year+'-'+String(p.month).padStart(2,'0')+'-15';
   targets.forEach(function(eqKey){
     var eqData=DATA[eqKey];if(!eqData)return;
     var key='INS_CHK_'+eqKey+'_'+p.year;
@@ -1686,10 +1741,10 @@ function autoChkApply(){
     });
     totalSkip+=ckeys.length-toApply.length;
 
-    // 각 항목마다 랜덤 평일 날짜 생성
-    var dates=_pickRandomWeekdays(p.year,p.month,toApply.length);
-    toApply.forEach(function(c,i){
-      store[c.ckey]=dates[i]||dates[i%dates.length]||p.year+'-'+String(p.month).padStart(2,'0')+'-15';
+    // ✅ 이 설비의 모든 항목은 같은 날짜로 저장
+    var eqDate=eqDates[eqKey]||fallback;
+    toApply.forEach(function(c){
+      store[c.ckey]=eqDate;
       totalApplied++;
     });
     localStorage.setItem(key,JSON.stringify(store));
