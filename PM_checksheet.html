@@ -2670,10 +2670,9 @@ function switchMainTab(tab){
 // ================================================================
 function renderVolTabs(){
   const tabs = document.getElementById('volTabs');
-  const vols = [...new Set(EQUIP.map(e=>e.vol))].sort((a,b)=>a-b);
-  let h = `<div class="vol-tab ${currentVol===0?'active':''}" onclick="currentVol=0;renderVolTabs()">전체</div>`;
-  vols.forEach(v=>h+=`<div class="vol-tab ${currentVol===v?'active':''}" onclick="currentVol=${v};renderVolTabs()">${v}권</div>`);
-  tabs.innerHTML = h;
+  // 권(볼륨) 구분 UI 비활성화: 항상 전체 설비를 표시
+  currentVol = 0;
+  if(tabs) tabs.style.display = 'none';
   renderEqTable();
 }
 
