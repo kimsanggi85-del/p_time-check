@@ -499,28 +499,26 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
     <div class="settings-section" style="border:2px solid #2563eb;background:#eff6ff">
       <h3>☁️ 클라우드 동기화 설정 (PC ↔ 핸드폰) <span id="syncSettingsStatus" style="font-size:13px;color:var(--muted);font-weight:500;margin-left:auto"></span></h3>
       <div style="background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:14px;line-height:1.7;margin-bottom:14px">
-        <b style="color:var(--accent)">📱 PC와 핸드폰에서 같은 데이터를 쓰려면 아래 설정이 필요합니다.</b><br>
-        • Supabase URL과 anon KEY를 입력하면 모든 기기에서 <b>자동으로 동기화</b>됩니다.<br>
-        • 기본 URL은 기존 프로젝트(<code>yimmmfuocifgherrgwze</code>)를 사용하며, 기존 <code>kv_store</code> 테이블을 재사용합니다.<br>
-        • PM 앱 데이터는 모두 <code>pm:</code> prefix로 격리되므로 다른 앱과 충돌하지 않습니다.<br>
-        • <b>최초 1회만 anon KEY를 입력하면 됩니다.</b> (kv_store 테이블이 이미 있으므로 SQL 실행은 불필요)<br>
-        • 만약 kv_store 테이블이 없다면 아래 SQL 복사 버튼을 사용하세요.
+        <b style="color:var(--accent)">✅ 자동 연결되어 있습니다.</b><br>
+        • Supabase 프로젝트 <code>ebthltdmxpzlkfwvdloz</code>의 <code>kv_store</code> 테이블 자동 사용<br>
+        • PM 앱 데이터는 모두 <code>pm:</code> prefix로 격리되므로 다른 앱과 충돌하지 않습니다<br>
+        • PC와 핸드폰이 같은 URL로 접속하면 <b>자동으로 동기화</b>됩니다<br>
+        • 아래 입력란은 다른 Supabase 프로젝트로 전환할 때만 사용하세요
       </div>
       <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px">
         <div>
-          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase URL</label>
+          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase URL (기본값 사용 권장)</label>
           <input type="text" id="cfgSbUrl" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace" placeholder="https://xxxxx.supabase.co">
         </div>
         <div>
-          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase anon KEY (public key)</label>
-          <input type="text" id="cfgSbKey" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace" placeholder="eyJhbGciOiJIUzI1NiIs...">
+          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase KEY (기본값 사용 권장)</label>
+          <input type="text" id="cfgSbKey" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace" placeholder="sb_publishable_... 또는 eyJ...">
         </div>
       </div>
       <div class="settings-actions">
-        <button class="btn btn-primary" onclick="saveSyncConfig()">💾 저장 후 테스트 연결</button>
+        <button class="btn btn-primary" onclick="saveSyncConfig()">💾 설정 변경 (고급)</button>
         <button class="btn btn-secondary" onclick="manualSync()">🔄 지금 동기화</button>
-        <button class="btn btn-secondary" onclick="copySyncSQL()">📋 kv_store 생성 SQL 복사 (필요시)</button>
-        <button class="btn btn-danger btn-sm" onclick="clearSyncConfig()">설정 초기화</button>
+        <button class="btn btn-danger btn-sm" onclick="clearSyncConfig()">기본값으로 복원</button>
       </div>
       <details style="margin-top:12px">
         <summary style="cursor:pointer;font-weight:600;color:var(--accent)">▶ kv_store 테이블이 없을 때만 실행할 SQL 보기</summary>
@@ -632,7 +630,8 @@ CREATE INDEX IF NOT EXISTS idx_kv_store_updated ON kv_store(updated_at DESC);</p
  * - 다른 앱과 충돌 방지를 위해 모든 키에 'pm:' prefix 사용
  * - Supabase URL/KEY는 localStorage에 저장 (설정 탭에서 변경 가능)
  * ================================================================ */
-const DEFAULT_SUPABASE_URL = 'https://yimmmfuocifgherrgwze.supabase.co';
+const DEFAULT_SUPABASE_URL = 'https://ebthltdmxpzlkfwvdloz.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_ZSgcZapb7cTgFezGmOV_ow_9MT15SnS';
 const SYNC_TABLE = 'kv_store';       // 기존 테이블 재사용
 const KEY_NS = 'pm:';                // PM 앱 전용 네임스페이스
 
@@ -646,7 +645,7 @@ function getSupabaseUrl(){
   return localStorage.getItem('pm_sb_url') || DEFAULT_SUPABASE_URL;
 }
 function getSupabaseKey(){
-  return localStorage.getItem('pm_sb_key') || '';
+  return localStorage.getItem('pm_sb_key') || DEFAULT_SUPABASE_KEY;
 }
 function setSupabaseConfig(url, key){
   localStorage.setItem('pm_sb_url', url);
@@ -954,13 +953,13 @@ function saveSyncConfig(){
 window.saveSyncConfig = saveSyncConfig;
 
 function clearSyncConfig(){
-  if(!confirm('클라우드 동기화 설정을 초기화하시겠습니까? (로컬 데이터는 유지됩니다)')) return;
+  if(!confirm('클라우드 동기화 설정을 기본값으로 복원하시겠습니까?\n(로컬 데이터는 유지됩니다)')) return;
   localStorage.removeItem('pm_sb_url');
   localStorage.removeItem('pm_sb_key');
   _sb = null;
   refreshSyncConfigUI();
-  setSyncUI('offline', '미설정');
-  alert('✅ 설정이 초기화되었습니다.');
+  alert('✅ 기본값으로 복원되었습니다. 다시 연결합니다...');
+  _bootstrapSync();
 }
 window.clearSyncConfig = clearSyncConfig;
 
@@ -989,9 +988,15 @@ function refreshSyncConfigUI(){
   if(urlEl) urlEl.value = getSupabaseUrl();
   if(keyEl) keyEl.value = getSupabaseKey();
   if(st){
-    const has = !!getSupabaseKey();
-    st.textContent = has ? '✅ 설정됨' : '⚠ anon KEY 미입력';
-    st.style.color = has ? 'var(--green)' : 'var(--red)';
+    const customUrl = localStorage.getItem('pm_sb_url');
+    const customKey = localStorage.getItem('pm_sb_key');
+    if(customUrl || customKey){
+      st.textContent = '🔧 사용자 지정 설정';
+      st.style.color = 'var(--orange)';
+    } else {
+      st.textContent = '✅ 기본값(자동 연결)';
+      st.style.color = 'var(--green)';
+    }
   }
 }
 window.refreshSyncConfigUI = refreshSyncConfigUI;
