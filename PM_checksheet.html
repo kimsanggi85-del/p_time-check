@@ -454,7 +454,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   </div>
 
   <div id="view_plan">
-    <div class="vol-tabs" id="volTabs" style="display:none"></div>
+    <div class="vol-tabs" id="volTabs"></div>
     <div class="legend">
       <span><span class="sym" style="color:#2563eb">□</span> 계획</span>
       <span><span class="sym" style="color:#16a34a">▣</span> 점검완료</span>
@@ -885,7 +885,6 @@ async function manualSync(){
 window.manualSync = manualSync;
 
 // 페이지 로드 시 초기화: 다운로드 → 기존 초기화 로직 실행
-// [핵심 수정] 실패해도 재시도, 성공 시 안전하게 재렌더 강화
 async function _bootstrapSync(){
   setSyncUI('connecting');
   // KEY 미설정 시 안내
@@ -893,17 +892,7 @@ async function _bootstrapSync(){
     setSyncUI('offline', '미설정 - 설정 탭에서 연결');
     return;
   }
-  // [신규] 최대 3회 재시도 - 모바일 네트워크 불안정 대응
-  let ok = false;
-  let attempt = 0;
-  while(!ok && attempt < 3){
-    attempt++;
-    ok = await initialDownload();
-    if(!ok && attempt < 3){
-      console.warn(`[Sync] 다운로드 실패, ${attempt}/3회 재시도 중...`);
-      await new Promise(r => setTimeout(r, 1000 * attempt)); // 1초, 2초 대기
-    }
-  }
+  const ok = await initialDownload();
   // 다운로드 성공했다면 화면을 최신 데이터로 재렌더 (경쟁 조건 방어)
   if(ok){
     try{
@@ -911,8 +900,6 @@ async function _bootstrapSync(){
       if(typeof window.renderYearSelect==='function') window.renderYearSelect();
       if(typeof window.updatePageTitle==='function') window.updatePageTitle();
       if(typeof window.renderVolTabs==='function') window.renderVolTabs();
-      // [신규] 보전이력 탭도 갱신
-      if(typeof window.renderMaintHistory==='function') window.renderMaintHistory();
       // 체크시트 옵션도 갱신
       if(typeof window.initChkSheet==='function') window.initChkSheet();
       const sel = document.getElementById('eqSelect');
@@ -920,10 +907,6 @@ async function _bootstrapSync(){
         window.restoreChks(sel.value);
       }
     }catch(e){console.warn('[Sync] 초기 재렌더 오류', e);}
-  } else {
-    // [신규] 완전 실패 시에도 사용자 안내
-    setSyncUI('error', '연결 실패 - 🔄 새로고침 버튼을 눌러주세요');
-    console.error('[Sync] 3회 재시도 실패. 수동 동기화 필요.');
   }
   // 30초마다 자동 갱신(다른 기기에서 변경된 내용 반영)
   setInterval(async ()=>{
@@ -977,50 +960,11 @@ if(document.readyState === 'loading'){
 }
 
 // 포커스/표시 전환 시에도 최신 상태 확인
-// [핵심 수정] 업로드 flush 뿐 아니라 다운로드도 수행 (다른 기기 변경사항 반영)
-let _lastFocusSync = 0;
-async function _refreshOnFocus(){
-  if(_uploadQueue.size>0) await flushUpload();
-  // 너무 잦은 호출 방지 (10초 쓰로틀)
-  const now = Date.now();
-  if(now - _lastFocusSync < 10000) return;
-  _lastFocusSync = now;
-  if(!getSupabaseKey()) return;
-  try{
-    const sb = getSb();
-    if(!sb) return;
-    const { data, error } = await sb.from(SYNC_TABLE)
-      .select('key,value,updated_at')
-      .like('key', KEY_NS+'%');
-    if(error || !Array.isArray(data)) return;
-    let changed = false;
-    for(const row of data){
-      if(!row || !row.key) continue;
-      const localKey = toLocalKey(row.key);
-      if(!localKey) continue;
-      const val = cloudValueToLocalString(row.value);
-      const cur = localStorage.getItem(localKey);
-      if(cur !== val){
-        _lsSet(localKey, val);
-        changed = true;
-      }
-    }
-    if(changed){
-      try{
-        if(typeof window.reloadYearData==='function') window.reloadYearData();
-        if(typeof window.currentMainTab!=='undefined'){
-          if(window.currentMainTab==='plan' && typeof window.renderVolTabs==='function') window.renderVolTabs();
-          if(window.currentMainTab==='history' && typeof window.renderMaintHistory==='function') window.renderMaintHistory();
-        }
-        setSyncUI('synced', '최신 데이터로 갱신됨');
-      }catch(e){console.warn('[Sync] focus 재렌더 오류', e);}
-    }
-  }catch(e){console.warn('[Sync] focus 재동기화 오류', e);}
-}
-
-window.addEventListener('focus', _refreshOnFocus);
+window.addEventListener('focus', ()=>{
+  if(_uploadQueue.size>0) flushUpload();
+});
 document.addEventListener('visibilitychange', ()=>{
-  if(!document.hidden) _refreshOnFocus();
+  if(!document.hidden && _uploadQueue.size>0) flushUpload();
 });
 
 // 설정 UI 함수
@@ -2740,20 +2684,208 @@ function toggleCheck(eqId,month,week,event){
   event.stopPropagation();
   const key = getCheckKey(eqId,month,week);
   if(checkData[key]){
-    if(confirm('점검 완료를 취소하시겠습니까?\n(자동 생성된 보전이력도 함께 삭제됩니다.)')){
-      const autoId = checkData[key].autoHistoryId;
-      if(autoId){
-        maintHistory = maintHistory.filter(h=>h.id!==autoId);
-        setHistory(maintHistory);
-      }
-      delete checkData[key];
-      setChecks(currentYear, checkData);
-      renderEqTable();
-    }
+    // 이미 점검 완료된 셀 → 상세 보기 팝업 (수정/삭제 가능)
+    openCheckDetailModal(eqId, month, week);
   }else{
+    // 미완료 셀 → 신규 등록
     openAutoHistoryForm(eqId, month, week);
   }
 }
+
+// 점검 완료된 셀 상세 보기 모달
+function openCheckDetailModal(eqId, month, week){
+  const key = getCheckKey(eqId,month,week);
+  const cd = checkData[key];
+  if(!cd) return;
+  const eq = EQUIP.find(e=>e.id===eqId);
+  const weekLabel = week==='w2'?'2주차':'4주차';
+  const hist = cd.autoHistoryId ? maintHistory.find(h=>h.id===cd.autoHistoryId) : null;
+
+  let h = `<div class="mh-form-title">
+    ✓ 점검완료 상세
+    <button onclick="closeMaintForm()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">✕</button>
+  </div>`;
+
+  h += `<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:14px;font-size:15px">
+    <b style="color:#15803d">${eqId}${eq?' · '+eq.name:''}</b>
+    <span style="color:var(--muted);font-size:14px">&nbsp;·&nbsp;${currentYear}년 ${month}월 ${weekLabel}</span>
+  </div>`;
+
+  h += `<div style="display:grid;grid-template-columns:120px 1fr;gap:8px 14px;font-size:14px;line-height:1.8;margin-bottom:14px">
+    <div style="color:var(--muted);font-weight:600">점검일자</div><div><b>${cd.date||'-'}</b></div>
+    <div style="color:var(--muted);font-weight:600">담당자</div><div>${cd.by||'-'}</div>`;
+
+  if(hist){
+    const tc = MH_TYPE_COLORS[hist.type]||'#666';
+    h += `
+      <div style="color:var(--muted);font-weight:600">보전유형</div>
+      <div><span class="mh-badge" style="background:${tc}">${hist.type||'-'}</span></div>
+      <div style="color:var(--muted);font-weight:600">점검 내용</div><div style="white-space:pre-wrap">${_esc(hist.work||'-')}</div>
+      <div style="color:var(--muted);font-weight:600">소요시간</div><div>${hist.hours||0} h</div>
+      <div style="color:var(--muted);font-weight:600">교체부품</div><div>${_esc(hist.parts||'-')}</div>
+      <div style="color:var(--muted);font-weight:600">비용</div><div>${hist.cost?(hist.cost/10000).toFixed(1)+'만원':'-'}</div>
+      <div style="color:var(--muted);font-weight:600">결과</div>
+      <div><span class="mh-badge" style="background:${hist.result==='정상복구'?'var(--green)':hist.result==='미완료'?'var(--red)':'#6b7280'}">${hist.result||'-'}</span></div>
+      <div style="color:var(--muted);font-weight:600">비고</div><div style="white-space:pre-wrap">${_esc(hist.note||'-')}</div>
+    `;
+  } else {
+    h += `
+      <div style="color:var(--muted);font-weight:600">상세 이력</div>
+      <div style="color:var(--muted);font-style:italic">연결된 보전이력이 없습니다 (이력 생략으로 완료처리됨)</div>
+    `;
+  }
+  h += `</div>`;
+
+  // 버튼: 수정 / 삭제 / 닫기
+  h += `<div style="display:flex;gap:10px;margin-top:16px;justify-content:space-between;flex-wrap:wrap">
+    <button onclick="deleteCheck('${eqId}',${month},'${week}')" class="btn btn-danger" style="background:var(--red);color:#fff">🗑 점검완료 삭제</button>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeMaintForm()" class="btn btn-secondary">닫기</button>
+      <button onclick="editCheck('${eqId}',${month},'${week}')" class="btn btn-primary">📝 수정</button>
+    </div>
+  </div>`;
+
+  document.getElementById('maintFormBody').innerHTML = h;
+  document.getElementById('maintFormModal').style.display = 'flex';
+}
+window.openCheckDetailModal = openCheckDetailModal;
+
+// 점검완료 삭제 (셀 해제 + 연결 이력 삭제)
+function deleteCheck(eqId, month, week){
+  const key = getCheckKey(eqId,month,week);
+  const cd = checkData[key];
+  if(!cd) return;
+  if(!confirm('이 점검완료를 삭제하시겠습니까?\n(연결된 자동생성 보전이력이 있으면 함께 삭제됩니다.)')) return;
+  const autoId = cd.autoHistoryId;
+  if(autoId){
+    maintHistory = maintHistory.filter(h=>h.id!==autoId);
+    setHistory(maintHistory);
+  }
+  delete checkData[key];
+  setChecks(currentYear, checkData);
+  closeMaintForm();
+  renderEqTable();
+}
+window.deleteCheck = deleteCheck;
+
+// 점검완료 수정 (날짜/담당자/이력 내용 편집)
+function editCheck(eqId, month, week){
+  const key = getCheckKey(eqId,month,week);
+  const cd = checkData[key];
+  if(!cd) return;
+  const eq = EQUIP.find(e=>e.id===eqId);
+  const weekLabel = week==='w2'?'2주차':'4주차';
+  const planSym = (currentPlan[eqId]&&currentPlan[eqId][String(month)]) ? currentPlan[eqId][String(month)][week] : '';
+  const isSelfCheck = planSym==='■';
+  const hist = cd.autoHistoryId ? maintHistory.find(h=>h.id===cd.autoHistoryId) : null;
+
+  let h = `<div class="mh-form-title">📝 점검완료 수정<button onclick="closeMaintForm()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">✕</button></div>`;
+  h += `<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:14px;font-size:15px">
+    <b style="color:#b45309">${eqId}${eq?' · '+eq.name:''}</b>
+    <span style="color:var(--muted);font-size:14px">&nbsp;·&nbsp;${currentYear}년 ${month}월 ${weekLabel}${isSelfCheck?' (자체점검)':''}</span>
+  </div>`;
+  h += `<div class="mh-form-grid">
+    <div class="mh-form-field"><label>점검일자 *</label><input type="date" id="ef_date" class="mh-input" value="${cd.date||''}"></div>
+    <div class="mh-form-field"><label>보전유형</label>
+      <select id="ef_type" class="mh-input">
+        <option value="정기보전"${(hist?.type==='정기보전'||!hist)?' selected':''}>정기보전</option>
+        <option value="예방보전"${hist?.type==='예방보전'?' selected':''}>예방보전</option>
+        <option value="고장보전"${hist?.type==='고장보전'?' selected':''}>고장보전</option>
+        <option value="자체점검"${hist?.type==='자체점검'?' selected':''}>자체점검</option>
+      </select>
+    </div>
+    <div class="mh-form-field"><label>담당자 *</label><input id="ef_worker" class="mh-input" value="${_esc(cd.by||hist?.worker||'')}" placeholder="예: 홍길동"></div>
+    <div class="mh-form-field"><label>소요시간(h)</label><input type="number" id="ef_hours" class="mh-input" value="${hist?.hours||''}" step="0.5"></div>
+  </div>
+  <div class="mh-form-field"><label>점검 내용${hist?' *':''}</label><textarea id="ef_work" class="mh-input" rows="3" placeholder="예: 일상점검 + 급유">${_esc(hist?.work||'')}</textarea></div>
+  <div class="mh-form-grid">
+    <div class="mh-form-field"><label>결과</label>
+      <select id="ef_result" class="mh-input">
+        <option value="정상복구"${(hist?.result==='정상복구'||!hist)?' selected':''}>정상복구</option>
+        <option value="양호"${hist?.result==='양호'?' selected':''}>양호</option>
+        <option value="미완료"${hist?.result==='미완료'?' selected':''}>미완료</option>
+      </select>
+    </div>
+    <div class="mh-form-field"><label>비용(원)</label><input type="number" id="ef_cost" class="mh-input" value="${hist?.cost||''}" placeholder="예: 150000"></div>
+  </div>
+  <div class="mh-form-grid">
+    <div class="mh-form-field"><label>교체부품</label><input id="ef_parts" class="mh-input" value="${_esc(hist?.parts||'')}" placeholder="예: 베어링, 실린더"></div>
+    <div class="mh-form-field"><label>비고</label><input id="ef_note" class="mh-input" value="${_esc(hist?.note||'')}"></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap">
+    <button onclick="closeMaintForm()" class="btn btn-secondary">취소</button>
+    <button onclick="saveEditedCheck('${eqId}',${month},'${week}')" class="btn btn-primary">💾 저장</button>
+  </div>`;
+  document.getElementById('maintFormBody').innerHTML = h;
+  document.getElementById('maintFormModal').style.display = 'flex';
+}
+window.editCheck = editCheck;
+
+// 수정 저장
+function saveEditedCheck(eqId, month, week){
+  const key = getCheckKey(eqId,month,week);
+  const cd = checkData[key];
+  if(!cd) return;
+
+  const date = document.getElementById('ef_date').value;
+  const type = document.getElementById('ef_type').value;
+  const worker = document.getElementById('ef_worker').value.trim();
+  const hours = parseFloat(document.getElementById('ef_hours').value)||0;
+  const work = document.getElementById('ef_work').value.trim();
+  const result = document.getElementById('ef_result').value;
+  const cost = parseInt(document.getElementById('ef_cost').value)||0;
+  const parts = document.getElementById('ef_parts').value.trim();
+  const note = document.getElementById('ef_note').value.trim();
+
+  if(!date){alert('점검일자는 필수입니다.');return}
+  if(!worker){alert('담당자는 필수입니다.');document.getElementById('ef_worker').focus();return}
+
+  // 체크 데이터 업데이트
+  checkData[key].date = date;
+  checkData[key].by = worker;
+
+  // 연결된 이력이 있으면 업데이트
+  if(cd.autoHistoryId){
+    const idx = maintHistory.findIndex(h=>h.id===cd.autoHistoryId);
+    if(idx >= 0){
+      maintHistory[idx] = {
+        ...maintHistory[idx],
+        date, type, worker, hours, work, result, cost, parts, note
+      };
+    } else {
+      // 참조 이력이 사라진 경우 새로 생성
+      if(work){
+        const newRec = {
+          id: _mhNextId++,
+          eqId, date, type, issue:'',
+          work, worker, hours, parts, cost, result, note,
+          autoGenerated: true,
+          planYear: currentYear, planMonth: month, planWeek: week
+        };
+        maintHistory.push(newRec);
+        checkData[key].autoHistoryId = newRec.id;
+      }
+    }
+  } else if(work){
+    // 이력이 없었는데 내용을 입력한 경우 새로 생성
+    const newRec = {
+      id: _mhNextId++,
+      eqId, date, type, issue:'',
+      work, worker, hours, parts, cost, result, note,
+      autoGenerated: true,
+      planYear: currentYear, planMonth: month, planWeek: week
+    };
+    maintHistory.push(newRec);
+    checkData[key].autoHistoryId = newRec.id;
+  }
+
+  setHistory(maintHistory);
+  setChecks(currentYear, checkData);
+  closeMaintForm();
+  renderEqTable();
+  alert('✅ 수정되었습니다.');
+}
+window.saveEditedCheck = saveEditedCheck;
 
 function openAutoHistoryForm(eqId, month, week){
   const eq = EQUIP.find(e=>e.id===eqId);
@@ -2912,7 +3044,7 @@ function renderEqTable(){
             const isDone = !!checkData[k];
             const display = isDone?'<span class="done">▣</span>':sym(v);
             const dateStr = isDone?`<span class="check-date">${checkData[k].date}</span>`:'';
-            h += `<td class="plan-cell clickable" onclick="toggleCheck('${eq.id}',${m},'${w}',event)" title="${isDone?'점검완료 '+checkData[k].date+' (클릭 취소)':'클릭하여 점검완료 + 이력등록'}">${display}${dateStr}</td>`;
+            h += `<td class="plan-cell clickable" onclick="toggleCheck('${eq.id}',${m},'${w}',event)" title="${isDone?'점검완료 '+checkData[k].date+' (클릭: 상세보기/수정/삭제)':'클릭하여 점검완료 + 이력등록'}">${display}${dateStr}</td>`;
           }else{
             h += `<td class="plan-cell"></td>`;
           }
