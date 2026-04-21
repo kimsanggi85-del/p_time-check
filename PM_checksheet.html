@@ -454,7 +454,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   </div>
 
   <div id="view_plan">
-    <div class="vol-tabs" id="volTabs"></div>
+    <div class="vol-tabs" id="volTabs" style="display:none"></div>
     <div class="legend">
       <span><span class="sym" style="color:#2563eb">□</span> 계획</span>
       <span><span class="sym" style="color:#16a34a">▣</span> 점검완료</span>
@@ -885,6 +885,7 @@ async function manualSync(){
 window.manualSync = manualSync;
 
 // 페이지 로드 시 초기화: 다운로드 → 기존 초기화 로직 실행
+// [핵심 수정] 실패해도 재시도, 성공 시 안전하게 재렌더 강화
 async function _bootstrapSync(){
   setSyncUI('connecting');
   // KEY 미설정 시 안내
@@ -892,7 +893,17 @@ async function _bootstrapSync(){
     setSyncUI('offline', '미설정 - 설정 탭에서 연결');
     return;
   }
-  const ok = await initialDownload();
+  // [신규] 최대 3회 재시도 - 모바일 네트워크 불안정 대응
+  let ok = false;
+  let attempt = 0;
+  while(!ok && attempt < 3){
+    attempt++;
+    ok = await initialDownload();
+    if(!ok && attempt < 3){
+      console.warn(`[Sync] 다운로드 실패, ${attempt}/3회 재시도 중...`);
+      await new Promise(r => setTimeout(r, 1000 * attempt)); // 1초, 2초 대기
+    }
+  }
   // 다운로드 성공했다면 화면을 최신 데이터로 재렌더 (경쟁 조건 방어)
   if(ok){
     try{
@@ -900,6 +911,8 @@ async function _bootstrapSync(){
       if(typeof window.renderYearSelect==='function') window.renderYearSelect();
       if(typeof window.updatePageTitle==='function') window.updatePageTitle();
       if(typeof window.renderVolTabs==='function') window.renderVolTabs();
+      // [신규] 보전이력 탭도 갱신
+      if(typeof window.renderMaintHistory==='function') window.renderMaintHistory();
       // 체크시트 옵션도 갱신
       if(typeof window.initChkSheet==='function') window.initChkSheet();
       const sel = document.getElementById('eqSelect');
@@ -907,6 +920,10 @@ async function _bootstrapSync(){
         window.restoreChks(sel.value);
       }
     }catch(e){console.warn('[Sync] 초기 재렌더 오류', e);}
+  } else {
+    // [신규] 완전 실패 시에도 사용자 안내
+    setSyncUI('error', '연결 실패 - 🔄 새로고침 버튼을 눌러주세요');
+    console.error('[Sync] 3회 재시도 실패. 수동 동기화 필요.');
   }
   // 30초마다 자동 갱신(다른 기기에서 변경된 내용 반영)
   setInterval(async ()=>{
@@ -960,11 +977,50 @@ if(document.readyState === 'loading'){
 }
 
 // 포커스/표시 전환 시에도 최신 상태 확인
-window.addEventListener('focus', ()=>{
-  if(_uploadQueue.size>0) flushUpload();
-});
+// [핵심 수정] 업로드 flush 뿐 아니라 다운로드도 수행 (다른 기기 변경사항 반영)
+let _lastFocusSync = 0;
+async function _refreshOnFocus(){
+  if(_uploadQueue.size>0) await flushUpload();
+  // 너무 잦은 호출 방지 (10초 쓰로틀)
+  const now = Date.now();
+  if(now - _lastFocusSync < 10000) return;
+  _lastFocusSync = now;
+  if(!getSupabaseKey()) return;
+  try{
+    const sb = getSb();
+    if(!sb) return;
+    const { data, error } = await sb.from(SYNC_TABLE)
+      .select('key,value,updated_at')
+      .like('key', KEY_NS+'%');
+    if(error || !Array.isArray(data)) return;
+    let changed = false;
+    for(const row of data){
+      if(!row || !row.key) continue;
+      const localKey = toLocalKey(row.key);
+      if(!localKey) continue;
+      const val = cloudValueToLocalString(row.value);
+      const cur = localStorage.getItem(localKey);
+      if(cur !== val){
+        _lsSet(localKey, val);
+        changed = true;
+      }
+    }
+    if(changed){
+      try{
+        if(typeof window.reloadYearData==='function') window.reloadYearData();
+        if(typeof window.currentMainTab!=='undefined'){
+          if(window.currentMainTab==='plan' && typeof window.renderVolTabs==='function') window.renderVolTabs();
+          if(window.currentMainTab==='history' && typeof window.renderMaintHistory==='function') window.renderMaintHistory();
+        }
+        setSyncUI('synced', '최신 데이터로 갱신됨');
+      }catch(e){console.warn('[Sync] focus 재렌더 오류', e);}
+    }
+  }catch(e){console.warn('[Sync] focus 재동기화 오류', e);}
+}
+
+window.addEventListener('focus', _refreshOnFocus);
 document.addEventListener('visibilitychange', ()=>{
-  if(!document.hidden && _uploadQueue.size>0) flushUpload();
+  if(!document.hidden) _refreshOnFocus();
 });
 
 // 설정 UI 함수
