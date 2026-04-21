@@ -518,6 +518,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
       <div class="settings-actions">
         <button class="btn btn-primary" onclick="saveSyncConfig()">💾 설정 변경 (고급)</button>
         <button class="btn btn-secondary" onclick="manualSync()">🔄 지금 동기화</button>
+        <button class="btn btn-secondary" onclick="forcePushAll()" style="background:#fef3c7;color:#b45309;border-color:#fbbf24">⬆️ 로컬 데이터 서버에 강제 푸시</button>
         <button class="btn btn-danger btn-sm" onclick="clearSyncConfig()">기본값으로 복원</button>
       </div>
       <details style="margin-top:12px">
@@ -772,6 +773,7 @@ localStorage.removeItem = function(key){
 };
 
 // 초기 다운로드: Supabase → localStorage (pm: prefix만 가져옴)
+// + 서버에 없거나 오래된 로컬 데이터는 자동으로 서버에 푸시
 async function initialDownload(){
   const sb = getSb();
   if(!sb){
@@ -789,18 +791,55 @@ async function initialDownload(){
       setSyncUI('error', '테이블 확인 필요: '+(error.message||''));
       return false;
     }
-    let applied = 0;
+
+    // 1) 서버 데이터 Map 구성 (key → value string)
+    const serverMap = new Map();
     if(Array.isArray(data)){
       for(const row of data){
         if(!row || !row.key) continue;
         const localKey = toLocalKey(row.key);
         if(!localKey) continue;
         const val = cloudValueToLocalString(row.value);
-        _lsSet(localKey, val);  // 후킹 우회(재업로드 방지)
+        serverMap.set(localKey, val);
+      }
+    }
+
+    // 2) 서버 값을 localStorage에 반영 (다운로드)
+    let applied = 0;
+    for(const [k, v] of serverMap.entries()){
+      const cur = localStorage.getItem(k);
+      if(cur !== v){
+        _lsSet(k, v);  // 후킹 우회(재업로드 방지)
         applied++;
       }
     }
-    setSyncUI('synced', `동기화됨 (${applied}건)`);
+
+    // 3) 서버에 없는 로컬 데이터 자동 푸시 (= 처음 업로드되는 데이터)
+    //    그리고 서버에 있지만 내용이 다른 경우도 해당 (이미 다운로드로 덮어쓴 것은 제외됨)
+    const toPush = [];
+    const allLocalKeys = Object.keys(localStorage);
+    for(const k of allLocalKeys){
+      if(!isSyncKey(k)) continue;                // 동기화 대상 키만
+      if(serverMap.has(k)) continue;              // 서버에 있으면 skip (2)에서 처리됨)
+      const v = localStorage.getItem(k);
+      if(v === null || v === '') continue;        // 빈 값은 제외
+      // 빈 객체/배열도 제외 (DEFAULT_PLAN 등 기본값을 서버에 올릴 필요 없음)
+      if(v === '{}' || v === '[]') continue;
+      toPush.push(k);
+    }
+
+    if(toPush.length > 0){
+      console.log('[Sync] 서버에 없는 로컬 데이터', toPush.length, '건 자동 푸시:', toPush);
+      for(const k of toPush){
+        queueUpload(k, localStorage.getItem(k));
+      }
+      // 즉시 flush (debounce 대기 생략)
+      if(_uploadTimer){ clearTimeout(_uploadTimer); _uploadTimer=null; }
+      await flushUpload();
+      setSyncUI('synced', `동기화됨 (${serverMap.size}건, +${toPush.length} 업로드)`);
+    } else {
+      setSyncUI('synced', `동기화됨 (${serverMap.size}건)`);
+    }
     return true;
   }catch(e){
     console.error('[Sync] 다운로드 예외', e);
@@ -980,6 +1019,30 @@ function copySyncSQL(){
   );
 }
 window.copySyncSQL = copySyncSQL;
+
+// 로컬 데이터를 서버에 강제 푸시 (서버 덮어쓰기)
+async function forcePushAll(){
+  const sb = getSb();
+  if(!sb){ alert('❌ Supabase 미연결 상태입니다.'); return; }
+  const keys = Object.keys(localStorage).filter(k => isSyncKey(k));
+  const valid = keys.filter(k => {
+    const v = localStorage.getItem(k);
+    return v !== null && v !== '' && v !== '{}' && v !== '[]';
+  });
+  if(valid.length === 0){
+    alert('⚠ 로컬에 저장된 동기화 대상 데이터가 없습니다.');
+    return;
+  }
+  if(!confirm(`로컬에 있는 ${valid.length}건의 데이터를 서버에 강제 푸시하시겠습니까?\n(같은 키가 서버에 있으면 덮어씁니다)`)) return;
+  setSyncUI('syncing', '강제 푸시 중...');
+  for(const k of valid){
+    queueUpload(k, localStorage.getItem(k));
+  }
+  if(_uploadTimer){ clearTimeout(_uploadTimer); _uploadTimer=null; }
+  await flushUpload();
+  alert(`✅ ${valid.length}건을 서버에 푸시했습니다.\n다른 기기에서 🔄 새로고침을 눌러 받아가세요.`);
+}
+window.forcePushAll = forcePushAll;
 
 function refreshSyncConfigUI(){
   const urlEl = document.getElementById('cfgSbUrl');
