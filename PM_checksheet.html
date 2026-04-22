@@ -385,7 +385,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 #pmPlanTab * {margin:0;padding:0;box-sizing:border-box}
 #pmPlanTab {--bg:#f5f6fa;--card:#ffffff;--card2:#f0f2f7;--text:#1a1a2e;--muted:#6b7280;--accent:#2563eb;--accent2:#3b82f6;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--border:#e0e3eb;--radius:12px}
 #pmPlanTab {font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:17px}
-#pmPlanTab .page {max-width:1000px;margin:0 auto;padding:12px 12px 40px}
+#pmPlanTab .page {max-width:1280px;margin:0 auto;padding:12px 12px 40px}
 #pmPlanTab .page-header {display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap}
 #pmPlanTab .page-header h2 {font-size:20px;font-weight:800;color:var(--accent)}
 #pmPlanTab .page-header .subtitle {font-size:14px;color:var(--muted);font-weight:500;margin-top:2px}
@@ -403,16 +403,24 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 #pmPlanTab .legend span {display:flex;align-items:center;gap:4px}
 #pmPlanTab .legend .sym {font-size:18px}
 #pmPlanTab .eq-table-wrap {overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);border:1px solid var(--border)}
-#pmPlanTab .eq-table {width:100%;border-collapse:collapse;font-size:14px;min-width:750px}
-#pmPlanTab .eq-table th {background:#f8f9fb;padding:10px 8px;font-weight:600;text-align:center;border:1px solid var(--border);position:sticky;top:0;white-space:nowrap;font-size:13px;color:var(--muted)}
-#pmPlanTab .eq-table td {padding:10px 8px;text-align:center;border:1px solid var(--border);background:#fff}
+#pmPlanTab .eq-table {width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+#pmPlanTab .eq-table th {background:#f8f9fb;padding:8px 2px;font-weight:600;text-align:center;border:1px solid var(--border);position:sticky;top:0;white-space:nowrap;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+#pmPlanTab .eq-table td {padding:8px 2px;text-align:center;border:1px solid var(--border);background:#fff;overflow:hidden;text-overflow:ellipsis;font-size:12px}
 #pmPlanTab .eq-table tr:hover td {background:#eef2ff}
-#pmPlanTab .eq-table .eq-id {font-weight:700;color:var(--accent);white-space:nowrap}
-#pmPlanTab .eq-table .eq-name {text-align:left;white-space:nowrap}
-#pmPlanTab .plan-cell {font-size:17px}
-#pmPlanTab .plan-cell .plan {color:#2563eb}
-#pmPlanTab .plan-cell .done {color:#16a34a}
-#pmPlanTab .plan-cell .self {color:#dc2626}
+#pmPlanTab .eq-table .eq-id {font-weight:700;color:var(--accent);white-space:nowrap;font-size:13px}
+#pmPlanTab .eq-table .eq-name {text-align:left;padding-left:8px;font-size:12px;line-height:1.3;word-break:keep-all;white-space:normal}
+/* 열 너비 고정 - 총 29열. 설비번호 70px, 설비명 105px, 월별 2주/4주 각 35px×24 = 840px, 등급 55px, 년식 55px, 진행 60px. 합계 1185px */
+#pmPlanTab .eq-table col.c-id{width:60px}
+#pmPlanTab .eq-table col.c-name{width:100px}
+#pmPlanTab .eq-table col.c-wk{width:34px}
+#pmPlanTab .eq-table col.c-grade{width:50px}
+#pmPlanTab .eq-table col.c-year{width:55px}
+#pmPlanTab .eq-table col.c-prog{width:60px}
+#pmPlanTab .plan-cell {font-size:15px;line-height:1.1;padding:6px 1px}
+#pmPlanTab .plan-cell .check-date{display:block;font-size:9px;color:var(--muted);margin-top:1px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pmPlanTab .plan-cell .plan{color:#2563eb}
+#pmPlanTab .plan-cell .done{color:#16a34a}
+#pmPlanTab .plan-cell .self{color:#dc2626}
 #pmPlanTab .grade-a {color:#16a34a;font-weight:700}
 #pmPlanTab .grade-b {color:#2563eb;font-weight:700}
 #pmPlanTab .grade-c {color:#d97706;font-weight:700}
@@ -486,10 +494,21 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 #pmPlanTab .pe-week-row .wk-lbl {font-size:12px;color:var(--muted);min-width:26px}
 #pmPlanTab .pe-week-row select {flex:1;padding:3px 4px;border:1px solid var(--border);border-radius:4px;font-size:14px;text-align:center;background:#fff}
 #pmPlanTab .auto-badge {display:inline-block;background:#dbeafe;color:#1e40af;font-size:12px;padding:1px 6px;border-radius:3px;font-weight:700;margin-left:4px}
-@media (max-width:768px){
-  #pmPlanTab {font-size:16px}
-  #pmPlanTab .page {padding:10px}
-  #pmPlanTab .eq-table {font-size:14px;min-width:680px}
+@media (max-width:900px){
+  #pmPlanTab {font-size:15px}
+  #pmPlanTab .page {padding:8px}
+  #pmPlanTab .eq-table {font-size:11px}
+  #pmPlanTab .eq-table th {padding:5px 1px;font-size:10px}
+  #pmPlanTab .eq-table td {padding:5px 0;font-size:11px}
+  #pmPlanTab .eq-table .eq-name{font-size:10px;padding-left:3px}
+  #pmPlanTab .eq-table col.c-id{width:40px}
+  #pmPlanTab .eq-table col.c-name{width:64px}
+  #pmPlanTab .eq-table col.c-wk{width:22px}
+  #pmPlanTab .eq-table col.c-grade{width:32px}
+  #pmPlanTab .eq-table col.c-year{width:36px}
+  #pmPlanTab .eq-table col.c-prog{width:40px}
+  #pmPlanTab .plan-cell {font-size:12px;padding:4px 0}
+  #pmPlanTab .plan-cell .check-date{font-size:8px}
 }
 @media (max-width:640px){
   #pmPlanTab {font-size:15px}
@@ -506,10 +525,19 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   #pmPlanTab .btn {padding:10px 14px;font-size:14px;min-height:44px}
   #pmPlanTab .legend {gap:8px;font-size:12px}
   #pmPlanTab .legend .sym {font-size:16px}
-  #pmPlanTab .eq-table {font-size:13px;min-width:560px}
-  #pmPlanTab .eq-table th {padding:8px 4px;font-size:12px}
-  #pmPlanTab .eq-table td {padding:8px 4px}
-  #pmPlanTab .plan-cell {font-size:16px}
+  #pmPlanTab .eq-table {font-size:11px}
+  #pmPlanTab .eq-table th {padding:6px 1px;font-size:10px}
+  #pmPlanTab .eq-table td {padding:6px 1px;font-size:11px}
+  #pmPlanTab .eq-table .eq-id{font-size:11px}
+  #pmPlanTab .eq-table .eq-name{font-size:10px;padding-left:3px;line-height:1.2}
+  #pmPlanTab .eq-table col.c-id{width:44px}
+  #pmPlanTab .eq-table col.c-name{width:70px}
+  #pmPlanTab .eq-table col.c-wk{width:20px}
+  #pmPlanTab .eq-table col.c-grade{width:32px}
+  #pmPlanTab .eq-table col.c-year{width:36px}
+  #pmPlanTab .eq-table col.c-prog{width:38px}
+  #pmPlanTab .plan-cell {font-size:12px;padding:4px 0}
+  #pmPlanTab .plan-cell .check-date{font-size:8px}
   #pmPlanTab .mp-cell .mp-val {font-size:20px}
   #pmPlanTab .mh-table {font-size:13px}
   #pmPlanTab .mh-table th,#pmPlanTab .mh-table td{padding:6px 4px}
@@ -520,12 +548,6 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   #pmPlanTab .notes-box p {font-size:13px}
   #pmPlanTab .notes-box textarea {font-size:14px;min-height:100px}
   #pmPlanTab .grade-legend {font-size:12px;padding:10px 12px}
-  /* 모바일 가로 스크롤 힌트 */
-  #pmPlanTab .eq-table-wrap {position:relative}
-  #pmPlanTab .eq-table-wrap::after{
-    content:"← 좌우 스크롤 →";display:block;text-align:center;
-    font-size:11px;color:var(--muted);padding:4px;background:#f8f9fb
-  }
 }
 @media (max-width:400px){
   #pmPlanTab {font-size:14px}
@@ -534,10 +556,19 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   #pmPlanTab .main-tab {padding:9px 8px;font-size:13px}
   #pmPlanTab .vol-tab {padding:8px 10px;font-size:12px}
   #pmPlanTab .btn {padding:9px 12px;font-size:13px}
-  #pmPlanTab .eq-table {font-size:12px;min-width:500px}
-  #pmPlanTab .eq-table th {padding:6px 2px;font-size:11px}
-  #pmPlanTab .eq-table td {padding:6px 2px}
-  #pmPlanTab .plan-cell {font-size:14px}
+  #pmPlanTab .eq-table{font-size:10px}
+  #pmPlanTab .eq-table th {padding:4px 1px;font-size:9px}
+  #pmPlanTab .eq-table td {padding:4px 0;font-size:10px}
+  #pmPlanTab .eq-table .eq-id{font-size:10px}
+  #pmPlanTab .eq-table .eq-name{font-size:9px;padding-left:2px}
+  #pmPlanTab .eq-table col.c-id{width:36px}
+  #pmPlanTab .eq-table col.c-name{width:56px}
+  #pmPlanTab .eq-table col.c-wk{width:16px}
+  #pmPlanTab .eq-table col.c-grade{width:26px}
+  #pmPlanTab .eq-table col.c-year{width:30px}
+  #pmPlanTab .eq-table col.c-prog{width:32px}
+  #pmPlanTab .plan-cell {font-size:11px;padding:3px 0}
+  #pmPlanTab .plan-cell .check-date{font-size:7px}
   #pmPlanTab .mp-cell .mp-val {font-size:18px}
 }
 
@@ -3313,7 +3344,14 @@ function renderEqTable(){
     <span class="prog-text" style="color:${barColor}">${stats.done}/${stats.total} (${stats.pct}%)</span>
   </div>`;
 
-  h += `<div class="eq-table-wrap"><table class="eq-table"><thead><tr>
+  h += `<div class="eq-table-wrap"><table class="eq-table">
+    <colgroup>
+      <col class="c-id"><col class="c-name">`;
+  // 월별 2주/4주 = 12월 × 2주 = 24개 칸
+  for(let i=0;i<24;i++) h += `<col class="c-wk">`;
+  h += `<col class="c-grade"><col class="c-year"><col class="c-prog">
+    </colgroup>
+    <thead><tr>
     <th rowspan="2">설비번호</th><th rowspan="2">설비명</th>`;
   months.forEach(m=>h+=`<th colspan="2">${m}</th>`);
   h += `<th rowspan="2">등급</th><th rowspan="2">년식</th><th rowspan="2">진행</th></tr><tr>`;
