@@ -1702,15 +1702,52 @@ function createNewChkYear(){
   if(isNaN(yy)||yy<2000||yy>2100){ alert('올바른 년도를 입력하세요.'); return; }
   const years = getChkYearList();
   if(years.map(Number).includes(yy)){ alert('이미 존재하는 년도입니다.'); return; }
+
+  const curY = getChkYear();
+
+  // 보전계획표의 설비목록/계획도 같이 복사할지 확인 (년도 목록이 공유되므로)
+  let copyPlan = false;
+  try{
+    const srcEq = JSON.parse(localStorage.getItem('eq_master_'+curY)||'[]');
+    const srcPlan = JSON.parse(localStorage.getItem('eq_plans_'+curY)||'{}');
+    if(srcEq.length>0 || Object.keys(srcPlan).length>0){
+      copyPlan = confirm(
+        `${yy}년을 추가합니다.\n\n` +
+        `보전계획표의 ${curY}년 데이터(설비 ${srcEq.length}대, 월별계획 ${Object.keys(srcPlan).length}건)를\n` +
+        `${yy}년에도 그대로 복사할까요?\n\n` +
+        `[확인] 복사 (추천) - 매년 비슷한 계획이라면 시간 절약\n` +
+        `[취소] 빈 상태로 시작`
+      );
+    }
+  }catch(e){}
+
   years.push(yy);
   setChkYearList(years.sort((a,b)=>b-a));
+
+  // 계획 복사 선택 시 보전계획표의 해당 년도도 함께 생성
+  if(copyPlan){
+    try{
+      const srcEq = JSON.parse(localStorage.getItem('eq_master_'+curY)||'[]');
+      const srcPlan = JSON.parse(localStorage.getItem('eq_plans_'+curY)||'{}');
+      const srcNotes = localStorage.getItem('eq_notes_'+curY)||'';
+      localStorage.setItem('eq_master_'+yy, JSON.stringify(srcEq));
+      localStorage.setItem('eq_plans_'+yy, JSON.stringify(srcPlan));
+      localStorage.setItem('eq_checks_'+yy, '{}');  // 점검완료는 빈 상태
+      localStorage.setItem('eq_notes_'+yy, srcNotes);
+      // 보전계획표가 이미 메모리에 currentYear를 들고 있다면 데이터 새로고침
+      try{ if(typeof reloadYearData === 'function') reloadYearData(); }catch(e){}
+    }catch(e){ console.warn('계획 복사 중 오류', e); }
+  }
+
   setChkCurYear(yy);
-  // 보전계획표 쪽도 동기화 (빈 설비/계획으로 초기화하지 않음 - 체크시트는 체크 이력만 저장)
-  // 보전계획표에서 해당 년도의 설비/계획이 없을 수 있으므로 해당 탭 들어갈 때 처리
   renderChkYearSelect();
   // 보전계획표 년도 드롭다운도 업데이트
   try{ if(typeof renderYearSelect === 'function') renderYearSelect(); }catch(e){}
-  alert(`${yy}년이 추가되었습니다.\n해당 년도의 점검 이력을 새로 기록할 수 있습니다.`);
+  alert(
+    `${yy}년이 추가되었습니다.` +
+    (copyPlan ? `\n✅ ${curY}년의 설비목록과 월별계획이 ${yy}년으로 복사되었습니다.` : '') +
+    `\n\n해당 년도의 점검 이력을 새로 기록할 수 있습니다.`
+  );
 }
 
 // 체크시트 탭용 - 다른 년도 이력에서 복사
@@ -3126,17 +3163,39 @@ function createNewYear(){
   const years = getYears();
   if(years.includes(yy)){alert('이미 존재하는 년도입니다.');return}
 
-  // 이전 년도 설비목록 복사 여부 확인
-  const copyEq = confirm(`${yy}년을 생성합니다.\n\n현재 ${currentYear}년의 설비목록(${EQUIP.length}대)을 복사해올까요?\n\n[확인] 설비 복사 (계획은 비어있음)\n[취소] 빈 상태로 시작`);
+  // 복사 모드 선택 (1=설비+계획 모두 / 2=설비만 / 3=빈 상태)
+  const mode = prompt(
+    `${yy}년을 생성합니다.\n\n${currentYear}년의 어떤 데이터를 복사할까요?\n\n` +
+    `1 = 설비목록 + 월별계획 모두 복사 (추천)\n` +
+    `2 = 설비목록만 복사 (계획은 비어있음)\n` +
+    `3 = 빈 상태로 시작\n\n` +
+    `숫자 입력:`,
+    '1'
+  );
+  if(mode===null) return;
+  if(!['1','2','3'].includes(mode)){ alert('1, 2, 3 중에서 입력해주세요.'); return; }
 
   years.push(yy);
   setYears(years);
-  if(copyEq){
+
+  let msgTail = '';
+  if(mode==='1'){
+    // 설비 + 계획 모두 복사
     setEquip(yy, JSON.parse(JSON.stringify(EQUIP)));
+    setPlan(yy, JSON.parse(JSON.stringify(currentPlan)));
+    const planCount = Object.keys(currentPlan||{}).length;
+    msgTail = `\n✅ 설비 ${EQUIP.length}대 + 월별계획 ${planCount}건이 복사되었습니다.\n필요시 설정 > 설비 관리에서 수정하세요.`;
+  } else if(mode==='2'){
+    // 설비만 복사
+    setEquip(yy, JSON.parse(JSON.stringify(EQUIP)));
+    setPlan(yy, {});
+    msgTail = `\n설비 ${EQUIP.length}대가 복사되었습니다.\n설정 > 설비 관리에서 월별 계획을 입력하세요.`;
   } else {
+    // 빈 상태
     setEquip(yy, []);
+    setPlan(yy, {});
+    msgTail = '\n설정에서 설비를 추가하거나 "다른 년도에서 복사"를 이용하세요.';
   }
-  setPlan(yy, {});
   setChecks(yy, {});
   setNotes(yy, '');
 
@@ -3147,8 +3206,14 @@ function createNewYear(){
   updatePageTitle();
   // 체크시트 탭 년도 드롭다운도 갱신 (년도 목록 공유)
   try{ if(typeof renderChkYearSelect === 'function') renderChkYearSelect(); }catch(e){}
-  alert(`${yy}년이 생성되었습니다.${copyEq?`\n설비 ${EQUIP.length}대가 복사되었습니다.\n설정 > 설비 관리에서 월별 계획을 입력하세요.`:'\n설정에서 설비를 추가하거나 "다른 년도에서 복사"를 이용하세요.'}`);
-  switchMainTab('settings');
+  alert(`${yy}년이 생성되었습니다.${msgTail}`);
+  // 계획까지 복사했다면 바로 보전계획표로, 아니면 설정으로
+  if(mode==='1'){
+    switchMainTab('plan');
+    if(typeof renderVolTabs==='function') renderVolTabs();
+  } else {
+    switchMainTab('settings');
+  }
 }
 
 function copyYearData(){
