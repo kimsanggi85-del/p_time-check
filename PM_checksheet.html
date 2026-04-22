@@ -197,6 +197,36 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   .chk-cell input[type=checkbox]{width:20px;height:20px}
 }
 
+/* ===== 체크시트 년도 관리 박스 ===== */
+.chk-year-box{
+  background:#fff;border:1px solid var(--border);border-left:4px solid var(--accent);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04)
+}
+.chk-year-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.chk-year-label{font-size:15px;font-weight:700;color:var(--text)}
+.chk-year-box select{
+  padding:8px 12px;border:1px solid var(--border);border-radius:6px;
+  font-size:15px;font-weight:700;color:var(--accent);background:#fff;
+  cursor:pointer;min-width:100px;min-height:40px
+}
+.chk-year-info{font-size:13px;color:var(--muted);margin-left:auto}
+.chk-year-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chk-year-hint{
+  background:#f8f9fb;border-radius:8px;padding:8px 12px;
+  font-size:12px;color:var(--muted);line-height:1.7
+}
+.chk-year-hint b{color:var(--text)}
+@media(max-width:640px){
+  .chk-year-box{padding:12px}
+  .chk-year-label{font-size:14px}
+  .chk-year-box select{font-size:14px;min-width:80px}
+  .chk-year-info{margin-left:0;width:100%;font-size:12px}
+  .chk-year-actions{gap:4px}
+  .chk-year-actions .btn{flex:1 1 auto;font-size:12px;padding:8px 10px}
+  .chk-year-hint{font-size:11px;padding:7px 10px}
+}
+
 /* ===== 상단 탭 네비게이션 ===== */
 .top-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);background:#fff;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;align-items:stretch}
 .top-tab{padding:14px 24px;font-size:16px;font-weight:700;background:#f8f9fb;border:none;cursor:pointer;color:var(--muted);border-right:1px solid var(--border);transition:all .15s}
@@ -610,6 +640,28 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 
   <!-- 점검 탭 -->
   <div id="tab-check" class="tab-pane">
+
+  <!-- 체크시트 년도 관리 박스 -->
+  <div class="chk-year-box no-print">
+    <div class="chk-year-row">
+      <label class="chk-year-label">📅 점검 년도</label>
+      <select id="chkYearMain" onchange="changeChkYearMain(this.value)">
+        <!-- 동적 생성 -->
+      </select>
+      <span id="chkYearInfo" class="chk-year-info"></span>
+    </div>
+    <div class="chk-year-actions">
+      <button class="btn btn-primary btn-sm" onclick="createNewChkYear()">+ 새 년도 추가</button>
+      <button class="btn btn-secondary btn-sm" onclick="copyChkYearData()">📋 다른 년도에서 복사</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteChkYearData()">🗑 현재 년도 이력 삭제</button>
+    </div>
+    <div class="chk-year-hint">
+      • 년도별로 <b>점검 이력(체크 날짜)</b>이 독립 관리됩니다.<br>
+      • 점검 항목(기준) 자체는 모든 년도 공통입니다.<br>
+      • 보전계획표 탭의 년도 목록과 공유됩니다.
+    </div>
+  </div>
+
   <div class="controls no-print">
     <label>설비 선택</label>
     <select id="eqSelect" onchange="showEquipment(this.value)">
@@ -865,7 +917,7 @@ window.setSupabaseConfig = setSupabaseConfig;
 // 동기화 대상 키 prefix (이 키들만 Supabase에 올림)
 const SYNC_PREFIXES = [
   'eq_master_', 'eq_plans_', 'eq_checks_', 'eq_notes_',
-  'eq_years_list', 'cur_year_v3', 'maint_history',
+  'eq_years_list', 'cur_year_v3', 'cur_year_chk', 'maint_history',
   'INS_CHK_'  // 체크시트 체크 이력
 ];
 
@@ -1481,12 +1533,13 @@ function showEquipment(key){
     <div class="info-item"><label>담당자</label><span class="value">${d.worker || '-'}</span></div>
   </div>`;
   
-  // 년도 선택기
-  const curY = new Date().getFullYear();
+  // 년도 선택기 (메인 년도와 동기화)
+  const curY = getChkYear();
+  const yearList = getChkYearList();
   h += `<div class="year-selector no-print">
     <label><b>📅 점검 년도:</b></label>
-    <select id="chkYearSel" onchange="changeChkYear('${key}')">
-      ${[curY-1,curY,curY+1].map(y=>`<option value="${y}" ${y===curY?'selected':''}>${y}년</option>`).join('')}
+    <select id="chkYearSel" onchange="syncChkYearFromDetail('${key}', this.value)">
+      ${yearList.map(y=>`<option value="${y}" ${String(y)===String(curY)?'selected':''}>${y}년</option>`).join('')}
     </select>
     <span style="color:var(--muted);font-size:13px">※ 체크박스 클릭 시 오늘 날짜 자동 저장, 다시 클릭 시 해제</span>
     <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="exportChkData('${key}')">📥 점검이력 내보내기</button>
@@ -1572,6 +1625,159 @@ function showEquipment(key){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
+// ====================================================================
+// 체크시트 년도 관리 (보전계획표와 년도 목록 공유)
+// 저장 구조:
+//   eq_years_list (공유) : [2025, 2026, 2027] - 보전계획표와 공유
+//   cur_year_chk        : "2026" - 체크시트 탭에서 현재 보는 년도
+//   INS_CHK_{eqKey}_{year} : 년도별 체크 이력
+// ====================================================================
+const LS_CUR_CHK_YEAR = 'cur_year_chk';
+
+function getChkYear(){
+  // 1) 체크시트 탭의 메인 년도 드롭다운
+  const mainSel = document.getElementById('chkYearMain');
+  if(mainSel && mainSel.value) return mainSel.value;
+  // 2) (구) 설비 상세 화면의 년도 드롭다운 - 하위호환
+  const legacy = document.getElementById('chkYearSel');
+  if(legacy && legacy.value) return legacy.value;
+  // 3) localStorage 저장값
+  const saved = localStorage.getItem(LS_CUR_CHK_YEAR);
+  if(saved) return saved;
+  // 4) 기본값 - 올해
+  return String(new Date().getFullYear());
+}
+function setChkCurYear(y){
+  localStorage.setItem(LS_CUR_CHK_YEAR, String(y));
+}
+// 보전계획표의 getYears()/setYears()를 공유 - 이미 eq_years_list로 저장됨
+function getChkYearList(){
+  // 보전계획표 함수가 먼저 정의되어 있으면 사용, 아니면 직접 읽기
+  try{
+    if(typeof getYears === 'function') return getYears();
+  }catch(e){}
+  try{
+    return JSON.parse(localStorage.getItem('eq_years_list')||'[2026]').sort((a,b)=>b-a);
+  }catch(e){return [2026]}
+}
+function setChkYearList(arr){
+  try{
+    if(typeof setYears === 'function'){ setYears(arr); return; }
+  }catch(e){}
+  localStorage.setItem('eq_years_list', JSON.stringify(arr));
+}
+
+// 체크시트 탭 년도 드롭다운 렌더링
+function renderChkYearSelect(){
+  const sel = document.getElementById('chkYearMain');
+  if(!sel) return;
+  const years = getChkYearList();
+  const cur = getChkYear();
+  sel.innerHTML = years.map(y=>`<option value="${y}"${String(y)===String(cur)?' selected':''}>${y}년</option>`).join('');
+  // 안내문구 업데이트
+  const info = document.getElementById('chkYearInfo');
+  if(info) info.textContent = `※ 등록된 년도: ${years.join(', ')}`;
+}
+
+// 체크시트 년도 변경
+function changeChkYearMain(y){
+  setChkCurYear(y);
+  // 현재 열려있는 설비가 있으면 이력 다시 불러오기
+  const eqSel = document.getElementById('eqSelect');
+  if(eqSel && eqSel.value){
+    // 상세 화면이 이미 열려있다면 재렌더로 기준 영역은 놔두고 체크 상태만 복원
+    if(typeof restoreChks === 'function') restoreChks(eqSel.value);
+    // (구) 상세 내 년도 드롭다운도 동기화
+    const legacy = document.getElementById('chkYearSel');
+    if(legacy) legacy.value = y;
+  }
+  renderChkYearSelect();
+}
+
+// 체크시트 탭용 새 년도 추가
+function createNewChkYear(){
+  const y = prompt('추가할 년도를 입력하세요 (예: 2027)');
+  if(!y) return;
+  const yy = parseInt(y);
+  if(isNaN(yy)||yy<2000||yy>2100){ alert('올바른 년도를 입력하세요.'); return; }
+  const years = getChkYearList();
+  if(years.map(Number).includes(yy)){ alert('이미 존재하는 년도입니다.'); return; }
+  years.push(yy);
+  setChkYearList(years.sort((a,b)=>b-a));
+  setChkCurYear(yy);
+  // 보전계획표 쪽도 동기화 (빈 설비/계획으로 초기화하지 않음 - 체크시트는 체크 이력만 저장)
+  // 보전계획표에서 해당 년도의 설비/계획이 없을 수 있으므로 해당 탭 들어갈 때 처리
+  renderChkYearSelect();
+  // 보전계획표 년도 드롭다운도 업데이트
+  try{ if(typeof renderYearSelect === 'function') renderYearSelect(); }catch(e){}
+  alert(`${yy}년이 추가되었습니다.\n해당 년도의 점검 이력을 새로 기록할 수 있습니다.`);
+}
+
+// 체크시트 탭용 - 다른 년도 이력에서 복사
+function copyChkYearData(){
+  const years = getChkYearList().map(Number).filter(y=>y!==parseInt(getChkYear()));
+  if(!years.length){ alert('복사할 다른 년도가 없습니다.\n먼저 "새 년도 추가"로 다른 년도를 만들어주세요.'); return; }
+  const cur = getChkYear();
+  const src = prompt(`${cur}년으로 복사해올 원본 년도를 입력하세요.\n사용 가능: ${years.join(', ')}\n\n※ 원본 년도의 "점검 완료 날짜 이력"이 복사됩니다.\n※ 현재 ${cur}년의 기존 이력은 덮어써집니다.`, String(years[0]));
+  if(!src) return;
+  const sy = parseInt(src);
+  if(!years.includes(sy)){ alert('존재하지 않는 년도입니다.'); return; }
+  if(!confirm(`${sy}년의 점검 이력을 ${cur}년으로 복사하시겠습니까?\n현재 ${cur}년의 이력은 덮어씌워집니다.`)) return;
+
+  // INS_CHK_{eqKey}_{sy} 형식의 모든 키를 {cur}로 복사
+  const prefix = 'INS_CHK_';
+  const srcSuffix = '_'+sy;
+  const curSuffix = '_'+cur;
+  let copied = 0;
+  const allKeys = Object.keys(localStorage).filter(k=>k.startsWith(prefix) && k.endsWith(srcSuffix));
+  allKeys.forEach(k=>{
+    const eqKey = k.substring(prefix.length, k.length - srcSuffix.length);
+    const newKey = prefix + eqKey + curSuffix;
+    const v = localStorage.getItem(k);
+    if(v) { localStorage.setItem(newKey, v); copied++; }
+  });
+  alert(`복사 완료: ${copied}개 설비의 이력이 복사되었습니다.`);
+  // 현재 열려있는 설비면 재렌더
+  const eqSel = document.getElementById('eqSelect');
+  if(eqSel && eqSel.value && typeof restoreChks === 'function') restoreChks(eqSel.value);
+}
+
+// 체크시트 탭용 - 현재 년도 이력 삭제
+function deleteChkYearData(){
+  const cur = getChkYear();
+  if(!confirm(`${cur}년의 모든 점검 이력(체크 날짜)을 삭제하시겠습니까?\n설비 목록·점검 항목은 유지됩니다.\n\n※ 이 작업은 되돌릴 수 없습니다.`)) return;
+  const prefix = 'INS_CHK_';
+  const suffix = '_'+cur;
+  let removed = 0;
+  const keys = Object.keys(localStorage).filter(k=>k.startsWith(prefix) && k.endsWith(suffix));
+  keys.forEach(k=>{ localStorage.removeItem(k); removed++; });
+  alert(`${cur}년 이력 ${removed}건이 삭제되었습니다.`);
+  // 현재 열려있는 설비면 재렌더
+  const eqSel = document.getElementById('eqSelect');
+  if(eqSel && eqSel.value && typeof restoreChks === 'function') restoreChks(eqSel.value);
+}
+
+// 페이지 로드/탭 전환 시 호출할 초기화
+function initChkYearUI(){
+  renderChkYearSelect();
+}
+window.changeChkYearMain = changeChkYearMain;
+window.createNewChkYear = createNewChkYear;
+window.copyChkYearData = copyChkYearData;
+window.deleteChkYearData = deleteChkYearData;
+window.initChkYearUI = initChkYearUI;
+window.renderChkYearSelect = renderChkYearSelect;
+
+// 설비 상세의 년도 드롭다운 변경 → 메인 드롭다운과 동기화 + 이력 재로드
+function syncChkYearFromDetail(eqKey, y){
+  setChkCurYear(y);
+  const mainSel = document.getElementById('chkYearMain');
+  if(mainSel) mainSel.value = y;
+  renderChkYearSelect();
+  if(typeof restoreChks === 'function') restoreChks(eqKey);
+}
+window.syncChkYearFromDetail = syncChkYearFromDetail;
+
 // ========== 점검 체크박스 시스템 ==========
 function getColCount(type){
   return type==='monthly'?12 : type==='quarterly'?4 : type==='halfly'?2 : 1;
@@ -1581,10 +1787,6 @@ function getPeriods(type){
   if(type==='quarterly') return [{k:'q1',label:'1분기'},{k:'q2',label:'2분기'},{k:'q3',label:'3분기'},{k:'q4',label:'4분기'}];
   if(type==='halfly') return [{k:'h1',label:'상반기'},{k:'h2',label:'하반기'}];
   return [{k:'y',label:'연간'}];
-}
-function getChkYear(){
-  const sel = document.getElementById('chkYearSel');
-  return sel ? sel.value : new Date().getFullYear();
 }
 function chkStoreKey(key){
   return 'INS_CHK_'+key+'_'+getChkYear();
@@ -1730,6 +1932,7 @@ function switchTopTab(name){
   document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.toggle('active',p.id==='tab-'+name);});
   if(name==='settings') buildSettings();
   if(name==='plan' && typeof window.initPmPlan==='function') window.initPmPlan();
+  if(name==='check' && typeof window.renderChkYearSelect==='function') window.renderChkYearSelect();
 }
 
 // --- 메인 렌더 ---
@@ -2942,6 +3145,8 @@ function createNewYear(){
   reloadYearData();
   renderYearSelect();
   updatePageTitle();
+  // 체크시트 탭 년도 드롭다운도 갱신 (년도 목록 공유)
+  try{ if(typeof renderChkYearSelect === 'function') renderChkYearSelect(); }catch(e){}
   alert(`${yy}년이 생성되었습니다.${copyEq?`\n설비 ${EQUIP.length}대가 복사되었습니다.\n설정 > 설비 관리에서 월별 계획을 입력하세요.`:'\n설정에서 설비를 추가하거나 "다른 년도에서 복사"를 이용하세요.'}`);
   switchMainTab('settings');
 }
@@ -2988,6 +3193,8 @@ function deleteCurrentYear(){
   updatePageTitle();
   if(currentMainTab==='plan') renderVolTabs();
   if(currentMainTab==='settings') renderSettings();
+  // 체크시트 년도 드롭다운도 갱신
+  try{ if(typeof renderChkYearSelect === 'function') renderChkYearSelect(); }catch(e){}
 }
 
 // ================================================================
@@ -4421,6 +4628,8 @@ window.initPmPlan = function(){
 // 페이지 로드 시 기본 활성 탭(설비점검계획) 초기화
 document.addEventListener('DOMContentLoaded', function(){
   if(typeof window.initPmPlan==='function') window.initPmPlan();
+  // 체크시트 년도 UI 초기화
+  if(typeof window.initChkYearUI==='function') window.initChkYearUI();
 });
 </script>
 </body>
