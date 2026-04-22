@@ -203,36 +203,45 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 .top-tab:hover{background:#eff6ff;color:var(--accent)}
 .top-tab.active{background:#fff;color:var(--accent);border-bottom:3px solid var(--accent);margin-bottom:-2px}
 .top-tabs-spacer{flex:1}
-.btn-save-now{
-  align-self:center;margin-right:10px;
-  padding:10px 18px;font-size:14px;font-weight:700;
-  background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;
-  border:none;border-radius:8px;cursor:pointer;
-  box-shadow:0 2px 6px rgba(22,163,74,.25);
-  transition:all .15s;white-space:nowrap
+/* ===== 지금 저장 버튼 (특이사항 박스 아래 배치) ===== */
+.save-now-box{
+  margin-top:14px;background:#fff;border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 16px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  display:flex;flex-direction:column;align-items:center;gap:6px
 }
-.btn-save-now:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(22,163,74,.35)}
+.save-now-hint{font-size:13px;color:var(--muted);text-align:center}
+.btn-save-now{
+  width:100%;max-width:420px;
+  padding:14px 20px;font-size:16px;font-weight:700;
+  background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;
+  border:none;border-radius:10px;cursor:pointer;
+  box-shadow:0 2px 8px rgba(22,163,74,.25);
+  transition:all .15s;white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:52px
+}
+.btn-save-now:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(22,163,74,.35)}
 .btn-save-now:active{transform:translateY(0)}
 .btn-save-now.saving{background:linear-gradient(135deg,#2563eb,#1d4ed8);pointer-events:none}
 .btn-save-now.saved{background:linear-gradient(135deg,#16a34a,#15803d)}
 .btn-save-now.error{background:linear-gradient(135deg,#dc2626,#b91c1c)}
 @media(max-width:768px){
   .top-tab{padding:12px 16px;font-size:14px}
-  .btn-save-now{padding:9px 14px;font-size:13px}
+  .btn-save-now{font-size:15px;padding:13px 16px;min-height:48px}
 }
 @media(max-width:640px){
   .top-tabs{flex-wrap:wrap}
   .top-tab{padding:11px 10px;font-size:13px;flex:1 1 auto;min-width:0;text-align:center;min-height:44px}
-  .top-tabs-spacer{display:none}
-  .btn-save-now{
-    flex:1 1 100%;order:99;margin:6px 4px;
-    padding:12px 14px;font-size:14px;min-height:48px;
-    border-radius:8px
-  }
+  .save-now-box{padding:12px;margin-top:12px}
+  .save-now-hint{font-size:12px}
+  .btn-save-now{font-size:15px;padding:14px 16px;min-height:50px;border-radius:10px}
 }
 @media(max-width:400px){
   .top-tab{padding:10px 6px;font-size:12px}
-  .btn-save-now{font-size:13px;padding:11px 12px}
+  .save-now-box{padding:10px}
+  .save-now-hint{font-size:11px}
+  .btn-save-now{font-size:14px;padding:12px 14px;min-height:48px}
 }
 .tab-pane{display:none}
 .tab-pane.active{display:block}
@@ -597,10 +606,6 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
     <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')">📅 설비점검계획</button>
     <button class="top-tab" data-tab="check" onclick="switchTopTab('check')">📋 설비정기점검 기준 및 체크시트</button>
     <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')">⚙️ 설정/조회</button>
-    <div class="top-tabs-spacer"></div>
-    <button id="btnSaveNow" class="btn-save-now" onclick="saveNow()" title="지금까지 입력한 내용을 즉시 클라우드에 저장합니다">
-      💾 <span id="btnSaveNowText">지금 저장</span>
-    </button>
   </div>
 
   <!-- 점검 탭 -->
@@ -3400,6 +3405,13 @@ function renderEqTable(){
     <span>📝 ${currentYear}년 특이사항</span>
     <button class="btn btn-sm btn-secondary" onclick="editNotes()">✏️ 편집</button>
   </h4><p id="notesDisplay">${currentNotes||'<span style="color:var(--muted)">특이사항이 없습니다. 편집 버튼을 눌러 추가하세요.</span>'}</p></div>`;
+  // 특이사항 바로 아래에 '지금 저장' 버튼 (핸드폰 작업 후 데이터 보존을 위해)
+  h += `<div class="save-now-box no-print">
+    <button id="btnSaveNow" class="btn-save-now" onclick="saveNow()" title="지금까지 입력한 내용을 즉시 클라우드에 저장합니다">
+      💾 <span id="btnSaveNowText">지금 저장</span>
+    </button>
+    <div class="save-now-hint">체크/수정 후 이 버튼을 눌러 클라우드에 즉시 저장하세요</div>
+  </div>`;
   h += `<div class="grade-legend"><b>등급기준:</b> A: 1년~10년 &nbsp;|&nbsp; B: 11년~20년 &nbsp;|&nbsp; C: 21년~30년 &nbsp;|&nbsp; D: 31년~40년 &nbsp;|&nbsp; E: 41년 이상 &nbsp;|&nbsp; <span style="color:var(--blue)">□</span> 클릭 → <span style="color:var(--green)">▣</span> 점검완료 + 보전이력 자동등록</div>`;
   document.getElementById('eqContent').innerHTML = h;
 }
