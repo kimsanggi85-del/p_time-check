@@ -2,7 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>설비정기점검 기준 및 체크시트 - (주)태진다이텍</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -129,33 +132,108 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 .empty-state h3{font-size:18px;margin-bottom:8px;color:var(--text)}
 
 /* 모바일 가시성 강화 */
-@media (max-width:640px){
-  body{font-size:16px}
+/* ===== 모바일 반응형 - 체크시트 탭 ===== */
+/* 태블릿 이하 */
+@media (max-width:768px){
   .page{padding:10px}
-  .page-header h2{font-size:22px}
-  .detail-header h1{font-size:24px}
-  .btn{padding:10px 16px;font-size:15px}
-  .controls select,.controls input{font-size:16px;min-width:140px}
-  .check-section h3{font-size:18px}
-  .check-table{font-size:14px}
-  .check-table th{font-size:13px;padding:8px 4px}
-  .check-table td{padding:10px 6px}
-  .check-table td.item{font-size:15px}
-  .chk-cell{min-height:48px;font-size:14px}
-  .chk-cell .date{font-size:12px}
+  .page-header{padding:12px 0;margin-bottom:12px}
+  .page-header h2{font-size:20px}
+  .page-header .subtitle{font-size:13px}
+  .controls{gap:8px}
+  .controls label{font-size:13px}
+  /* iOS Safari 자동 줌 방지를 위해 input/select는 16px 이상 유지 */
+  .controls select,.controls input{font-size:16px;min-width:auto;padding:10px 12px}
+}
+/* 일반 스마트폰 (iPhone 12/13/14, 갤럭시 S 시리즈 등) */
+@media (max-width:640px){
+  body{font-size:15px;-webkit-text-size-adjust:100%}
+  .page{padding:8px}
+  .page-header{flex-direction:column;align-items:flex-start;gap:6px;padding:10px 0}
+  .page-header h2{font-size:19px;line-height:1.3}
+  .page-header .subtitle{font-size:13px}
+  .detail-header h1{font-size:20px;line-height:1.3}
+  .detail-header .subtitle{font-size:13px}
+  .btn{padding:11px 14px;font-size:14px;min-height:44px}
+  .btn-sm{padding:7px 12px;font-size:13px;min-height:36px}
+  .controls{flex-direction:column;align-items:stretch;gap:6px}
+  .controls label{font-size:13px}
+  .controls select,.controls input{font-size:16px;min-width:0;width:100%;padding:11px 12px;min-height:44px}
+  .check-section h3{font-size:16px;padding:8px 10px}
+  .check-table{font-size:13px}
+  .check-table th{font-size:12px;padding:8px 3px;word-break:keep-all}
+  .check-table td{padding:8px 4px}
+  .check-table td.item{font-size:14px;line-height:1.4}
+  .check-table td.period{font-size:12px;width:22%}
+  .chk-cell{min-height:46px;font-size:13px;padding:6px 2px}
+  .chk-cell .date{font-size:11px;margin-top:2px}
+  .chk-cell input[type=checkbox]{width:22px;height:22px}
+  .eq-card h4{font-size:16px}
+  .eq-card p{font-size:13px;line-height:1.4}
+  .info-item{flex-direction:column;align-items:flex-start;gap:2px}
+  .info-item label{font-size:12px}
+  .info-item .value{font-size:14px}
+  .year-selector{flex-wrap:wrap;font-size:14px;padding:8px 10px}
+  .year-selector select{font-size:15px;padding:6px 10px;min-height:40px}
+  .image-gallery h3{font-size:15px}
+  .history-section h3{font-size:16px;padding:8px 10px}
+  .history-list li{font-size:13px;padding:8px 10px}
+}
+/* 작은 스마트폰 (iPhone SE 1세대, 구형 안드로이드, 갤럭시 폴드 닫힘) */
+@media (max-width:400px){
+  body{font-size:14px}
+  .page{padding:6px}
+  .page-header h2{font-size:18px}
+  .detail-header h1{font-size:18px}
+  .btn{padding:10px 12px;font-size:13px}
+  .btn-sm{padding:6px 10px;font-size:12px}
+  .check-section h3{font-size:15px}
+  .check-table{font-size:12px}
+  .check-table th{font-size:11px;padding:6px 2px}
+  .check-table td{padding:6px 3px}
+  .check-table td.item{font-size:13px}
+  .check-table td.period{font-size:11px}
+  .chk-cell{min-height:44px;font-size:12px;padding:4px 2px}
+  .chk-cell .date{font-size:10px}
   .chk-cell input[type=checkbox]{width:20px;height:20px}
-  .eq-card h4{font-size:17px}
-  .eq-card p{font-size:14px}
-  .info-item label{font-size:13px}
-  .info-item .value{font-size:15px}
-  .year-selector{flex-wrap:wrap;font-size:15px}
 }
 
 /* ===== 상단 탭 네비게이션 ===== */
-.top-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);background:#fff;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden}
+.top-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);background:#fff;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;align-items:stretch}
 .top-tab{padding:14px 24px;font-size:16px;font-weight:700;background:#f8f9fb;border:none;cursor:pointer;color:var(--muted);border-right:1px solid var(--border);transition:all .15s}
 .top-tab:hover{background:#eff6ff;color:var(--accent)}
 .top-tab.active{background:#fff;color:var(--accent);border-bottom:3px solid var(--accent);margin-bottom:-2px}
+.top-tabs-spacer{flex:1}
+.btn-save-now{
+  align-self:center;margin-right:10px;
+  padding:10px 18px;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;
+  border:none;border-radius:8px;cursor:pointer;
+  box-shadow:0 2px 6px rgba(22,163,74,.25);
+  transition:all .15s;white-space:nowrap
+}
+.btn-save-now:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(22,163,74,.35)}
+.btn-save-now:active{transform:translateY(0)}
+.btn-save-now.saving{background:linear-gradient(135deg,#2563eb,#1d4ed8);pointer-events:none}
+.btn-save-now.saved{background:linear-gradient(135deg,#16a34a,#15803d)}
+.btn-save-now.error{background:linear-gradient(135deg,#dc2626,#b91c1c)}
+@media(max-width:768px){
+  .top-tab{padding:12px 16px;font-size:14px}
+  .btn-save-now{padding:9px 14px;font-size:13px}
+}
+@media(max-width:640px){
+  .top-tabs{flex-wrap:wrap}
+  .top-tab{padding:11px 10px;font-size:13px;flex:1 1 auto;min-width:0;text-align:center;min-height:44px}
+  .top-tabs-spacer{display:none}
+  .btn-save-now{
+    flex:1 1 100%;order:99;margin:6px 4px;
+    padding:12px 14px;font-size:14px;min-height:48px;
+    border-radius:8px
+  }
+}
+@media(max-width:400px){
+  .top-tab{padding:10px 6px;font-size:12px}
+  .btn-save-now{font-size:13px;padding:11px 12px}
+}
 .tab-pane{display:none}
 .tab-pane.active{display:block}
 
@@ -208,10 +286,50 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 .stg-badge.both{background:#e9d5ff;color:#6b21a8}
 #stgConnInfo{font-size:14px;line-height:2;font-family:'SF Mono',Monaco,Consolas,monospace}
 
+@media (max-width:768px){
+  .stg-panel{padding:16px}
+  .stg-input{font-size:16px;padding:10px 12px;min-height:44px}
+}
 @media (max-width:640px){
-  .top-tab{padding:12px 16px;font-size:15px}
   .stg-row.r2,.stg-row.r3,.stg-row.r4,.stg-row.r5{grid-template-columns:1fr}
-  .stg-panel{padding:14px}
+  .stg-panel{padding:12px;margin-bottom:12px}
+  .stg-title{font-size:15px}
+  .stg-hint{font-size:12px;line-height:1.5}
+  .stg-field label{font-size:12px}
+  .stg-input{font-size:16px;padding:11px 12px;min-height:44px}
+  .stg-item{flex-wrap:wrap;font-size:13px;padding:8px 10px}
+  .stg-btn{padding:7px 12px;font-size:12px;min-height:36px}
+  .stg-btn-primary{padding:10px 14px;font-size:14px;min-height:44px;width:100%}
+  #stgConnInfo{font-size:13px;line-height:1.8;word-break:break-all}
+}
+@media (max-width:400px){
+  .stg-panel{padding:10px}
+  .stg-title{font-size:14px}
+  .stg-hint{font-size:11px}
+}
+
+/* ===== 전역 모바일 최적화 ===== */
+@media (max-width:640px){
+  /* 모든 테이블 가로 스크롤 가능하게 */
+  .eq-table-wrap,.hist-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* iOS 탭 하이라이트 제거 */
+  button,a,.chk-cell,.eq-card,.top-tab,.main-tab,.vol-tab{-webkit-tap-highlight-color:transparent}
+  /* 텍스트 선택 방지 (체크시트 셀) */
+  .chk-cell{-webkit-user-select:none;user-select:none}
+  /* 숫자 입력 필드 모바일 키보드 최적화 */
+  input[type="number"],input[type="tel"]{font-size:16px}
+  /* alert/confirm 대화상자 크기 문제 완화 위해 body 오버플로 제한 */
+  body{overflow-x:hidden}
+  /* 동기화 상태 배지 */
+  #syncStatus{font-size:12px;padding:5px 10px}
+}
+/* 세로 모드에서 safe area 대응(노치 있는 아이폰) */
+@supports(padding:max(0px)){
+  body{
+    padding-left:env(safe-area-inset-left);
+    padding-right:env(safe-area-inset-right);
+    padding-bottom:env(safe-area-inset-bottom)
+  }
 }
 
 
@@ -240,11 +358,22 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 .hist-empty{text-align:center;padding:30px;color:var(--muted);font-size:14px;background:#f8f9fb;border-radius:8px;margin-top:12px}
 .hist-table input[type="checkbox"]{width:18px;height:18px;cursor:pointer}
 
+@media (max-width:768px){
+  .hist-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .hist-table{font-size:13px}
+}
 @media (max-width:640px){
   .hist-grid{grid-template-columns:1fr}
   .hist-row2{grid-template-columns:1fr}
   .hist-table{font-size:12px}
-  .hist-table th,.hist-table td{padding:6px 4px}
+  .hist-table th,.hist-table td{padding:6px 3px}
+  .hist-summary{font-size:12px;padding:8px 10px}
+  .hist-btn{min-height:44px}
+  .hist-empty{padding:20px;font-size:13px}
+}
+@media (max-width:400px){
+  .hist-table{font-size:11px}
+  .hist-table th,.hist-table td{padding:5px 2px}
 }
 
 
@@ -357,21 +486,59 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 #pmPlanTab .pe-week-row .wk-lbl {font-size:12px;color:var(--muted);min-width:26px}
 #pmPlanTab .pe-week-row select {flex:1;padding:3px 4px;border:1px solid var(--border);border-radius:4px;font-size:14px;text-align:center;background:#fff}
 #pmPlanTab .auto-badge {display:inline-block;background:#dbeafe;color:#1e40af;font-size:12px;padding:1px 6px;border-radius:3px;font-weight:700;margin-left:4px}
+@media (max-width:768px){
+  #pmPlanTab {font-size:16px}
+  #pmPlanTab .page {padding:10px}
+  #pmPlanTab .eq-table {font-size:14px;min-width:680px}
+}
 @media (max-width:640px){
-#pmPlanTab {font-size:16px}
-#pmPlanTab .page {padding:10px}
-#pmPlanTab .page-header h2 {font-size:22px}
-#pmPlanTab .main-tab {padding:12px 18px;font-size:16px}
-#pmPlanTab .vol-tab {padding:10px 16px;font-size:15px}
-#pmPlanTab .btn {padding:10px 16px;font-size:15px}
-#pmPlanTab .eq-table {font-size:15px;min-width:620px}
-#pmPlanTab .eq-table th {padding:10px 6px;font-size:14px}
-#pmPlanTab .eq-table td {padding:10px 6px}
-#pmPlanTab .plan-cell {font-size:18px}
-#pmPlanTab .mp-cell .mp-val {font-size:22px}
-#pmPlanTab .mh-table {font-size:15px}
-#pmPlanTab .modal-box {padding:18px}
-#pmPlanTab .detail-item span {font-size:16px}
+  #pmPlanTab {font-size:15px}
+  #pmPlanTab .page {padding:8px}
+  #pmPlanTab .page-header {flex-direction:column;align-items:stretch;gap:8px}
+  #pmPlanTab .page-header h2 {font-size:19px;line-height:1.3}
+  #pmPlanTab .page-header .subtitle {font-size:13px}
+  #pmPlanTab .header-controls {margin-left:0;justify-content:space-between}
+  #pmPlanTab .year-selector {padding:4px 8px}
+  #pmPlanTab .year-selector select {font-size:15px;padding:6px 4px;min-height:38px}
+  #pmPlanTab .main-tabs {gap:4px}
+  #pmPlanTab .main-tab {padding:10px 12px;font-size:14px;flex:1 1 auto;text-align:center;min-height:44px}
+  #pmPlanTab .vol-tab {padding:9px 12px;font-size:13px;min-height:40px}
+  #pmPlanTab .btn {padding:10px 14px;font-size:14px;min-height:44px}
+  #pmPlanTab .legend {gap:8px;font-size:12px}
+  #pmPlanTab .legend .sym {font-size:16px}
+  #pmPlanTab .eq-table {font-size:13px;min-width:560px}
+  #pmPlanTab .eq-table th {padding:8px 4px;font-size:12px}
+  #pmPlanTab .eq-table td {padding:8px 4px}
+  #pmPlanTab .plan-cell {font-size:16px}
+  #pmPlanTab .mp-cell .mp-val {font-size:20px}
+  #pmPlanTab .mh-table {font-size:13px}
+  #pmPlanTab .mh-table th,#pmPlanTab .mh-table td{padding:6px 4px}
+  #pmPlanTab .modal-box {padding:16px;max-height:90vh;overflow-y:auto}
+  #pmPlanTab .modal-box.wide {max-width:95vw}
+  #pmPlanTab .detail-item span {font-size:14px}
+  #pmPlanTab .notes-box h4 {font-size:14px}
+  #pmPlanTab .notes-box p {font-size:13px}
+  #pmPlanTab .notes-box textarea {font-size:14px;min-height:100px}
+  #pmPlanTab .grade-legend {font-size:12px;padding:10px 12px}
+  /* 모바일 가로 스크롤 힌트 */
+  #pmPlanTab .eq-table-wrap {position:relative}
+  #pmPlanTab .eq-table-wrap::after{
+    content:"← 좌우 스크롤 →";display:block;text-align:center;
+    font-size:11px;color:var(--muted);padding:4px;background:#f8f9fb
+  }
+}
+@media (max-width:400px){
+  #pmPlanTab {font-size:14px}
+  #pmPlanTab .page {padding:6px}
+  #pmPlanTab .page-header h2 {font-size:17px}
+  #pmPlanTab .main-tab {padding:9px 8px;font-size:13px}
+  #pmPlanTab .vol-tab {padding:8px 10px;font-size:12px}
+  #pmPlanTab .btn {padding:9px 12px;font-size:13px}
+  #pmPlanTab .eq-table {font-size:12px;min-width:500px}
+  #pmPlanTab .eq-table th {padding:6px 2px;font-size:11px}
+  #pmPlanTab .eq-table td {padding:6px 2px}
+  #pmPlanTab .plan-cell {font-size:14px}
+  #pmPlanTab .mp-cell .mp-val {font-size:18px}
 }
 
 </style>
@@ -399,6 +566,10 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
     <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')">📅 설비점검계획</button>
     <button class="top-tab" data-tab="check" onclick="switchTopTab('check')">📋 설비정기점검 기준 및 체크시트</button>
     <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')">⚙️ 설정/조회</button>
+    <div class="top-tabs-spacer"></div>
+    <button id="btnSaveNow" class="btn-save-now" onclick="saveNow()" title="지금까지 입력한 내용을 즉시 클라우드에 저장합니다">
+      💾 <span id="btnSaveNowText">지금 저장</span>
+    </button>
   </div>
 
   <!-- 점검 탭 -->
@@ -718,6 +889,7 @@ const _lsRemove = localStorage.removeItem.bind(localStorage);
 // setItem 후킹: 변경 시 자동 업로드 큐잉
 const _uploadQueue = new Map(); // key → value
 let _uploadTimer = null;
+let _uploading = false;  // flushUpload 실행 중 여부 (폴링 경쟁 방지)
 function queueUpload(key, value){
   if(!isSyncKey(key)) return;
   _uploadQueue.set(key, value);
@@ -741,6 +913,7 @@ async function flushUpload(){
     rows.push({ key: toCloudKey(k), value: val, updated_at: new Date().toISOString() });
   }
   _uploadQueue.clear();
+  _uploading = true;  // 폴링이 과거 값으로 덮어쓰지 않도록 가드
   setSyncUI('syncing');
   try{
     const { error } = await sb.from(SYNC_TABLE).upsert(rows, { onConflict:'key' });
@@ -754,6 +927,8 @@ async function flushUpload(){
   }catch(e){
     console.error('[Sync] 업로드 예외', e);
     setSyncUI('error', '네트워크 오류');
+  }finally{
+    _uploading = false;
   }
 }
 
@@ -884,6 +1059,82 @@ async function manualSync(){
 }
 window.manualSync = manualSync;
 
+// ====================================================================
+// [지금 저장] 버튼 전용 로직
+// manualSync와 달리 "업로드만" 강제로 플러시합니다.
+// 다운로드까지 하면 방금 입력한 내용이 서버 값으로 덮어써질 위험이 있어
+// 저장 버튼 사용자 의도(= 내 입력 보존)를 해칠 수 있음.
+// 버튼에 시각적 피드백(저장 중 → 저장됨)을 줍니다.
+// ====================================================================
+async function saveNow(){
+  const btn = document.getElementById('btnSaveNow');
+  const txt = document.getElementById('btnSaveNowText');
+  if(!btn || !txt) return;
+
+  // Supabase 미설정 체크
+  if(!getSupabaseKey()){
+    btn.classList.remove('saving','saved');
+    btn.classList.add('error');
+    txt.textContent = '❌ 연결 미설정';
+    setTimeout(()=>{
+      btn.classList.remove('error');
+      txt.textContent = '지금 저장';
+    }, 2500);
+    alert('⚠️ Supabase 연결이 설정되지 않았습니다.\n[설정/조회] 탭에서 먼저 연결해주세요.');
+    return;
+  }
+
+  // 버튼: 저장 중 상태
+  btn.classList.remove('saved','error');
+  btn.classList.add('saving');
+  txt.textContent = '⏳ 저장 중...';
+
+  try{
+    // 대기중인 업로드 타이머가 있으면 즉시 실행
+    if(_uploadTimer){ clearTimeout(_uploadTimer); _uploadTimer = null; }
+
+    // 큐에 아무것도 없어도, 현재 localStorage의 모든 동기화 대상 키를
+    // 강제로 큐에 넣어 전체 백업 업로드(사용자가 "지금 저장"을 눌렀다는 건
+    // 데이터 안전에 대한 강한 요구이므로 전체 스냅샷을 올려 덮어쓰기 피해 방지)
+    const allKeys = Object.keys(localStorage);
+    let pushed = 0;
+    for(const k of allKeys){
+      if(!isSyncKey(k)) continue;
+      const v = localStorage.getItem(k);
+      if(v === null || v === '') continue;
+      if(v === '{}' || v === '[]') continue;  // 빈 객체/배열은 제외
+      // 이미 큐에 있으면 스킵 (그대로 flushUpload가 처리)
+      if(!_uploadQueue.has(k)){
+        _uploadQueue.set(k, v);
+      }
+      pushed++;
+    }
+
+    // flush 실행
+    await flushUpload();
+
+    // 성공 피드백
+    btn.classList.remove('saving');
+    btn.classList.add('saved');
+    txt.textContent = `✅ 저장됨 (${pushed}건)`;
+    setTimeout(()=>{
+      btn.classList.remove('saved');
+      txt.textContent = '지금 저장';
+    }, 2500);
+  }catch(e){
+    console.error('[saveNow] 실패', e);
+    btn.classList.remove('saving','saved');
+    btn.classList.add('error');
+    txt.textContent = '❌ 저장 실패';
+    setTimeout(()=>{
+      btn.classList.remove('error');
+      txt.textContent = '지금 저장';
+    }, 3000);
+    alert('❌ 저장 중 오류가 발생했습니다.\n네트워크 연결을 확인하고 다시 시도해주세요.\n\n오류: ' + (e.message || e));
+  }
+}
+window.saveNow = saveNow;
+
 // 페이지 로드 시 초기화: 다운로드 → 기존 초기화 로직 실행
 async function _bootstrapSync(){
   setSyncUI('connecting');
@@ -911,6 +1162,7 @@ async function _bootstrapSync(){
   // 30초마다 자동 갱신(다른 기기에서 변경된 내용 반영)
   setInterval(async ()=>{
     if(_uploadQueue.size>0) return;  // 업로드 대기중이면 skip
+    if(_uploading) return;             // 업로드 실행중이면 skip (경쟁 조건 방지)
     if(document.hidden) return;       // 탭 비활성이면 skip
     if(!getSupabaseKey()) return;     // 미설정이면 skip
     try{
@@ -958,6 +1210,50 @@ if(document.readyState === 'loading'){
 } else {
   _bootstrapSync();
 }
+
+// ====================================================================
+// [중요] 페이지 이탈/숨김 시 미전송 큐 강제 전송
+// 모바일에서 체크 후 800ms debounce 완료 전에 앱 전환/백그라운드/뒤로가기 하면
+// 업로드가 누락되어 데이터가 유실됨. visibilitychange + pagehide 에서 강제 flush.
+// sendBeacon을 쓰고 싶지만 Supabase REST는 헤더가 필요하므로 keepalive fetch로 대체.
+// ====================================================================
+function _forceFlushOnUnload(){
+  if(_uploadQueue.size === 0) return;
+  const url = getSupabaseUrl();
+  const key = getSupabaseKey();
+  if(!url || !key) return;
+
+  const rows = [];
+  for(const [k, v] of _uploadQueue.entries()){
+    let val;
+    try{ val = JSON.parse(v); }catch(e){ val = v; }
+    if(val === null || val === undefined) val = {};
+    rows.push({ key: toCloudKey(k), value: val, updated_at: new Date().toISOString() });
+  }
+  _uploadQueue.clear();
+  if(_uploadTimer){ clearTimeout(_uploadTimer); _uploadTimer = null; }
+
+  try{
+    // keepalive=true: 페이지가 닫혀도 브라우저가 요청을 계속 보내줌
+    fetch(url + '/rest/v1/' + SYNC_TABLE + '?on_conflict=key', {
+      method: 'POST',
+      headers: {
+        'apikey': key,
+        'Authorization': 'Bearer ' + key,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify(rows),
+      keepalive: true
+    }).catch(()=>{});
+  }catch(e){/* 조용히 무시 */}
+}
+
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) _forceFlushOnUnload();
+});
+window.addEventListener('pagehide', _forceFlushOnUnload);
+window.addEventListener('beforeunload', _forceFlushOnUnload);
 
 // 포커스/표시 전환 시에도 최신 상태 확인
 window.addEventListener('focus', ()=>{
@@ -2484,31 +2780,38 @@ const LS = {
 };
 
 function migrateOldData(){
+  // [중요] 기본값을 localStorage에 넣을 때 localStorage.setItem 후킹이 작동하면
+  // 기본값이 Supabase로 업로드되어 다른 기기의 실제 데이터를 덮어써버립니다.
+  // 따라서 후킹되지 않은 원본 _lsSet을 사용합니다. (_lsSet은 상단 동기화 블록에서 정의됨)
+  const __rawSet = (typeof _lsSet === 'function')
+    ? _lsSet
+    : Storage.prototype.setItem.bind(localStorage);
+
   // 이미 v3 이상이 있다면 스킵
   if(localStorage.getItem(LS.EQUIP(2026))) return;
   // 이전 버전(v2)에서 equip_master_v2가 있으면 2026년으로 이관
   const oldMaster = localStorage.getItem('equip_master_v2');
   if(oldMaster){
-    localStorage.setItem(LS.EQUIP(2026), oldMaster);
+    __rawSet(LS.EQUIP(2026), oldMaster);
   } else {
-    localStorage.setItem(LS.EQUIP(2026), JSON.stringify(DEFAULT_EQUIP));
+    __rawSet(LS.EQUIP(2026), JSON.stringify(DEFAULT_EQUIP));
   }
   // 기존 계획/점검/특이사항 이관 또는 초기값
   if(!localStorage.getItem(LS.PLAN(2026))){
-    localStorage.setItem(LS.PLAN(2026), JSON.stringify(DEFAULT_PLAN_2026));
+    __rawSet(LS.PLAN(2026), JSON.stringify(DEFAULT_PLAN_2026));
   }
   const oldChecks = JSON.parse(localStorage.getItem('eq_checks')||'{}');
   if(Object.keys(oldChecks).length && !localStorage.getItem(LS.CHECK(2026))){
-    localStorage.setItem(LS.CHECK(2026), JSON.stringify(oldChecks));
+    __rawSet(LS.CHECK(2026), JSON.stringify(oldChecks));
   }
   if(!localStorage.getItem(LS.NOTES(2026))){
-    localStorage.setItem(LS.NOTES(2026), DEFAULT_NOTES);
+    __rawSet(LS.NOTES(2026), DEFAULT_NOTES);
   }
   if(!localStorage.getItem(LS.YEARS)){
-    localStorage.setItem(LS.YEARS, JSON.stringify([2026]));
+    __rawSet(LS.YEARS, JSON.stringify([2026]));
   }
   if(!localStorage.getItem(LS.CUR_YEAR)){
-    localStorage.setItem(LS.CUR_YEAR, '2026');
+    __rawSet(LS.CUR_YEAR, '2026');
   }
 }
 
