@@ -935,7 +935,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
       결재선은 <b style="color:var(--accent)">⚙ 설정</b> 탭에서 미리 등록한 4명(작성·검토·확인·승인)이 자동 적용됩니다.
     </div>
 
-    <label class="lbl">📋 점검표 선택</label>
+    <label class="lbl">📋 점검표</label>
     <div class="tpl-grid" id="tplGrid"></div>
 
     <div style="margin-top:14px" class="fg-row">
@@ -997,7 +997,6 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
       <div class="fg">
         <label class="lbl">점검표</label>
         <select id="searchTpl">
-          <option value="">전체 점검표</option>
         </select>
       </div>
       <div class="fg">
@@ -5984,8 +5983,14 @@ async function runDiagnostic(){
 async function loadTemplates(){
   if(!isCfg()) return [];
   try{
-    templateCache = await sbSelect('p_check_template',
+    const all = await sbSelect('p_check_template',
       'select=*&is_active=eq.true&order=display_order.asc') || [];
+    // PM 점검표만 사용 (DB에 다른 점검표가 남아있어도 UI에서는 숨김)
+    templateCache = all.filter(t => t.code === 'PM');
+    // PM이 자동 선택되도록 - 한 개뿐이므로
+    if(templateCache.length === 1 && !selectedTplCode){
+      selectedTplCode = 'PM';
+    }
     populateSearchTpl();
     return templateCache;
   }catch(e){
@@ -5997,19 +6002,24 @@ async function loadTemplates(){
 function populateSearchTpl(){
   const sel = document.getElementById('searchTpl');
   if(!sel) return;
-  sel.innerHTML = '<option value="">전체 점검표</option>' +
-    templateCache.map(t=>`<option value="${t.code}">${TPL_ICONS[t.code]||'📋'} ${t.name}</option>`).join('');
+  // PM 한 개만 있으므로 '전체' 옵션 없이 PM 자동 선택
+  sel.innerHTML = templateCache.map(t=>`<option value="${t.code}">${TPL_ICONS[t.code]||'🔧'} ${t.name}</option>`).join('');
+  if(templateCache.length === 1) sel.value = templateCache[0].code;
 }
 
 function loadTemplateGrid(){
   const grid = document.getElementById('tplGrid');
   if(!templateCache.length){
-    grid.innerHTML = '<div class="empty-state"><div class="ico">📭</div>점검표가 없습니다 (Supabase 연결 필요)</div>';
+    grid.innerHTML = '<div class="empty-state"><div class="ico">📭</div>점검표가 없습니다 (Supabase 연결 + SQL 스키마 적용 필요)</div>';
     return;
   }
+  // PM 한 개만 있으므로 자동 선택 + 카드 1개로 단순화
+  if(!selectedTplCode && templateCache.length){
+    selectedTplCode = templateCache[0].code;
+  }
   grid.innerHTML = templateCache.map(t=>`
-    <div class="tpl-card ${t.code===selectedTplCode?'selected':''}" onclick="selectTemplate('${t.code}')">
-      <div class="ico">${TPL_ICONS[t.code]||'📋'}</div>
+    <div class="tpl-card selected" style="cursor:default" title="현재 PM 점검표 전용입니다">
+      <div class="ico">${TPL_ICONS[t.code]||'🔧'}</div>
       <div class="name">${t.name}</div>
       <div class="code">${t.code}</div>
     </div>
