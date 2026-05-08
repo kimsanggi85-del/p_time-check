@@ -6,7 +6,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>설비정기점검 기준 및 체크시트 - (주)태진다이텍</title>
+<title>설비정기점검 기준·체크시트·보고서결재 - (주)태진다이텍</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -611,7 +611,200 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   #pmPlanTab .mp-cell .mp-val {font-size:18px}
 }
 
+
+/* =========================================================
+   📋 보고서결재 모듈 (approval_report v3.6) — .appr-app 스코프
+   ========================================================= */
+
+  .appr-app {
+    --bg:#0f172a; --surface:#1e293b; --surface2:#334155;
+    --border:#475569; --accent:#f59e0b; --accent2:#d97706;
+    --ok:#22c55e; --ok-bg:rgba(34,197,94,.12);
+    --ng:#ef4444; --ng-bg:rgba(239,68,68,.12);
+    --info:#38bdf8; --info-bg:rgba(56,189,248,.12);
+    --text:#e2e8f0; --text2:#94a3b8; --text3:#64748b;
+    --paper:#fafafa; --paper-text:#1e293b; --paper-border:#475569;
+    --radius:10px;
+  }
+  .appr-app * {box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  .appr-app {font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px}
+
+  .appr-app .hdr {background:linear-gradient(135deg,#78350f,#b45309);padding:16px 14px 12px;text-align:center;position:relative;overflow:hidden}
+  .appr-app .hdr h1 {font-size:18px;font-weight:900;letter-spacing:-.3px}
+  .appr-app .hdr p {font-size:11px;color:#fcd34d;margin-top:3px}
+  .appr-app .hdr .v {font-size:9px;color:#fcd34d;opacity:.7;margin-top:1px}
+  .appr-app .user-badge {display:inline-block;background:rgba(74,222,128,.18);color:#86efac;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-top:5px}
+
+  .appr-app .tabs {display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;overflow-x:auto}
+  .appr-app .tab {flex:1;min-width:80px;padding:13px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;position:relative}
+  .appr-app .tab.on {color:var(--accent);border-bottom-color:var(--accent);background:rgba(245,158,11,.05)}
+  .appr-app .tab .badge-dot {position:absolute;top:7px;right:6px;background:var(--ng);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center}
+
+  .appr-app .pnl {display:none}
+  .appr-app .pnl.on {display:block}
+  .appr-app .form-wrap {max-width:920px;margin:0 auto;padding:12px}
+
+  .appr-app .card {background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+  .appr-app .card-title {font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.3px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .appr-app .card-title::before {content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;flex-shrink:0}
+
+  .appr-app .fg {margin-bottom:10px}
+  .appr-app .lbl {display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px}
+  .appr-app input[type=text], .appr-app input[type=date], .appr-app select, .appr-app textarea {width:100%;padding:10px 12px;font-size:14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit}
+  .appr-app textarea {min-height:60px;resize:vertical}
+  .appr-app input:focus, .appr-app select:focus, .appr-app textarea:focus {outline:none;border-color:var(--accent)}
+  .appr-app .fg-row {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .appr-app .fg-row-3 {display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+  .appr-app .btn {padding:10px 14px;font-size:13px;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .appr-app .btn-pri {background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+  .appr-app .btn-ok {background:var(--ok);color:#fff}
+  .appr-app .btn-ng {background:var(--ng);color:#fff}
+  .appr-app .btn-info {background:var(--info);color:#fff}
+  .appr-app .btn-ghost {background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .appr-app .btn:disabled {opacity:.4;cursor:not-allowed}
+  .appr-app .btn-block {width:100%}
+
+  .appr-app .inbox-item {background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:.15s;margin-bottom:8px;position:relative}
+  .appr-app .inbox-item:hover {border-color:var(--accent)}
+  .appr-app .inbox-item.urgent {border-left:4px solid var(--ng)}
+  .appr-app .inbox-hdr {display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px;flex-wrap:wrap}
+  .appr-app .inbox-title {font-size:14px;font-weight:700;color:var(--text)}
+  .appr-app .inbox-meta {font-size:11px;color:var(--text2);display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .appr-app .inbox-meta b {color:var(--text)}
+  .appr-app .inbox-meta .ng {color:#fca5a5}
+  .appr-app .tpl-tag {display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;background:rgba(56,189,248,.15);color:#7dd3fc;border-radius:4px}
+
+  .appr-app .badge {display:inline-block;padding:2px 9px;font-size:10px;font-weight:700;border-radius:11px;letter-spacing:.3px}
+  .appr-app .badge.draft {background:rgba(148,163,184,.15);color:#94a3b8}
+  .appr-app .badge.reviewing {background:rgba(56,189,248,.15);color:#38bdf8}
+  .appr-app .badge.confirming {background:rgba(168,85,247,.15);color:#c084fc}
+  .appr-app .badge.approving {background:rgba(245,158,11,.18);color:#fbbf24}
+  .appr-app .badge.completed {background:rgba(34,197,94,.18);color:#86efac}
+  .appr-app .badge.rejected {background:rgba(239,68,68,.18);color:#fca5a5}
+
+  .appr-app .empty-state {text-align:center;padding:36px 20px;color:var(--text3)}
+  .appr-app .empty-state .ico {font-size:38px;margin-bottom:8px}
+
+  /* 점검표 그리드 (작성 탭) */
+  .appr-app .tpl-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .appr-app .tpl-card {background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:.15s;font-size:12px}
+  .appr-app .tpl-card:hover {border-color:var(--accent);background:rgba(245,158,11,.08);transform:translateY(-2px)}
+  .appr-app .tpl-card.selected {border-color:var(--accent);background:rgba(245,158,11,.12)}
+  .appr-app .tpl-card .ico {font-size:26px;margin-bottom:4px}
+  .appr-app .tpl-card .name {font-weight:700;color:var(--text);font-size:12px;line-height:1.3}
+  .appr-app .tpl-card .code {font-size:9px;color:var(--text3);margin-top:2px}
+
+  /* 페이퍼 양식 */
+  .appr-app .paper-wrap {background:var(--paper);color:var(--paper-text);border-radius:8px;padding:24px 20px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.4);border:1px solid var(--paper-border);font-family:'Noto Sans KR',sans-serif}
+  .appr-app .paper-title {text-align:center;font-size:22px;font-weight:900;border-bottom:3px double #1e293b;padding-bottom:8px;margin-bottom:14px;letter-spacing:.5px}
+  .appr-app .paper-sub {text-align:center;font-size:12px;color:#475569;margin-bottom:14px}
+  .appr-app .paper-info {display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1.5px solid #1e293b;font-size:11px;margin-bottom:12px}
+  .appr-app .paper-info > div {padding:6px 8px;border-right:1px solid #1e293b;border-bottom:1px solid #1e293b}
+  .appr-app .paper-info > div:nth-child(4n) {border-right:none}
+  .appr-app .paper-info > div:nth-last-child(-n+4) {border-bottom:none}
+  .appr-app .paper-info .l {background:#e2e8f0;font-weight:700;font-size:10px}
+  .appr-app .paper-info .v {font-weight:600}
+
+  .appr-app .paper-section-title {font-size:13px;font-weight:800;background:#1e293b;color:#fff;padding:5px 10px;margin:14px 0 6px;letter-spacing:.5px;border-radius:2px}
+
+  .appr-app .paper-kpi {display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1.5px solid #1e293b;font-size:11px}
+  .appr-app .paper-kpi > div {padding:6px 4px;text-align:center;border-right:1px solid #1e293b;border-bottom:1px solid #1e293b}
+  .appr-app .paper-kpi > div:nth-child(4n) {border-right:none}
+  .appr-app .paper-kpi > div:nth-last-child(-n+4) {border-bottom:none}
+  .appr-app .paper-kpi .l {background:#e2e8f0;font-weight:700;font-size:10px;color:#475569}
+  .appr-app .paper-kpi .v {font-weight:900;font-size:14px;padding:7px 4px}
+  .appr-app .paper-kpi .v.ok {color:#15803d}
+  .appr-app .paper-kpi .v.ng {color:#b91c1c}
+
+  .appr-app .mtx-wrap {overflow-x:auto;border:1.5px solid #1e293b;background:#fff;border-radius:2px}
+  .appr-app table.mtx {border-collapse:collapse;width:100%;font-size:10px}
+  .appr-app table.mtx th, .appr-app table.mtx td {border:1px solid #94a3b8;padding:3px 4px;text-align:center;white-space:nowrap}
+  .appr-app table.mtx th {background:#1e293b;color:#fff;font-weight:700;position:sticky;top:0}
+  .appr-app table.mtx td.mc {background:#f1f5f9;text-align:left;font-weight:700;color:#1e293b;position:sticky;left:0;min-width:120px;border-right:2px solid #1e293b}
+  .appr-app table.mtx td.ok {background:#dcfce7;color:#15803d;font-weight:700}
+  .appr-app table.mtx td.ng {background:#fee2e2;color:#b91c1c;font-weight:900}
+  .appr-app table.mtx td.na {color:#94a3b8}
+  .appr-app table.mtx td.sum {background:#e2e8f0;font-weight:800}
+
+  .appr-app table.ng-tbl {width:100%;border-collapse:collapse;font-size:11px;border:1.5px solid #1e293b}
+  .appr-app table.ng-tbl th, .appr-app table.ng-tbl td {border:1px solid #94a3b8;padding:5px 7px;text-align:left}
+  .appr-app table.ng-tbl th {background:#1e293b;color:#fff;font-weight:700;text-align:center}
+  .appr-app table.ng-tbl td.ng-it {color:#b91c1c;font-weight:600}
+
+  .appr-app .paper-comment {border:1.5px solid #1e293b;padding:10px 12px;min-height:60px;font-size:12px;background:#fff;line-height:1.7;white-space:pre-wrap}
+  .appr-app .paper-comment.editable {background:#fffbeb;border-color:#f59e0b}
+
+  .appr-app .approval-row {display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:2px solid #1e293b;margin-top:14px}
+  .appr-app .appr-cell {border-right:1.5px solid #1e293b;text-align:center;display:flex;flex-direction:column;min-height:170px}
+  .appr-app .appr-cell:last-child {border-right:none}
+  .appr-app .appr-role {background:#1e293b;color:#fff;font-weight:800;font-size:13px;padding:6px}
+  .appr-app .appr-sig {flex:1;display:flex;align-items:center;justify-content:center;background:#fff;cursor:pointer;position:relative;min-height:80px}
+  .appr-app .appr-sig:hover {background:#fef3c7}
+  .appr-app .appr-sig img {max-width:100%;max-height:78px;display:block}
+  .appr-app .appr-sig.empty {color:#94a3b8;font-size:11px;font-weight:600}
+  .appr-app .appr-sig.locked {cursor:not-allowed;background:#f8fafc}
+  .appr-app .appr-sig.locked:hover {background:#f8fafc}
+  .appr-app .appr-sig.current {background:#fef3c7;animation:blink 1.5s ease-in-out infinite}
+  @keyframes blink{0%,100%{background:#fef3c7}50%{background:#fde68a}}
+  .appr-app .appr-name {padding:5px;font-size:11px;font-weight:700;background:#f1f5f9;color:#1e293b;border-top:1px solid #94a3b8}
+  .appr-app .appr-date {padding:3px 5px;font-size:10px;color:#64748b;background:#f8fafc}
+
+  @media print{
+    .appr-app {background:#fff !important;color:#000 !important}
+    .appr-app .hdr, .appr-app .tabs, .appr-app .action-bar, .appr-app .btn, .appr-app .card-title, .appr-app .no-print {display:none !important}
+    .appr-app .paper-wrap {box-shadow:none;border:none;padding:0}
+  }
+
+  .appr-app .modal-overlay {position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:14px}
+  .appr-app .modal-overlay.show {display:flex}
+  .appr-app .modal {background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;max-width:520px;width:100%;max-height:96vh;overflow-y:auto}
+  .appr-app .modal h3 {font-size:16px;font-weight:700;color:var(--accent);margin-bottom:12px}
+  .appr-app .sigpad-wrap {background:#fff;border:2px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px}
+  .appr-app .sigpad {display:block;width:100%;height:200px;touch-action:none;cursor:crosshair}
+
+  .appr-app .action-bar {display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding:12px;background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius)}
+  .appr-app .action-bar .btn {flex:1;min-width:110px}
+
+  /* 결재선 마스터 카드 */
+  .appr-app .route-card {background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+  .appr-app .route-card-hdr {display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .appr-app .route-card-name {font-size:13px;font-weight:700;color:var(--accent)}
+  .appr-app .route-card-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .appr-app .route-step {background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px}
+  .appr-app .route-step .step-lbl {font-size:9px;color:var(--text3);font-weight:700;text-align:center;margin-bottom:3px}
+  .appr-app .route-step input {padding:6px 8px;font-size:11px;width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;margin-bottom:3px}
+  .appr-app .route-step input:last-child {margin-bottom:0}
+
+  @media(max-width:640px){
+    .appr-app .paper-info {grid-template-columns:repeat(2,1fr)}
+    .appr-app .paper-info > div {border-right:1px solid #1e293b !important;border-bottom:1px solid #1e293b !important}
+    .appr-app .paper-info > div:nth-child(2n) {border-right:none !important}
+    .appr-app .paper-kpi {grid-template-columns:repeat(2,1fr)}
+    .appr-app .paper-kpi > div {border-right:1px solid #1e293b !important;border-bottom:1px solid #1e293b !important}
+    .appr-app .paper-kpi > div:nth-child(2n) {border-right:none !important}
+    .appr-app .approval-row {grid-template-columns:repeat(2,1fr)}
+    .appr-app .appr-cell {border-right:1.5px solid #1e293b !important;border-bottom:1.5px solid #1e293b !important}
+    .appr-app .appr-cell:nth-child(2n) {border-right:none !important}
+    .appr-app .appr-cell:nth-last-child(-n+2) {border-bottom:none !important}
+    .appr-app .fg-row, .appr-app .fg-row-3 {grid-template-columns:1fr}
+    .appr-app .route-card-grid {grid-template-columns:1fr 1fr}
+  }
+
+
+/* 보고서결재 탭 인쇄 시: 다른 탭 숨기기 */
+@media print {
+  body.appr-printing .page-header,
+  body.appr-printing .top-tabs,
+  body.appr-printing #tab-plan,
+  body.appr-printing #tab-check,
+  body.appr-printing #tab-settings { display: none !important; }
+  body.appr-printing #tab-approval { display: block !important; padding: 0; }
+}
+
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -636,6 +829,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
     <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')">📅 설비점검계획</button>
     <button class="top-tab" data-tab="check" onclick="switchTopTab('check')">📋 설비정기점검 기준 및 체크시트</button>
     <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')">⚙️ 설정/조회</button>
+    <button class="top-tab" data-tab="approval" onclick="switchTopTab('approval')">📋 보고서결재</button>
   </div>
 
   <!-- 점검 탭 -->
@@ -678,6 +872,344 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 
   <!-- 설정 탭 -->
   <div id="tab-settings" class="tab-pane no-print"></div>
+
+<!-- ============================================
+     📋 보고서결재 탭
+     ============================================ -->
+<div id="tab-approval" class="tab-pane no-print">
+<div class="appr-app" id="apprApp" style="display:block">
+
+
+<div class="hdr">
+  <h1>📋 보고서 결재 v3.6</h1>
+  <p>점검표 통합 월별 결재 시스템 · 4단계 (작성·검토·확인·승인)</p>
+  <div class="v">v3.6 · 설정 탭에 SQL 스키마 복사 + 진단 도구 내장</div>
+  <div id="hdrUserBadge" class="user-badge" style="display:none">👤 -</div>
+</div>
+
+<div class="tabs">
+  <div class="tab on" onclick="swTab(0)">📥 결재함<span id="inboxBadge" class="badge-dot" style="display:none">0</span></div>
+  <div class="tab" onclick="swTab(1)">✏ 작성</div>
+  <div class="tab" onclick="swTab(2)" id="tabReport" style="display:none">📑 보고서</div>
+  <div class="tab" onclick="swTab(3)">✅ 완료</div>
+  <div class="tab" onclick="swTab(4)">⚙ 설정</div>
+</div>
+
+<!-- =========================================================
+     [0] 결재함
+     ========================================================= -->
+<div class="pnl on" id="pnl0">
+<div class="form-wrap">
+
+  <div class="card">
+    <div class="card-title">📥 내 결재 대기 보고서</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      현재 로그인 PIN(<b id="loginPin" style="color:var(--accent)">-</b>) 으로 결재해야 할 보고서가 표시됩니다.
+    </div>
+    <button class="btn btn-info btn-block" onclick="loadInbox()">🔄 새로고침</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 결재 대기 목록</div>
+    <div id="inboxList"></div>
+  </div>
+
+  <div class="card" style="background:rgba(56,189,248,.05);border:1px dashed var(--info)">
+    <div class="card-title">📤 내가 작성한 보고서</div>
+    <div id="myUploadList"></div>
+  </div>
+
+</div>
+</div><!-- /pnl0 -->
+
+<!-- =========================================================
+     [1] 작성 - 점검표 선택 → 년/월 → 자동 집계
+     ========================================================= -->
+<div class="pnl" id="pnl1">
+<div class="form-wrap">
+
+  <div class="card">
+    <div class="card-title">✏ 새 월보고서 작성</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      년/월을 정하면 PM 점검표 데이터가 자동 집계됩니다.<br>
+      결재선은 <b style="color:var(--accent)">⚙ 설정</b> 탭에서 미리 등록한 4명(작성·검토·확인·승인)이 자동 적용됩니다.
+    </div>
+
+    <label class="lbl">📋 점검표 선택</label>
+    <div class="tpl-grid" id="tplGrid"></div>
+
+    <div style="margin-top:14px" class="fg-row">
+      <div class="fg">
+        <label class="lbl">년</label>
+        <select id="newYear"></select>
+      </div>
+      <div class="fg">
+        <label class="lbl">월</label>
+        <select id="newMonth">
+          <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+          <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+          <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-pri btn-block" onclick="createOrOpenReport()">📂 보고서 생성/열기</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📃 작성중 / 진행중 보고서</div>
+    <div id="draftList"></div>
+  </div>
+
+</div>
+</div><!-- /pnl1 -->
+
+
+<!-- =========================================================
+     [2] 보고서 보기 (페이퍼 양식)
+     ========================================================= -->
+<div class="pnl" id="pnl2">
+<div class="form-wrap">
+  <div id="paperArea"></div>
+  <div class="action-bar no-print" id="actionBar" style="display:none">
+    <button class="btn btn-ghost" onclick="closeReport()">← 목록</button>
+    <button class="btn btn-info" onclick="recalcStats()">🔄 통계 재집계</button>
+    <button class="btn btn-ghost" onclick="saveDraft()" id="btnDraft">💾 임시저장</button>
+    <button class="btn btn-pri" onclick="openSignModal()" id="btnSign" style="display:none">✍ 사인하기</button>
+    <button class="btn btn-ng" onclick="openRejectModal()" id="btnReject" style="display:none">❌ 반려</button>
+    <button class="btn btn-info" onclick="printReport()">🖨 인쇄</button>
+    <button class="btn btn-ghost" onclick="downloadPDF()">⬇ PDF</button>
+  </div>
+</div>
+</div><!-- /pnl2 -->
+
+
+<!-- =========================================================
+     [3] 완료 보고서 검색
+     ========================================================= -->
+<div class="pnl" id="pnl3">
+<div class="form-wrap">
+
+  <div class="card">
+    <div class="card-title">🔍 완료된 보고서 검색</div>
+    <div class="fg-row-3">
+      <div class="fg">
+        <label class="lbl">점검표</label>
+        <select id="searchTpl">
+          <option value="">전체 점검표</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="lbl">연도</label>
+        <select id="searchYear"></select>
+      </div>
+      <div class="fg">
+        <label class="lbl">월</label>
+        <select id="searchMonth">
+          <option value="">전체</option>
+          <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+          <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+          <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg-row">
+      <div class="fg">
+        <label class="lbl">상태</label>
+        <select id="searchStatus">
+          <option value="COMPLETED">✅ 최종승인 완료</option>
+          <option value="">전체 상태</option>
+          <option value="REJECTED">❌ 반려</option>
+          <option value="REVIEWING">검토중</option>
+          <option value="CONFIRMING">확인중</option>
+          <option value="APPROVING">승인중</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="lbl">결재자명 (선택)</label>
+        <input type="text" id="searchApprover" placeholder="이름 일부">
+      </div>
+    </div>
+    <button class="btn btn-pri btn-block" onclick="searchReports()">🔍 검색</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📑 검색 결과 <span id="searchCount" style="font-size:11px;color:var(--text2);font-weight:400"></span></div>
+    <div id="searchResults"></div>
+  </div>
+
+</div>
+</div><!-- /pnl3 -->
+
+<!-- =========================================================
+     [4] 설정
+     ========================================================= -->
+<div class="pnl" id="pnl4">
+<div class="form-wrap">
+
+  <div class="card">
+    <div class="card-title">👤 로그인 정보</div>
+    <div class="fg">
+      <label class="lbl">PIN (필수, 결재함 식별용)</label>
+      <input type="text" id="cfgMyPin" placeholder="예: A001">
+    </div>
+    <div class="fg">
+      <label class="lbl">이름 (필수, 사인란 표시용)</label>
+      <input type="text" id="cfgMyName" placeholder="예: 강병주">
+    </div>
+    <button class="btn btn-pri btn-block" onclick="saveLogin()">💾 로그인 정보 저장</button>
+    <div style="font-size:11px;color:var(--text2);margin-top:8px">
+      ESG 메인 페이지 PIN 로그인 사용 시 자동 채워집니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔧 Supabase 연결</div>
+    <div class="fg"><label class="lbl">URL</label><input type="text" id="apprCfgSbUrl" placeholder="https://xxxxx.supabase.co"></div>
+    <div class="fg"><label class="lbl">Anon Key</label><input type="text" id="apprCfgSbKey" placeholder="sb_publishable_..."></div>
+    <button class="btn btn-info btn-block" onclick="saveSettings()">💾 저장 + 연결 테스트</button>
+    <div style="font-size:11px;color:var(--text2);margin-top:10px;line-height:1.6" id="connStatus">미연결</div>
+  </div>
+
+  <!-- DB 정리 (1회성 마이그레이션 도구) -->
+  <div class="card" style="background:rgba(239,68,68,.05);border:1px dashed var(--ng)">
+    <div class="card-title" style="color:var(--ng)">🗑 기존 점검표 데이터 정리 (1회성)</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      이전 버전에서 등록된 <b>PM 외 7개 점검표</b>(P_MACHINE, QC_MACHINE, WASH, SHIPPING, LOAD_MON, LINE, SAFETY)와 그에 연결된 결재선·보고서·이력을 모두 DB에서 삭제합니다.<br>
+      <b style="color:var(--ng)">⚠ 되돌릴 수 없으니 신중히 실행하세요.</b><br>
+      이 버튼은 처음 1회만 실행하면 됩니다. 새로 SQL 스키마를 적용하면 PM 한 개만 자동 등록됩니다.
+    </div>
+    <button class="btn btn-ng btn-block" onclick="cleanupNonPMTemplates()">🗑 PM 외 7개 점검표 데이터 일괄 삭제</button>
+    <div id="cleanupStatus" style="font-size:11px;margin-top:8px;line-height:1.5"></div>
+  </div>
+
+  <!-- 결재선 마스터 -->
+  <div class="card">
+    <div class="card-title">📋 점검표별 결재선 + HTML 경로 등록</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.6">
+      점검표마다 다음 항목을 등록하세요:<br>
+      &nbsp;&nbsp;• <b style="color:var(--info)">📄 HTML 파일 경로</b> — 점검표 페이지 URL (보고서에서 바로가기 링크로 사용)<br>
+      &nbsp;&nbsp;• <b style="color:var(--accent)">4단계 결재자</b> — 작성·검토·확인·승인 PIN/이름 (보고서 작성 시 자동 적용)
+    </div>
+    <div id="routeList"></div>
+    <button class="btn btn-pri btn-block" style="margin-top:8px" onclick="saveAllRoutes()">💾 모든 설정 저장 (URL + 결재선)</button>
+  </div>
+
+  <details style="margin-bottom:12px" open>
+    <summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--accent);padding:10px 14px;background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius)">▶ 🗃️ Supabase SQL 스키마 (복사 → SQL Editor 붙여넣기 → Run)</summary>
+    <div style="margin-top:8px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text2);line-height:1.7">
+      <div style="margin-bottom:10px">
+        <b style="color:var(--text)">📌 사용법</b><br>
+        ① 아래 <b style="color:var(--accent)">📋 SQL 전체 복사</b> 클릭<br>
+        ② Supabase 대시보드 → SQL Editor → 새 쿼리 → 붙여넣기 → <b>Run</b><br>
+        ③ 첫 실행: 모든 테이블·함수·기본 점검표 8종 자동 생성<br>
+        ④ 재실행: 안전 (IF NOT EXISTS / ON CONFLICT 처리)
+      </div>
+      <div style="margin-bottom:10px">
+        <b style="color:var(--text)">생성 객체</b><br>
+        • <code>p_check_template</code> · 점검표 마스터 (8종)<br>
+        • <code>p_check_approval_route</code> · 점검표별 결재선<br>
+        • <code>p_monthly_report</code> · 월별 보고서 본체<br>
+        • <code>p_monthly_approval_log</code> · 결재 이력<br>
+        • 함수 5개 + 잠금 트리거 1개
+      </div>
+      <div style="margin-bottom:10px">
+        <b style="color:var(--text)">전제조건</b> — 점검 원본 테이블이 미리 있어야 합니다:<br>
+        <code style="font-size:10px">p_machine_check, qc_machine_check, wash_machine_check, shipping_check, load_monitor_check, line_patrol, safety_check, pm_checksheet</code>
+      </div>
+      <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-pri" onclick="copySchemaSQL()">📋 SQL 전체 복사</button>
+        <button class="btn btn-info" onclick="downloadSchemaSQL()">⬇ .sql 파일 다운로드</button>
+        <button class="btn btn-ghost" onclick="toggleSqlPreview()">🔍 미리보기</button>
+        <span id="sqlCopyStatus" style="font-size:11px;font-weight:700;align-self:center"></span>
+      </div>
+      <pre id="sqlPreview" style="display:none;max-height:380px;overflow:auto;background:#0a0f1c;border:1px solid var(--border);border-radius:6px;padding:12px;font-size:10px;color:#86efac;white-space:pre;line-height:1.45;font-family:'Consolas','Monaco','Courier New',monospace;tab-size:2"></pre>
+    </div>
+  </details>
+
+  <details style="margin-bottom:12px">
+    <summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--info);padding:10px 14px;background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius)">▶ 🩺 점검표 진단 (데이터가 안 보일 때)</summary>
+    <div style="margin-top:8px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text2);line-height:1.7">
+      특정 점검표 매트릭스가 비어 보일 때 원본 테이블 상태와 컬럼 매핑을 확인합니다.
+      <div class="fg-row" style="margin-top:10px;align-items:end">
+        <div class="fg" style="margin-bottom:0">
+          <label class="lbl">점검표</label>
+          <select id="diagTplCode"></select>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <button class="btn btn-info btn-block" onclick="runDiagnostic()">🩺 진단 실행</button>
+        </div>
+      </div>
+      <pre id="diagResult" style="margin-top:10px;background:#0a0f1c;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:10px;color:#7dd3fc;white-space:pre-wrap;line-height:1.6;display:none;font-family:'Consolas','Monaco','Courier New',monospace"></pre>
+    </div>
+  </details>
+
+</div>
+</div><!-- /pnl4 -->
+
+
+<!-- =========================================================
+     사인 모달
+     ========================================================= -->
+<div class="modal-overlay" id="signModal">
+  <div class="modal">
+    <h3 id="signModalTitle">결재 사인</h3>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
+      <b id="signModalRole" style="color:var(--accent)">-</b>
+    </div>
+    <div id="nextApproverInfo" style="margin-bottom:12px;padding:10px 12px;background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.3);border-radius:8px;font-size:12px">
+      ➡ 다음 결재자: <b id="nextApproverName" style="color:var(--info)">-</b>
+      <span id="nextApproverPin" style="color:var(--text3);font-size:11px"></span>
+    </div>
+    <div class="fg">
+      <label class="lbl">결재 의견 (선택)</label>
+      <textarea id="signComment" rows="2" placeholder="검토/확인/승인 의견"></textarea>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">
+      🖊 아래 흰 박스에 직접 사인을 그려주세요
+    </div>
+    <div class="sigpad-wrap">
+      <canvas class="sigpad" id="sigCanvas"></canvas>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn btn-ghost" style="flex:1" onclick="clearSig()">↻ 다시</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeSignModal()">취소</button>
+      <button class="btn btn-pri" style="flex:2" onclick="confirmSign()" id="btnConfirmSign">
+        ✅ 사인 + 다음 결재선
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 반려 모달 -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal">
+    <h3 style="color:var(--ng)">❌ 보고서 반려</h3>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
+      반려 시 작성자가 재작성 후 다시 제출해야 합니다.
+    </div>
+    <div class="fg">
+      <label class="lbl">반려 사유 (필수)</label>
+      <textarea id="rejectReason" rows="3" placeholder="반려 사유를 입력하세요" required></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeRejectModal()">취소</button>
+      <button class="btn btn-ng" style="flex:2" onclick="confirmReject()">❌ 반려 처리</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+</div>
+
+</div>
+
 
   <!-- 연간계획 탭 -->
   <div id="tab-plan" class="tab-pane no-print active">
@@ -1970,6 +2502,10 @@ function switchTopTab(name){
   if(name==='settings') buildSettings();
   if(name==='plan' && typeof window.initPmPlan==='function') window.initPmPlan();
   if(name==='check' && typeof window.renderChkYearSelect==='function') window.renderChkYearSelect();
+  if(name==='approval' && typeof window.apprInit==='function' && !window.__apprInited){
+    window.__apprInited = true;
+    try{ window.apprInit(); }catch(e){console.error('[Approval init]', e);}
+  }
 }
 
 // --- 메인 렌더 ---
@@ -4696,6 +5232,2210 @@ document.addEventListener('DOMContentLoaded', function(){
   // 체크시트 년도 UI 초기화
   if(typeof window.initChkYearUI==='function') window.initChkYearUI();
 });
+</script>
+
+<!-- ============== 📋 보고서결재 모듈 JS ============== -->
+<script>
+(function(){
+'use strict';
+
+// =========================================================
+// 설정 / 상수
+// =========================================================
+const SCHEMA_SQL_B64 = [
+  "LS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09Ci0tIOuztOqzoOyEnCDqsrDsnqwg7Iuc7Iqk7YWcIHYzLjAKLS0g64uk7KSRIOygkOqygO2RnCDt",
+  "hrXtlakgLyDqsrDsnqzshKAg66eI7Iqk7YSwIOyCrOyghCDrk7HroZ0g67Cp7IudCi0tID09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKLS0gPT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0t",
+  "IDEpIOygkOqygO2RnCDrp4jsiqTthLAKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09CkNSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIHBfY2hl",
+  "Y2tfdGVtcGxhdGUgKAogIGlkICAgICAgICAgICAgICBiaWdpbnQgZ2VuZXJhdGVkIGFsd2F5cyBhcyBp",
+  "ZGVudGl0eSBwcmltYXJ5IGtleSwKICBjb2RlICAgICAgICAgICAgdGV4dCBub3QgbnVsbCB1bmlxdWUs",
+  "ICAgICAgICAtLSAnUE0nICjtmITsnqwgUE3rp4wg7IKs7JqpKQogIG5hbWUgICAgICAgICAgICB0ZXh0",
+  "IG5vdCBudWxsLCAgICAgICAgICAgICAgICAtLSDtkZzsi5zrqoUgKOyYiDog7IOd7IKw7ISk67mEIOyd",
+  "vOyDgeygkOqygO2RnCkKICBzb3VyY2VfdGFibGUgICAgdGV4dCBub3QgbnVsbCwgICAgICAgICAgICAg",
+  "ICAgLS0g7JuQ67O4IO2FjOydtOu4lOuqhSAo7JiIOiBwX21hY2hpbmVfY2hlY2spCiAgc291cmNlX3Vy",
+  "bCAgICAgIHRleHQsICAgICAgICAgICAgICAgICAgICAgICAgICAtLSDsoJDqsoDtkZwgSFRNTCDtjIzs",
+  "nbwg6rK966GcICjsmIg6ICdQX21hY2hpbmVfY2hlY2suaHRtbCcg65iQ64qUIOyghOyytCBVUkwpCiAg",
+  "ZGF0ZV9jb2wgICAgICAgIHRleHQgbm90IG51bGwgZGVmYXVsdCAnY2hlY2tfZGF0ZScsCiAgcmVzdWx0",
+  "X2NvbCAgICAgIHRleHQgbm90IG51bGwgZGVmYXVsdCAncmVzdWx0JywgICAtLSAnT0snLydORycg65Ok",
+  "7Ja07J6I64qUIOy7rOufvAogIG1hY2hpbmVfY29sICAgICB0ZXh0IGRlZmF1bHQgJ21hY2hpbmUnLCAg",
+  "ICAgICAgICAgLS0g7Zi46riwL+yEpOu5hCDsu6zrn7wgKOyXhuycvOuptCBOVUxMKQogIGluc3BlY3Rv",
+  "cl9jb2wgICB0ZXh0IGRlZmF1bHQgJ2luc3BlY3RvcicsICAgICAgICAgLS0g7KCQ6rKA7J6QCiAgbmdf",
+  "Y291bnRfY29sICAgIHRleHQgZGVmYXVsdCAnbmdfY291bnQnLCAgICAgICAgICAtLSBORyDqsbTsiJgg",
+  "7Lus65+8ICjsl4bsnLzrqbQgTlVMTCkKICBtZW1vX2NvbCAgICAgICAgdGV4dCBkZWZhdWx0ICdtZW1v",
+  "JywKICBjaGVja19pdGVtcyAgICAganNvbmIsICAgICAgICAgICAgICAgICAgICAgICAgICAgIC0tIFt7",
+  "a2V5OidjaGtfb3ZlcmxvYWQnLG5hbWU6JzEu7Jik67KE66Gc65OcJ30sLi4uXQogIGRpc3BsYXlfb3Jk",
+  "ZXIgICBpbnQgZGVmYXVsdCAxMDAsCiAgaXNfYWN0aXZlICAgICAgIGJvb2xlYW4gZGVmYXVsdCB0cnVl",
+  "LAogIGNyZWF0ZWRfYXQgICAgICB0aW1lc3RhbXB0eiBkZWZhdWx0IG5vdygpCik7CgotLSDquLDsobQg",
+  "7YWM7J2067iU7JeQIOy7rOufvCDstpTqsIAgKOydtOuvuCDsnojsnLzrqbQg66y07IucKQpBTFRFUiBU",
+  "QUJMRSBwX2NoZWNrX3RlbXBsYXRlIEFERCBDT0xVTU4gSUYgTk9UIEVYSVNUUyBzb3VyY2VfdXJsIHRl",
+  "eHQ7CgpBTFRFUiBUQUJMRSBwX2NoZWNrX3RlbXBsYXRlIEVOQUJMRSBST1cgTEVWRUwgU0VDVVJJVFk7",
+  "CkRST1AgUE9MSUNZIElGIEVYSVNUUyAiYW5vbl9hbGwiIE9OIHBfY2hlY2tfdGVtcGxhdGU7CkNSRUFU",
+  "RSBQT0xJQ1kgImFub25fYWxsIiBPTiBwX2NoZWNrX3RlbXBsYXRlIEZPUiBBTEwgVE8gYW5vbiBVU0lO",
+  "RyAodHJ1ZSkgV0lUSCBDSEVDSyAodHJ1ZSk7CkdSQU5UIEFMTCBPTiBwX2NoZWNrX3RlbXBsYXRlIFRP",
+  "IGFub24sIGF1dGhlbnRpY2F0ZWQ7CkdSQU5UIFVTQUdFIE9OIFNFUVVFTkNFIHBfY2hlY2tfdGVtcGxh",
+  "dGVfaWRfc2VxIFRPIGFub24sIGF1dGhlbnRpY2F0ZWQ7CgotLSDquLDrs7gg7KCQ6rKA7ZGcIDjsooUg",
+  "65Ox66GdIChzbXRlY19tYWluMiDrj4TrqZTsnbgg6riw7KSAKQpJTlNFUlQgSU5UTyBwX2NoZWNrX3Rl",
+  "bXBsYXRlIChjb2RlLCBuYW1lLCBzb3VyY2VfdGFibGUsIHNvdXJjZV91cmwsIGNoZWNrX2l0ZW1zLCBk",
+  "aXNwbGF5X29yZGVyKSBWQUxVRVMKCiAgKCdQTScsICAgICAgICAgJ+yEpOu5hCDsoJXquLDsoJDqsoDt",
+  "kZwnLCAgICAgICAncG1fY2hlY2tzaGVldCcsCiAgICdodHRwczovL2tpbXNhbmdnaTg1LWRlbC5naXRo",
+  "dWIuaW8vcF90aW1lLWNoZWNrL1BNX2NoZWNrc2hlZXQuaHRtbCcsICAgICAgICBOVUxMLCA4MCkKT04g",
+  "Q09ORkxJQ1QgKGNvZGUpIERPIFVQREFURQogIFNFVCBzb3VyY2VfdXJsID0gRVhDTFVERUQuc291cmNl",
+  "X3VybAogIFdIRVJFIHBfY2hlY2tfdGVtcGxhdGUuc291cmNlX3VybCBJUyBOVUxMOwoKLS0gPT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIDEt",
+  "Mikg7KCQ6rKA7ZGc67OEIOy7rOufvCDrp6TtlZEg7KCV7KCVICjsi6TsoJwg7YWM7J2067iUIOq1rOyh",
+  "sOyXkCDrp57stqQpCi0tICAgICAg7Ja065akIOygkOqygO2RnOuToCDtmLjquLAv7ISk67mEIOyLneuz",
+  "hCDsu6zrn7zsnbQg64uk66W8IOyImCDsnojslrQKLS0gICAgICDsi6TsoJwg7Jq07JiBIO2FjOydtOu4",
+  "lOyXkCDrp57qsowg66qF7Iuc7KCB7Jy866GcIOqwseyLoAotLSA9PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCi0tIOy2nO2VmOqzteyglTogJ21h",
+  "Y2hpbmUnIOuYkOuKlCAnbGluZScg7Lus65+8IOyCrOyaqSAo65287J2466qFOiBTS0YgQeyLpCwg7J28",
+  "7KeEIEHsi6Qg65OxKQpVUERBVEUgcF9jaGVja190ZW1wbGF0ZQpTRVQgbWFjaGluZV9jb2wgPSAnbWFj",
+  "aGluZScgICAtLSDsnbzrsJjsoIHsnLzroZwgbWFjaGluZSDsu6zrn7wg7Jqw7ISgIOyCrOyaqQpXSEVS",
+  "RSBjb2RlID0gJ1BNJzsKCi0tIOuhnOuTnOuqqOuLiO2EsDogdG90YWwvY2gxL2NoMiDsoJDqsoAg7ZiV",
+  "7YOc7J2066+A66GcIHJlc3VsdCDsu6zrn7zsnbQg64uk66W8IOyImCDsnojsnYwKVVBEQVRFIHBfY2hl",
+  "Y2tfdGVtcGxhdGUKU0VUIHJlc3VsdF9jb2wgPSBDT0FMRVNDRShyZXN1bHRfY29sLCAncmVzdWx0Jyks",
+  "CiAgICBtYWNoaW5lX2NvbCA9IENPQUxFU0NFKG1hY2hpbmVfY29sLCAnbWFjaGluZScpCldIRVJFIGNv",
+  "ZGUgPSAnUE0nOwoKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09Ci0tIDEtMykg7KeE64uoIFNRTDog7Iuk7KCcIO2FjOydtOu4lOyXkCDslrTr",
+  "lqQg7Lus65+87J20IOyeiOuKlOyngCDtmZXsnbgKLS0gICAgICDrrLjsoJwg67Cc7IOdIOyLnCDrqLzs",
+  "oIAg7J20IOy/vOumrOuhnCDsu6zrn7zrqoUg7YyM7JWFCi0tID09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLSBTRUxFQ1QgY29sdW1uX25hbWUs",
+  "IGRhdGFfdHlwZSBGUk9NIGluZm9ybWF0aW9uX3NjaGVtYS5jb2x1bW5zCi0tIFdIRVJFIHRhYmxlX3Nj",
+  "aGVtYT0ncHVibGljJyBBTkQgdGFibGVfbmFtZT0nc2hpcHBpbmdfY2hlY2snCi0tIE9SREVSIEJZIG9y",
+  "ZGluYWxfcG9zaXRpb247CgoKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09Ci0tIDIpIOygkOqygO2RnOuzhCDqsrDsnqzshKAg66eI7Iqk7YSw",
+  "ICjsoJDqsoDtkZwgMeyiheuLuSA066qFID0gMe2WiSkKLS0gPT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CkNSRUFURSBUQUJMRSBJRiBOT1QgRVhJ",
+  "U1RTIHBfY2hlY2tfYXBwcm92YWxfcm91dGUgKAogIGlkICAgICAgICAgICAgICBiaWdpbnQgZ2VuZXJh",
+  "dGVkIGFsd2F5cyBhcyBpZGVudGl0eSBwcmltYXJ5IGtleSwKICB0ZW1wbGF0ZV9jb2RlICAgdGV4dCBu",
+  "b3QgbnVsbCB1bmlxdWUgcmVmZXJlbmNlcyBwX2NoZWNrX3RlbXBsYXRlKGNvZGUpIG9uIGRlbGV0ZSBj",
+  "YXNjYWRlLAogIAogIC0tIDHssKg6IOyekeyEsQogIHN0ZXAxX3BpbiAgICAgICB0ZXh0LAogIHN0ZXAx",
+  "X25hbWUgICAgICB0ZXh0LAogIHN0ZXAxX3JvbGUgICAgICB0ZXh0IGRlZmF1bHQgJ+yekeyEsScsCiAg",
+  "CiAgLS0gMuywqDog6rKA7YagCiAgc3RlcDJfcGluICAgICAgIHRleHQsCiAgc3RlcDJfbmFtZSAgICAg",
+  "IHRleHQsCiAgc3RlcDJfcm9sZSAgICAgIHRleHQgZGVmYXVsdCAn6rKA7YagJywKICAKICAtLSAz7LCo",
+  "OiDtmZXsnbgKICBzdGVwM19waW4gICAgICAgdGV4dCwKICBzdGVwM19uYW1lICAgICAgdGV4dCwKICBz",
+  "dGVwM19yb2xlICAgICAgdGV4dCBkZWZhdWx0ICftmZXsnbgnLAogIAogIC0tIDTssKg6IOyKueyduAog",
+  "IHN0ZXA0X3BpbiAgICAgICB0ZXh0LAogIHN0ZXA0X25hbWUgICAgICB0ZXh0LAogIHN0ZXA0X3JvbGUg",
+  "ICAgICB0ZXh0IGRlZmF1bHQgJ+yKueyduCcsCiAgCiAgdXBkYXRlZF9hdCAgICAgIHRpbWVzdGFtcHR6",
+  "IGRlZmF1bHQgbm93KCkKKTsKCkFMVEVSIFRBQkxFIHBfY2hlY2tfYXBwcm92YWxfcm91dGUgRU5BQkxF",
+  "IFJPVyBMRVZFTCBTRUNVUklUWTsKRFJPUCBQT0xJQ1kgSUYgRVhJU1RTICJhbm9uX2FsbCIgT04gcF9j",
+  "aGVja19hcHByb3ZhbF9yb3V0ZTsKQ1JFQVRFIFBPTElDWSAiYW5vbl9hbGwiIE9OIHBfY2hlY2tfYXBw",
+  "cm92YWxfcm91dGUgRk9SIEFMTCBUTyBhbm9uIFVTSU5HICh0cnVlKSBXSVRIIENIRUNLICh0cnVlKTsK",
+  "R1JBTlQgQUxMIE9OIHBfY2hlY2tfYXBwcm92YWxfcm91dGUgVE8gYW5vbiwgYXV0aGVudGljYXRlZDsK",
+  "R1JBTlQgVVNBR0UgT04gU0VRVUVOQ0UgcF9jaGVja19hcHByb3ZhbF9yb3V0ZV9pZF9zZXEgVE8gYW5v",
+  "biwgYXV0aGVudGljYXRlZDsKCi0tIOygkOqygO2RnOuzhCDruYgg6rKw7J6s7ISgIOyekOuPmSDsg53s",
+  "hLEKSU5TRVJUIElOVE8gcF9jaGVja19hcHByb3ZhbF9yb3V0ZSAodGVtcGxhdGVfY29kZSkKU0VMRUNU",
+  "IGNvZGUgRlJPTSBwX2NoZWNrX3RlbXBsYXRlCk9OIENPTkZMSUNUICh0ZW1wbGF0ZV9jb2RlKSBETyBO",
+  "T1RISU5HOwoKCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PQotLSAzKSDsm5Trs4Qg67O06rOg7IScIOuzuOyytCAo7KCQ6rKA7ZGcICsg64WE",
+  "7JuUIOuLqOychCkKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09CkNSRUFURSBUQUJMRSBJRiBOT1QgRVhJU1RTIHBfbW9udGhseV9yZXBvcnQg",
+  "KAogIGlkICAgICAgICAgICAgICBiaWdpbnQgZ2VuZXJhdGVkIGFsd2F5cyBhcyBpZGVudGl0eSBwcmlt",
+  "YXJ5IGtleSwKICB0ZW1wbGF0ZV9jb2RlICAgdGV4dCBub3QgbnVsbCByZWZlcmVuY2VzIHBfY2hlY2tf",
+  "dGVtcGxhdGUoY29kZSksCiAgdGVtcGxhdGVfbmFtZSAgIHRleHQsICAgICAgICAgICAgICAgICAgICAg",
+  "ICAgICAgICAgLS0g7Iqk64OF7IO3ICjslpHsi50g67OA6rK965CY7Ja064+EIOycoOyngCkKICB0YXJn",
+  "ZXRfeWVhciAgICAgc21hbGxpbnQgbm90IG51bGwsCiAgdGFyZ2V0X21vbnRoICAgIHNtYWxsaW50IG5v",
+  "dCBudWxsLAoKICAtLSDthrXqs4QKICB0b3RhbF9tYWNoaW5lcyAgICAgIGludCBkZWZhdWx0IDAsCiAg",
+  "dG90YWxfd29ya2RheXMgICAgICBpbnQgZGVmYXVsdCAwLAogIHRvdGFsX3BlcmZvcm1lZCAgICAgaW50",
+  "IGRlZmF1bHQgMCwKICBva19jb3VudCAgICAgICAgICAgIGludCBkZWZhdWx0IDAsCiAgbmdfY291bnQg",
+  "ICAgICAgICAgICBpbnQgZGVmYXVsdCAwLAogIG5nX3JhdGUgICAgICAgICAgICAgbnVtZXJpYyg1LDIp",
+  "LAoKICAtLSDrs7jrrLgKICBzdW1tYXJ5X2NvbW1lbnQgICAgIHRleHQsCiAgaW1wcm92ZW1lbnRfYWN0",
+  "aW9uICB0ZXh0LAoKICAtLSDsg4Htg5wKICAtLSBEUkFGVCwgUkVWSUVXSU5HLCBDT05GSVJNSU5HLCBB",
+  "UFBST1ZJTkcsIENPTVBMRVRFRCwgUkVKRUNURUQKICBzdGF0dXMgICAgICAgICAgICAgIHRleHQgbm90",
+  "IG51bGwgZGVmYXVsdCAnRFJBRlQnLAogIGN1cnJlbnRfc3RlcCAgICAgICAgc21hbGxpbnQgZGVmYXVs",
+  "dCAxLAoKICAtLSA064uo6rOEIOyCrOyduCAocm91dGXsl5DshJwg67O17IKs65CcIO2bhCDsgqzsnbgg",
+  "7IucIOyxhOybjOynkCkKICBzdGVwMV9waW4gICAgICAgICAgIHRleHQsCiAgc3RlcDFfbmFtZSAgICAg",
+  "ICAgICB0ZXh0LAogIHN0ZXAxX3NpZ25hdHVyZSAgICAgdGV4dCwKICBzdGVwMV9hdCAgICAgICAgICAg",
+  "IHRpbWVzdGFtcHR6LAogIHN0ZXAxX2NvbW1lbnQgICAgICAgdGV4dCwKCiAgc3RlcDJfcGluICAgICAg",
+  "ICAgICB0ZXh0LAogIHN0ZXAyX25hbWUgICAgICAgICAgdGV4dCwKICBzdGVwMl9zaWduYXR1cmUgICAg",
+  "IHRleHQsCiAgc3RlcDJfYXQgICAgICAgICAgICB0aW1lc3RhbXB0eiwKICBzdGVwMl9jb21tZW50ICAg",
+  "ICAgIHRleHQsCgogIHN0ZXAzX3BpbiAgICAgICAgICAgdGV4dCwKICBzdGVwM19uYW1lICAgICAgICAg",
+  "IHRleHQsCiAgc3RlcDNfc2lnbmF0dXJlICAgICB0ZXh0LAogIHN0ZXAzX2F0ICAgICAgICAgICAgdGlt",
+  "ZXN0YW1wdHosCiAgc3RlcDNfY29tbWVudCAgICAgICB0ZXh0LAoKICBzdGVwNF9waW4gICAgICAgICAg",
+  "IHRleHQsCiAgc3RlcDRfbmFtZSAgICAgICAgICB0ZXh0LAogIHN0ZXA0X3NpZ25hdHVyZSAgICAgdGV4",
+  "dCwKICBzdGVwNF9hdCAgICAgICAgICAgIHRpbWVzdGFtcHR6LAogIHN0ZXA0X2NvbW1lbnQgICAgICAg",
+  "dGV4dCwKCiAgLS0g7ZiE7J6sIOuLpOydjCDqsrDsnqzsnpAgKOqysOyerO2VqCDqsoDsg4kg7YKkKQog",
+  "IG5leHRfYXBwcm92ZXJfcGluICAgdGV4dCwKICBuZXh0X2FwcHJvdmVyX25hbWUgIHRleHQsCgogIC0t",
+  "IOuwmOugpAogIHJlamVjdGVkX3N0ZXAgICAgICAgc21hbGxpbnQsCiAgcmVqZWN0ZWRfcmVhc29uICAg",
+  "ICB0ZXh0LAogIHJlamVjdGVkX2F0ICAgICAgICAgdGltZXN0YW1wdHosCgogIC0tIOuplO2DgAogIHBk",
+  "Zl91cmwgICAgICAgICAgICAgdGV4dCwKICBjcmVhdGVkX2F0ICAgICAgICAgIHRpbWVzdGFtcHR6IGRl",
+  "ZmF1bHQgbm93KCksCiAgdXBkYXRlZF9hdCAgICAgICAgICB0aW1lc3RhbXB0eiBkZWZhdWx0IG5vdygp",
+  "LAoKICBDT05TVFJBSU5UIHVxX3RlbXBsYXRlX3llYXJfbW9udGggVU5JUVVFICh0ZW1wbGF0ZV9jb2Rl",
+  "LCB0YXJnZXRfeWVhciwgdGFyZ2V0X21vbnRoKQopOwoKQ1JFQVRFIElOREVYIElGIE5PVCBFWElTVFMg",
+  "aWR4X3Btcl90ZW1wbGF0ZV95bQogIE9OIHBfbW9udGhseV9yZXBvcnQodGVtcGxhdGVfY29kZSwgdGFy",
+  "Z2V0X3llYXIgREVTQywgdGFyZ2V0X21vbnRoIERFU0MpOwpDUkVBVEUgSU5ERVggSUYgTk9UIEVYSVNU",
+  "UyBpZHhfcG1yX25leHQKICBPTiBwX21vbnRobHlfcmVwb3J0KG5leHRfYXBwcm92ZXJfcGluKQogIFdI",
+  "RVJFIHN0YXR1cyBJTiAoJ1JFVklFV0lORycsJ0NPTkZJUk1JTkcnLCdBUFBST1ZJTkcnKTsKQ1JFQVRF",
+  "IElOREVYIElGIE5PVCBFWElTVFMgaWR4X3Btcl9jb21wbGV0ZWQKICBPTiBwX21vbnRobHlfcmVwb3J0",
+  "KHN0YXR1cywgdGFyZ2V0X3llYXIsIHRhcmdldF9tb250aCkKICBXSEVSRSBzdGF0dXM9J0NPTVBMRVRF",
+  "RCc7CgpBTFRFUiBUQUJMRSBwX21vbnRobHlfcmVwb3J0IEVOQUJMRSBST1cgTEVWRUwgU0VDVVJJVFk7",
+  "CkRST1AgUE9MSUNZIElGIEVYSVNUUyAiYW5vbl9hbGwiIE9OIHBfbW9udGhseV9yZXBvcnQ7CkNSRUFU",
+  "RSBQT0xJQ1kgImFub25fYWxsIiBPTiBwX21vbnRobHlfcmVwb3J0IEZPUiBBTEwgVE8gYW5vbiBVU0lO",
+  "RyAodHJ1ZSkgV0lUSCBDSEVDSyAodHJ1ZSk7CkdSQU5UIEFMTCBPTiBwX21vbnRobHlfcmVwb3J0IFRP",
+  "IGFub24sIGF1dGhlbnRpY2F0ZWQ7CkdSQU5UIFVTQUdFIE9OIFNFUVVFTkNFIHBfbW9udGhseV9yZXBv",
+  "cnRfaWRfc2VxIFRPIGFub24sIGF1dGhlbnRpY2F0ZWQ7CgoKLS0gPT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIDQpIOqysOyerCDsp4Ttlokg",
+  "66Gc6re4Ci0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PQpDUkVBVEUgVEFCTEUgSUYgTk9UIEVYSVNUUyBwX21vbnRobHlfYXBwcm92YWxfbG9n",
+  "ICgKICBpZCAgICAgICAgICAgIGJpZ2ludCBnZW5lcmF0ZWQgYWx3YXlzIGFzIGlkZW50aXR5IHByaW1h",
+  "cnkga2V5LAogIHJlcG9ydF9pZCAgICAgYmlnaW50IG5vdCBudWxsIHJlZmVyZW5jZXMgcF9tb250aGx5",
+  "X3JlcG9ydChpZCkgb24gZGVsZXRlIGNhc2NhZGUsCiAgYWN0aW9uICAgICAgICB0ZXh0IG5vdCBudWxs",
+  "LCAgICAgICAgLS0gJ0NSRUFURScsJ1NJR04nLCdGT1JXQVJEJywnUkVKRUNUJywnQ09NUExFVEUnCiAg",
+  "c3RlcF9ubyAgICAgICBzbWFsbGludCwKICBhY3Rvcl9waW4gICAgIHRleHQsCiAgYWN0b3JfbmFtZSAg",
+  "ICB0ZXh0LAogIHRhcmdldF9waW4gICAgdGV4dCwKICB0YXJnZXRfbmFtZSAgIHRleHQsCiAgY29tbWVu",
+  "dCAgICAgICB0ZXh0LAogIGNyZWF0ZWRfYXQgICAgdGltZXN0YW1wdHogZGVmYXVsdCBub3coKQopOwpD",
+  "UkVBVEUgSU5ERVggSUYgTk9UIEVYSVNUUyBpZHhfcG1hbF9yZXBvcnQgT04gcF9tb250aGx5X2FwcHJv",
+  "dmFsX2xvZyhyZXBvcnRfaWQsIGNyZWF0ZWRfYXQgREVTQyk7CgpBTFRFUiBUQUJMRSBwX21vbnRobHlf",
+  "YXBwcm92YWxfbG9nIEVOQUJMRSBST1cgTEVWRUwgU0VDVVJJVFk7CkRST1AgUE9MSUNZIElGIEVYSVNU",
+  "UyAiYW5vbl9hbGwiIE9OIHBfbW9udGhseV9hcHByb3ZhbF9sb2c7CkNSRUFURSBQT0xJQ1kgImFub25f",
+  "YWxsIiBPTiBwX21vbnRobHlfYXBwcm92YWxfbG9nIEZPUiBBTEwgVE8gYW5vbiBVU0lORyAodHJ1ZSkg",
+  "V0lUSCBDSEVDSyAodHJ1ZSk7CkdSQU5UIEFMTCBPTiBwX21vbnRobHlfYXBwcm92YWxfbG9nIFRPIGFu",
+  "b24sIGF1dGhlbnRpY2F0ZWQ7CkdSQU5UIFVTQUdFIE9OIFNFUVVFTkNFIHBfbW9udGhseV9hcHByb3Zh",
+  "bF9sb2dfaWRfc2VxIFRPIGFub24sIGF1dGhlbnRpY2F0ZWQ7CgoKLS0gPT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIDUpIOuztOqzoOyEnCDs",
+  "npDrj5kg7IOd7ISxICsg7Ya16rOEIOqwseyLoCArIOqysOyerOyEoCDsnpDrj5nsoIHsmqkKLS0gPT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CkNS",
+  "RUFURSBPUiBSRVBMQUNFIEZVTkNUSU9OIHJlZnJlc2hfbW9udGhseV9yZXBvcnQoCiAgcF90ZW1wbGF0",
+  "ZV9jb2RlIHRleHQsCiAgcF95ZWFyIHNtYWxsaW50LAogIHBfbW9udGggc21hbGxpbnQKKSBSRVRVUk5T",
+  "IGJpZ2ludCBBUyAkJApERUNMQVJFCiAgdl9pZCAgICAgICAgICBiaWdpbnQ7CiAgdl9kMSAgICAgICAg",
+  "ICBkYXRlOwogIHZfZDIgICAgICAgICAgZGF0ZTsKICB2X3RlbXBsYXRlICAgIHBfY2hlY2tfdGVtcGxh",
+  "dGUlUk9XVFlQRTsKICB2X3JvdXRlICAgICAgIHBfY2hlY2tfYXBwcm92YWxfcm91dGUlUk9XVFlQRTsK",
+  "ICB2X3NxbCAgICAgICAgIHRleHQ7CiAgdl9tYWNoaW5lcyAgICBpbnQgOj0gMDsKICB2X2RheXMgICAg",
+  "ICAgIGludCA6PSAwOwogIHZfcGVyZm9ybWVkICAgaW50IDo9IDA7CiAgdl9vayAgICAgICAgICBpbnQg",
+  "Oj0gMDsKICB2X25nICAgICAgICAgIGludCA6PSAwOwpCRUdJTgogIHZfZDEgOj0gbWFrZV9kYXRlKHBf",
+  "eWVhciwgcF9tb250aCwgMSk7CiAgdl9kMiA6PSAodl9kMSArIGludGVydmFsICcxIG1vbnRoJyk6OmRh",
+  "dGU7CgogIC0tIOygkOqygO2RnCDrp4jsiqTthLAgLyDqsrDsnqzshKAg7KGw7ZqMCiAgU0VMRUNUICog",
+  "SU5UTyB2X3RlbXBsYXRlIEZST00gcF9jaGVja190ZW1wbGF0ZSBXSEVSRSBjb2RlID0gcF90ZW1wbGF0",
+  "ZV9jb2RlOwogIElGIE5PVCBGT1VORCBUSEVOIFJBSVNFIEVYQ0VQVElPTiAn7KCQ6rKA7ZGcIOy9lOuT",
+  "nCglKeulvCDssL7snYQg7IiYIOyXhuyKteuLiOuLpCcsIHBfdGVtcGxhdGVfY29kZTsgRU5EIElGOwoK",
+  "ICBTRUxFQ1QgKiBJTlRPIHZfcm91dGUgRlJPTSBwX2NoZWNrX2FwcHJvdmFsX3JvdXRlIFdIRVJFIHRl",
+  "bXBsYXRlX2NvZGUgPSBwX3RlbXBsYXRlX2NvZGU7CgogIC0tIOuztOqzoOyEnCDsl4bsnLzrqbQg7IOd",
+  "7ISxICjqsrDsnqzshKAg66eI7Iqk7YSw7JeQ7IScIDHssKgg7J6R7ISx7J6QIFBJTiDsnpDrj5kg7KCB",
+  "7JqpKQogIFNFTEVDVCBpZCBJTlRPIHZfaWQgRlJPTSBwX21vbnRobHlfcmVwb3J0CiAgIFdIRVJFIHRl",
+  "bXBsYXRlX2NvZGUgPSBwX3RlbXBsYXRlX2NvZGUKICAgICBBTkQgdGFyZ2V0X3llYXIgPSBwX3llYXIg",
+  "QU5EIHRhcmdldF9tb250aCA9IHBfbW9udGg7CgogIElGIHZfaWQgSVMgTlVMTCBUSEVOCiAgICBJTlNF",
+  "UlQgSU5UTyBwX21vbnRobHlfcmVwb3J0ICgKICAgICAgdGVtcGxhdGVfY29kZSwgdGVtcGxhdGVfbmFt",
+  "ZSwKICAgICAgdGFyZ2V0X3llYXIsIHRhcmdldF9tb250aCwgc3RhdHVzLCBjdXJyZW50X3N0ZXAsCiAg",
+  "ICAgIG5leHRfYXBwcm92ZXJfcGluLCBuZXh0X2FwcHJvdmVyX25hbWUKICAgICkgVkFMVUVTICgKICAg",
+  "ICAgcF90ZW1wbGF0ZV9jb2RlLCB2X3RlbXBsYXRlLm5hbWUsCiAgICAgIHBfeWVhciwgcF9tb250aCwg",
+  "J0RSQUZUJywgMSwKICAgICAgdl9yb3V0ZS5zdGVwMV9waW4sIHZfcm91dGUuc3RlcDFfbmFtZQogICAg",
+  "KSBSRVRVUk5JTkcgaWQgSU5UTyB2X2lkOwoKICAgIElOU0VSVCBJTlRPIHBfbW9udGhseV9hcHByb3Zh",
+  "bF9sb2cgKHJlcG9ydF9pZCwgYWN0aW9uLCBjb21tZW50KQogICAgVkFMVUVTICh2X2lkLCAnQ1JFQVRF",
+  "JywgZm9ybWF0KCclc+uFhCAlc+yblCAlcyDrs7Tqs6DshJwg7IOd7ISxJywgcF95ZWFyLCBwX21vbnRo",
+  "LCB2X3RlbXBsYXRlLm5hbWUpKTsKICBFTkQgSUY7CgogIC0tIO2GteqzhCDsp5Hqs4QgKOybkOuzuCDt",
+  "hYzsnbTruJQg64+Z7KCBIOy/vOumrCkKICBJRiB2X3RlbXBsYXRlLnNvdXJjZV90YWJsZSBJUyBOT1Qg",
+  "TlVMTCBUSEVOCiAgICBCRUdJTgogICAgICB2X3NxbCA6PSBmb3JtYXQoCiAgICAgICAgJ1NFTEVDVCBD",
+  "T1VOVChESVNUSU5DVCAlSSksIENPVU5UKERJU1RJTkNUICVJKSwgQ09VTlQoKiksCiAgICAgICAgICAg",
+  "ICAgICBTVU0oQ0FTRSBXSEVOICVJPScnT0snJyBUSEVOIDEgRUxTRSAwIEVORCksCiAgICAgICAgICAg",
+  "ICAgICBTVU0oQ0FTRSBXSEVOICVJPScnTkcnJyBUSEVOIDEgRUxTRSAwIEVORCkKICAgICAgICAgRlJP",
+  "TSAlSSBXSEVSRSAlSSA+PSAkMSBBTkQgJUkgPCAkMicsCiAgICAgICAgQ09BTEVTQ0Uodl90ZW1wbGF0",
+  "ZS5tYWNoaW5lX2NvbCwgdl90ZW1wbGF0ZS5kYXRlX2NvbCksCiAgICAgICAgdl90ZW1wbGF0ZS5kYXRl",
+  "X2NvbCwKICAgICAgICB2X3RlbXBsYXRlLnJlc3VsdF9jb2wsIHZfdGVtcGxhdGUucmVzdWx0X2NvbCwK",
+  "ICAgICAgICB2X3RlbXBsYXRlLnNvdXJjZV90YWJsZSwKICAgICAgICB2X3RlbXBsYXRlLmRhdGVfY29s",
+  "LCB2X3RlbXBsYXRlLmRhdGVfY29sCiAgICAgICk7CiAgICAgIEVYRUNVVEUgdl9zcWwgSU5UTyB2X21h",
+  "Y2hpbmVzLCB2X2RheXMsIHZfcGVyZm9ybWVkLCB2X29rLCB2X25nIFVTSU5HIHZfZDEsIHZfZDI7CiAg",
+  "ICBFWENFUFRJT04gV0hFTiBPVEhFUlMgVEhFTgogICAgICAtLSDsm5Drs7gg7YWM7J2067iUL+y7rOuf",
+  "vOydtCDsl4bsnLzrqbQgMOycvOuhnCDrkaAKICAgICAgdl9tYWNoaW5lcyA6PSAwOyB2X2RheXMgOj0g",
+  "MDsgdl9wZXJmb3JtZWQgOj0gMDsgdl9vayA6PSAwOyB2X25nIDo9IDA7CiAgICBFTkQ7CiAgRU5EIElG",
+  "OwoKICBVUERBVEUgcF9tb250aGx5X3JlcG9ydCBTRVQKICAgIHRvdGFsX21hY2hpbmVzICA9IENPQUxF",
+  "U0NFKHZfbWFjaGluZXMsIDApLAogICAgdG90YWxfd29ya2RheXMgID0gQ09BTEVTQ0Uodl9kYXlzLCAw",
+  "KSwKICAgIHRvdGFsX3BlcmZvcm1lZCA9IENPQUxFU0NFKHZfcGVyZm9ybWVkLCAwKSwKICAgIG9rX2Nv",
+  "dW50ICAgICAgICA9IENPQUxFU0NFKHZfb2ssIDApLAogICAgbmdfY291bnQgICAgICAgID0gQ09BTEVT",
+  "Q0Uodl9uZywgMCksCiAgICBuZ19yYXRlICAgICAgICAgPSBDQVNFIFdIRU4gQ09BTEVTQ0Uodl9wZXJm",
+  "b3JtZWQsMCkgPiAwCiAgICAgICAgICAgICAgICAgICAgICAgICAgIFRIRU4gUk9VTkQodl9uZyoxMDAu",
+  "MC92X3BlcmZvcm1lZCwgMikgRUxTRSAwIEVORCwKICAgIHVwZGF0ZWRfYXQgICAgICA9IG5vdygpCiAg",
+  "V0hFUkUgaWQgPSB2X2lkOwoKICBSRVRVUk4gdl9pZDsKRU5EOwokJCBMQU5HVUFHRSBwbHBnc3FsOwoK",
+  "Ci0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PQotLSA2KSDsoJDqsoAg7JuQ67O4642w7J207YSwIOyhsO2ajCAo7KCQ6rKA7ZGc67OEIOuPmeyg",
+  "gSkKLS0gICAg7YG065287J207Ja47Yq46rCAIOunpO2KuOumreyKpC9OR+yDgeyEuOulvCDqt7jrprQg",
+  "65WMIOyCrOyaqQotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT0KQ1JFQVRFIE9SIFJFUExBQ0UgRlVOQ1RJT04gZ2V0X21vbnRobHlfY2hlY2tf",
+  "ZGF0YSgKICBwX3RlbXBsYXRlX2NvZGUgdGV4dCwgcF95ZWFyIHNtYWxsaW50LCBwX21vbnRoIHNtYWxs",
+  "aW50CikgUkVUVVJOUyBUQUJMRSAoCiAgY2hlY2tfZGF0ZSAgICBkYXRlLAogIG1hY2hpbmUgICAgICAg",
+  "dGV4dCwKICBpbnNwZWN0b3IgICAgIHRleHQsCiAgcmVzdWx0ICAgICAgICB0ZXh0LAogIG5nX2NvdW50",
+  "ICAgICAgaW50LAogIG1lbW8gICAgICAgICAgdGV4dCwKICByYXdfcm93ICAgICAgIGpzb25iCikgQVMg",
+  "JCQKREVDTEFSRQogIHZfdGVtcGxhdGUgcF9jaGVja190ZW1wbGF0ZSVST1dUWVBFOwogIHZfZDEgICAg",
+  "ICAgZGF0ZTsKICB2X2QyICAgICAgIGRhdGU7CiAgdl9zcWwgICAgICB0ZXh0OwogIHZfbWFjaGluZV9l",
+  "eHByICAgdGV4dDsKICB2X2luc3BlY3Rvcl9leHByIHRleHQ7CiAgdl9uZ2NvdW50X2V4cHIgICB0ZXh0",
+  "OwogIHZfbWVtb19leHByICAgICAgdGV4dDsKQkVHSU4KICBTRUxFQ1QgKiBJTlRPIHZfdGVtcGxhdGUg",
+  "RlJPTSBwX2NoZWNrX3RlbXBsYXRlIFdIRVJFIGNvZGUgPSBwX3RlbXBsYXRlX2NvZGU7CiAgSUYgTk9U",
+  "IEZPVU5EIFRIRU4gUkVUVVJOOyBFTkQgSUY7CgogIHZfZDEgOj0gbWFrZV9kYXRlKHBfeWVhciwgcF9t",
+  "b250aCwgMSk7CiAgdl9kMiA6PSAodl9kMSArIGludGVydmFsICcxIG1vbnRoJyk6OmRhdGU7CgogIC0t",
+  "IOy7rOufvOydtCBOVUxML+u5iOusuOyekOyXtOydtOuptCDrpqzthLDrn7QsIOq3uCDsmbjsl5QgcXVv",
+  "dGVfaWRlbnTroZwg7JWI7KCEIOyymOumrAogIHZfbWFjaGluZV9leHByICAgOj0gQ0FTRSBXSEVOIHZf",
+  "dGVtcGxhdGUubWFjaGluZV9jb2wgICBJUyBOVUxMIE9SIHZfdGVtcGxhdGUubWFjaGluZV9jb2wgICA9",
+  "ICcnCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBUSEVOICcnJy0nJycgRUxTRSBxdW90ZV9pZGVu",
+  "dCh2X3RlbXBsYXRlLm1hY2hpbmVfY29sKSAgIEVORDsKICB2X2luc3BlY3Rvcl9leHByIDo9IENBU0Ug",
+  "V0hFTiB2X3RlbXBsYXRlLmluc3BlY3Rvcl9jb2wgSVMgTlVMTCBPUiB2X3RlbXBsYXRlLmluc3BlY3Rv",
+  "cl9jb2wgPSAnJwogICAgICAgICAgICAgICAgICAgICAgICAgICAgVEhFTiAnJyctJycnIEVMU0UgcXVv",
+  "dGVfaWRlbnQodl90ZW1wbGF0ZS5pbnNwZWN0b3JfY29sKSBFTkQ7CiAgdl9uZ2NvdW50X2V4cHIgICA6",
+  "PSBDQVNFIFdIRU4gdl90ZW1wbGF0ZS5uZ19jb3VudF9jb2wgIElTIE5VTEwgT1Igdl90ZW1wbGF0ZS5u",
+  "Z19jb3VudF9jb2wgID0gJycKICAgICAgICAgICAgICAgICAgICAgICAgICAgIFRIRU4gJzAnICAgIEVM",
+  "U0UgcXVvdGVfaWRlbnQodl90ZW1wbGF0ZS5uZ19jb3VudF9jb2wpICAgRU5EOwogIHZfbWVtb19leHBy",
+  "ICAgICAgOj0gQ0FTRSBXSEVOIHZfdGVtcGxhdGUubWVtb19jb2wgICAgICBJUyBOVUxMIE9SIHZfdGVt",
+  "cGxhdGUubWVtb19jb2wgICAgICA9ICcnCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBUSEVOICdO",
+  "VUxMJyBFTFNFIHF1b3RlX2lkZW50KHZfdGVtcGxhdGUubWVtb19jb2wpICAgICAgIEVORDsKCiAgdl9z",
+  "cWwgOj0gZm9ybWF0KAogICAgJ1NFTEVDVCAlSTo6ZGF0ZSBBUyBjaGVja19kYXRlLAogICAgICAgICAg",
+  "ICAlczo6dGV4dCBBUyBtYWNoaW5lLAogICAgICAgICAgICAlczo6dGV4dCBBUyBpbnNwZWN0b3IsCiAg",
+  "ICAgICAgICAgICVJOjp0ZXh0IEFTIHJlc3VsdCwKICAgICAgICAgICAgQ09BTEVTQ0UoJXMsMCk6Omlu",
+  "dCBBUyBuZ19jb3VudCwKICAgICAgICAgICAgJXM6OnRleHQgQVMgbWVtbywKICAgICAgICAgICAgdG9f",
+  "anNvbmIodC4qKSBBUyByYXdfcm93CiAgICAgICBGUk9NICVJIHQKICAgICAgV0hFUkUgJUkgPj0gJDEg",
+  "QU5EICVJIDwgJDIKICAgICAgT1JERVIgQlkgJUknLAogICAgdl90ZW1wbGF0ZS5kYXRlX2NvbCwKICAg",
+  "IHZfbWFjaGluZV9leHByLAogICAgdl9pbnNwZWN0b3JfZXhwciwKICAgIHZfdGVtcGxhdGUucmVzdWx0",
+  "X2NvbCwKICAgIHZfbmdjb3VudF9leHByLAogICAgdl9tZW1vX2V4cHIsCiAgICB2X3RlbXBsYXRlLnNv",
+  "dXJjZV90YWJsZSwKICAgIHZfdGVtcGxhdGUuZGF0ZV9jb2wsIHZfdGVtcGxhdGUuZGF0ZV9jb2wsCiAg",
+  "ICB2X3RlbXBsYXRlLmRhdGVfY29sCiAgKTsKCiAgUkVUVVJOIFFVRVJZIEVYRUNVVEUgdl9zcWwgVVNJ",
+  "Tkcgdl9kMSwgdl9kMjsKRVhDRVBUSU9OIFdIRU4gT1RIRVJTIFRIRU4KICAtLSDsl5Drn6zrpbwg7IK8",
+  "7YKk7KeAIOunkOqzoCBJTkZPIOuhnOq3uOuhnCDrgqjquYAgKFN1cGFiYXNlIOuhnOq3uOyXkOyEnCDt",
+  "mZXsnbgg6rCA64qlKQogIFJBSVNFIElORk8gJ2dldF9tb250aGx5X2NoZWNrX2RhdGEg7JeQ65+sOiAl",
+  "IC8gU1FMOiAlJywgU1FMRVJSTSwgdl9zcWw7CiAgUkVUVVJOOwpFTkQ7CiQkIExBTkdVQUdFIHBscGdz",
+  "cWw7CgoKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09Ci0tIDYtMikg7KeE64uoIO2VqOyImCAo7KCQ6rKA7ZGc67OEIOybkOuzuCDthYzsnbTr",
+  "uJQg7IOB7YOcIO2ZleyduCkKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09CkNSRUFURSBPUiBSRVBMQUNFIEZVTkNUSU9OIGRpYWdfY2hlY2tf",
+  "dGVtcGxhdGUocF90ZW1wbGF0ZV9jb2RlIHRleHQpClJFVFVSTlMgVEFCTEUgKAogIHRlbXBsYXRlX2Nv",
+  "ZGUgICB0ZXh0LAogIHNvdXJjZV90YWJsZSAgICB0ZXh0LAogIHRhYmxlX2V4aXN0cyAgICBib29sZWFu",
+  "LAogIHRvdGFsX3Jvd3MgICAgICBiaWdpbnQsCiAgZGF0ZV9jb2wgICAgICAgIHRleHQsCiAgbWFjaGlu",
+  "ZV9jb2wgICAgIHRleHQsCiAgcmVzdWx0X2NvbCAgICAgIHRleHQsCiAgc2FtcGxlX21hY2hpbmVzIHRl",
+  "eHQsCiAgcmVjZW50X2RhdGVzICAgIHRleHQKKSBBUyAkJApERUNMQVJFCiAgdl90ZW1wbGF0ZSBwX2No",
+  "ZWNrX3RlbXBsYXRlJVJPV1RZUEU7CiAgdl9leGlzdHMgICBib29sZWFuOwogIHZfdG90YWwgICAgYmln",
+  "aW50IDo9IDA7CiAgdl9tYWNoaW5lcyB0ZXh0ICAgOj0gJyc7CiAgdl9kYXRlcyAgICB0ZXh0ICAgOj0g",
+  "Jyc7CiAgdl9zcWwgICAgICB0ZXh0OwpCRUdJTgogIFNFTEVDVCAqIElOVE8gdl90ZW1wbGF0ZSBGUk9N",
+  "IHBfY2hlY2tfdGVtcGxhdGUgV0hFUkUgY29kZSA9IHBfdGVtcGxhdGVfY29kZTsKICBJRiBOT1QgRk9V",
+  "TkQgVEhFTiBSRVRVUk47IEVORCBJRjsKCiAgLS0g7YWM7J2067iUIOyhtOyerCDtmZXsnbgKICBTRUxF",
+  "Q1QgRVhJU1RTKAogICAgU0VMRUNUIDEgRlJPTSBpbmZvcm1hdGlvbl9zY2hlbWEudGFibGVzCiAgICBX",
+  "SEVSRSB0YWJsZV9zY2hlbWE9J3B1YmxpYycgQU5EIHRhYmxlX25hbWUgPSB2X3RlbXBsYXRlLnNvdXJj",
+  "ZV90YWJsZQogICkgSU5UTyB2X2V4aXN0czsKCiAgSUYgdl9leGlzdHMgVEhFTgogICAgQkVHSU4KICAg",
+  "ICAgdl9zcWwgOj0gZm9ybWF0KCdTRUxFQ1QgQ09VTlQoKikgRlJPTSAlSScsIHZfdGVtcGxhdGUuc291",
+  "cmNlX3RhYmxlKTsKICAgICAgRVhFQ1VURSB2X3NxbCBJTlRPIHZfdG90YWw7CiAgICBFWENFUFRJT04g",
+  "V0hFTiBPVEhFUlMgVEhFTiB2X3RvdGFsIDo9IC0xOwogICAgRU5EOwoKICAgIC0tIOyDmO2UjCDtmLjq",
+  "uLAgKE5VTEwg7JWE64uMIOqygyA16rCcKQogICAgSUYgdl90ZW1wbGF0ZS5tYWNoaW5lX2NvbCBJUyBO",
+  "T1QgTlVMTCBBTkQgdl90ZW1wbGF0ZS5tYWNoaW5lX2NvbCA8PiAnJyBUSEVOCiAgICAgIEJFR0lOCiAg",
+  "ICAgICAgdl9zcWwgOj0gZm9ybWF0KAogICAgICAgICAgJ1NFTEVDVCBzdHJpbmdfYWdnKERJU1RJTkNU",
+  "ICVJOjp0ZXh0LCAnJywgJycpIEZST00gKFNFTEVDVCAlSSBGUk9NICVJIFdIRVJFICVJIElTIE5PVCBO",
+  "VUxMIExJTUlUIDUpIHMnLAogICAgICAgICAgdl90ZW1wbGF0ZS5tYWNoaW5lX2NvbCwgdl90ZW1wbGF0",
+  "ZS5tYWNoaW5lX2NvbCwKICAgICAgICAgIHZfdGVtcGxhdGUuc291cmNlX3RhYmxlLCB2X3RlbXBsYXRl",
+  "Lm1hY2hpbmVfY29sCiAgICAgICAgKTsKICAgICAgICBFWEVDVVRFIHZfc3FsIElOVE8gdl9tYWNoaW5l",
+  "czsKICAgICAgRVhDRVBUSU9OIFdIRU4gT1RIRVJTIFRIRU4gdl9tYWNoaW5lcyA6PSAnKOyhsO2ajCDs",
+  "i6TtjKg6ICd8fFNRTEVSUk18fCcpJzsKICAgICAgRU5EOwogICAgRU5EIElGOwoKICAgIC0tIOy1nOq3",
+  "vCDrgqDsp5wKICAgIEJFR0lOCiAgICAgIHZfc3FsIDo9IGZvcm1hdCgKICAgICAgICAnU0VMRUNUIHN0",
+  "cmluZ19hZ2coRElTVElOQ1QgJUk6OnRleHQsICcnLCAnJykgRlJPTSAoU0VMRUNUICVJIEZST00gJUkg",
+  "T1JERVIgQlkgJUkgREVTQyBMSU1JVCA1KSBkJywKICAgICAgICB2X3RlbXBsYXRlLmRhdGVfY29sLCB2",
+  "X3RlbXBsYXRlLmRhdGVfY29sLAogICAgICAgIHZfdGVtcGxhdGUuc291cmNlX3RhYmxlLCB2X3RlbXBs",
+  "YXRlLmRhdGVfY29sCiAgICAgICk7CiAgICAgIEVYRUNVVEUgdl9zcWwgSU5UTyB2X2RhdGVzOwogICAg",
+  "RVhDRVBUSU9OIFdIRU4gT1RIRVJTIFRIRU4gdl9kYXRlcyA6PSAnKOyhsO2ajCDsi6TtjKg6ICd8fFNR",
+  "TEVSUk18fCcpJzsKICAgIEVORDsKICBFTkQgSUY7CgogIHRlbXBsYXRlX2NvZGUgICA6PSBwX3RlbXBs",
+  "YXRlX2NvZGU7CiAgc291cmNlX3RhYmxlICAgIDo9IHZfdGVtcGxhdGUuc291cmNlX3RhYmxlOwogIHRh",
+  "YmxlX2V4aXN0cyAgICA6PSBDT0FMRVNDRSh2X2V4aXN0cywgZmFsc2UpOwogIHRvdGFsX3Jvd3MgICAg",
+  "ICA6PSBDT0FMRVNDRSh2X3RvdGFsLCAwKTsKICBkYXRlX2NvbCAgICAgICAgOj0gdl90ZW1wbGF0ZS5k",
+  "YXRlX2NvbDsKICBtYWNoaW5lX2NvbCAgICAgOj0gdl90ZW1wbGF0ZS5tYWNoaW5lX2NvbDsKICByZXN1",
+  "bHRfY29sICAgICAgOj0gdl90ZW1wbGF0ZS5yZXN1bHRfY29sOwogIHNhbXBsZV9tYWNoaW5lcyA6PSBD",
+  "T0FMRVNDRSh2X21hY2hpbmVzLCAnKOyXhuydjCknKTsKICByZWNlbnRfZGF0ZXMgICAgOj0gQ09BTEVT",
+  "Q0Uodl9kYXRlcywgJyjsl4bsnYwpJyk7CiAgUkVUVVJOIE5FWFQ7CkVORDsKJCQgTEFOR1VBR0UgcGxw",
+  "Z3NxbDsKCgotLSDsp4Tri6gg7IKs7JqpIOyYiOyLnDoKLS0gICBTRUxFQ1QgKiBGUk9NIGRpYWdfY2hl",
+  "Y2tfdGVtcGxhdGUoJ1BNJyk7Ci0tICAg4oaSIHRhYmxlX2V4aXN0cz10cnVlLCB0b3RhbF9yb3dzPU7q",
+  "sbQsIHNhbXBsZV9tYWNoaW5lcz0nMe2YuOq4sCDsjI3smqkyMDDthqQsIDLtmLjquLAgLi4uJwotLSAg",
+  "IO2ZleyduCDtm4Qg6rKw6rO866W8IOuztOqzoOyEnCDsnpHshLHsl5Ag67CY7JiBCgoKLS0gPT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIDcp",
+  "IOyCrOyduCArIOuLpOydjCDqsrDsnqzshKAg7KeE7ZaJCi0tID09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQpDUkVBVEUgT1IgUkVQTEFDRSBGVU5D",
+  "VElPTiBzaWduX2FuZF9mb3J3YXJkKAogIHBfcmVwb3J0X2lkIGJpZ2ludCwKICBwX3N0ZXAgICAgICBz",
+  "bWFsbGludCwKICBwX2FjdG9yX3BpbiB0ZXh0LAogIHBfYWN0b3JfbmFtZSB0ZXh0LAogIHBfc2lnbmF0",
+  "dXJlIHRleHQsCiAgcF9jb21tZW50ICAgdGV4dAopIFJFVFVSTlMganNvbiBBUyAkJApERUNMQVJFCiAg",
+  "dl9yZXBvcnQgcF9tb250aGx5X3JlcG9ydCVST1dUWVBFOwogIHZfcm91dGUgIHBfY2hlY2tfYXBwcm92",
+  "YWxfcm91dGUlUk9XVFlQRTsKICB2X25ld19zdGF0dXMgdGV4dDsKICB2X25leHRfcGluICB0ZXh0Owog",
+  "IHZfbmV4dF9uYW1lIHRleHQ7CkJFR0lOCiAgU0VMRUNUICogSU5UTyB2X3JlcG9ydCBGUk9NIHBfbW9u",
+  "dGhseV9yZXBvcnQgV0hFUkUgaWQgPSBwX3JlcG9ydF9pZDsKICBJRiBOT1QgRk9VTkQgVEhFTiBSQUlT",
+  "RSBFWENFUFRJT04gJ+uztOqzoOyEnOulvCDssL7snYQg7IiYIOyXhuyKteuLiOuLpCc7IEVORCBJRjsK",
+  "ICBJRiB2X3JlcG9ydC5zdGF0dXMgPSAnQ09NUExFVEVEJyBUSEVOIFJBSVNFIEVYQ0VQVElPTiAn7J20",
+  "66+4IOy1nOyihSDsirnsnbjrkJwg67O06rOg7ISc7J6F64uI64ukJzsgRU5EIElGOwogIElGIHZfcmVw",
+  "b3J0LmN1cnJlbnRfc3RlcCA8PiBwX3N0ZXAgVEhFTgogICAgUkFJU0UgRVhDRVBUSU9OICftmITsnqwg",
+  "6rKw7J6sIOuLqOqzhOqwgCDslYTri5nri4jri6QgKO2YhOyerCAl64uo6rOEKScsIHZfcmVwb3J0LmN1",
+  "cnJlbnRfc3RlcDsKICBFTkQgSUY7CgogIC0tIOqysOyerOyEoCDrp4jsiqTthLDsl5DshJwg64uk7J2M",
+  "IOqysOyerOyekCDsnpDrj5kg7KGw7ZqMCiAgU0VMRUNUICogSU5UTyB2X3JvdXRlIEZST00gcF9jaGVj",
+  "a19hcHByb3ZhbF9yb3V0ZSBXSEVSRSB0ZW1wbGF0ZV9jb2RlID0gdl9yZXBvcnQudGVtcGxhdGVfY29k",
+  "ZTsKCiAgdl9uZXdfc3RhdHVzIDo9IENBU0UgcF9zdGVwCiAgICBXSEVOIDEgVEhFTiAnUkVWSUVXSU5H",
+  "JyBXSEVOIDIgVEhFTiAnQ09ORklSTUlORycKICAgIFdIRU4gMyBUSEVOICdBUFBST1ZJTkcnIFdIRU4g",
+  "NCBUSEVOICdDT01QTEVURUQnIEVORDsKCiAgLS0g64uk7J2MIOqysOyerOyekCDqsrDsoJUgKDTssKjs",
+  "l5DshJzripQgTlVMTCkKICBJRiBwX3N0ZXAgPSAxIFRIRU4gdl9uZXh0X3BpbiA6PSB2X3JvdXRlLnN0",
+  "ZXAyX3Bpbjsgdl9uZXh0X25hbWUgOj0gdl9yb3V0ZS5zdGVwMl9uYW1lOwogIEVMU0lGIHBfc3RlcCA9",
+  "IDIgVEhFTiB2X25leHRfcGluIDo9IHZfcm91dGUuc3RlcDNfcGluOyB2X25leHRfbmFtZSA6PSB2X3Jv",
+  "dXRlLnN0ZXAzX25hbWU7CiAgRUxTSUYgcF9zdGVwID0gMyBUSEVOIHZfbmV4dF9waW4gOj0gdl9yb3V0",
+  "ZS5zdGVwNF9waW47IHZfbmV4dF9uYW1lIDo9IHZfcm91dGUuc3RlcDRfbmFtZTsKICBFTFNFIHZfbmV4",
+  "dF9waW4gOj0gTlVMTDsgdl9uZXh0X25hbWUgOj0gTlVMTDsKICBFTkQgSUY7CgogIC0tIOyCrOyduCDs",
+  "oIDsnqUgKyDri6TsnYwg6rKw7J6s7J6QIOyekOuPmSDsp4DsoJUKICBJRiBwX3N0ZXAgPSAxIFRIRU4K",
+  "ICAgIFVQREFURSBwX21vbnRobHlfcmVwb3J0IFNFVAogICAgICBzdGVwMV9waW4gPSBwX2FjdG9yX3Bp",
+  "biwgc3RlcDFfbmFtZSA9IHBfYWN0b3JfbmFtZSwKICAgICAgc3RlcDFfc2lnbmF0dXJlID0gcF9zaWdu",
+  "YXR1cmUsIHN0ZXAxX2F0ID0gbm93KCksIHN0ZXAxX2NvbW1lbnQgPSBwX2NvbW1lbnQsCiAgICAgIG5l",
+  "eHRfYXBwcm92ZXJfcGluID0gdl9uZXh0X3BpbiwgbmV4dF9hcHByb3Zlcl9uYW1lID0gdl9uZXh0X25h",
+  "bWUsCiAgICAgIGN1cnJlbnRfc3RlcCA9IDIsIHN0YXR1cyA9IHZfbmV3X3N0YXR1cywgdXBkYXRlZF9h",
+  "dCA9IG5vdygpCiAgICBXSEVSRSBpZCA9IHBfcmVwb3J0X2lkOwogIEVMU0lGIHBfc3RlcCA9IDIgVEhF",
+  "TgogICAgVVBEQVRFIHBfbW9udGhseV9yZXBvcnQgU0VUCiAgICAgIHN0ZXAyX3BpbiA9IHBfYWN0b3Jf",
+  "cGluLCBzdGVwMl9uYW1lID0gcF9hY3Rvcl9uYW1lLAogICAgICBzdGVwMl9zaWduYXR1cmUgPSBwX3Np",
+  "Z25hdHVyZSwgc3RlcDJfYXQgPSBub3coKSwgc3RlcDJfY29tbWVudCA9IHBfY29tbWVudCwKICAgICAg",
+  "bmV4dF9hcHByb3Zlcl9waW4gPSB2X25leHRfcGluLCBuZXh0X2FwcHJvdmVyX25hbWUgPSB2X25leHRf",
+  "bmFtZSwKICAgICAgY3VycmVudF9zdGVwID0gMywgc3RhdHVzID0gdl9uZXdfc3RhdHVzLCB1cGRhdGVk",
+  "X2F0ID0gbm93KCkKICAgIFdIRVJFIGlkID0gcF9yZXBvcnRfaWQ7CiAgRUxTSUYgcF9zdGVwID0gMyBU",
+  "SEVOCiAgICBVUERBVEUgcF9tb250aGx5X3JlcG9ydCBTRVQKICAgICAgc3RlcDNfcGluID0gcF9hY3Rv",
+  "cl9waW4sIHN0ZXAzX25hbWUgPSBwX2FjdG9yX25hbWUsCiAgICAgIHN0ZXAzX3NpZ25hdHVyZSA9IHBf",
+  "c2lnbmF0dXJlLCBzdGVwM19hdCA9IG5vdygpLCBzdGVwM19jb21tZW50ID0gcF9jb21tZW50LAogICAg",
+  "ICBuZXh0X2FwcHJvdmVyX3BpbiA9IHZfbmV4dF9waW4sIG5leHRfYXBwcm92ZXJfbmFtZSA9IHZfbmV4",
+  "dF9uYW1lLAogICAgICBjdXJyZW50X3N0ZXAgPSA0LCBzdGF0dXMgPSB2X25ld19zdGF0dXMsIHVwZGF0",
+  "ZWRfYXQgPSBub3coKQogICAgV0hFUkUgaWQgPSBwX3JlcG9ydF9pZDsKICBFTFNFCiAgICBVUERBVEUg",
+  "cF9tb250aGx5X3JlcG9ydCBTRVQKICAgICAgc3RlcDRfcGluID0gcF9hY3Rvcl9waW4sIHN0ZXA0X25h",
+  "bWUgPSBwX2FjdG9yX25hbWUsCiAgICAgIHN0ZXA0X3NpZ25hdHVyZSA9IHBfc2lnbmF0dXJlLCBzdGVw",
+  "NF9hdCA9IG5vdygpLCBzdGVwNF9jb21tZW50ID0gcF9jb21tZW50LAogICAgICBuZXh0X2FwcHJvdmVy",
+  "X3BpbiA9IE5VTEwsIG5leHRfYXBwcm92ZXJfbmFtZSA9IE5VTEwsCiAgICAgIHN0YXR1cyA9ICdDT01Q",
+  "TEVURUQnLCB1cGRhdGVkX2F0ID0gbm93KCkKICAgIFdIRVJFIGlkID0gcF9yZXBvcnRfaWQ7CiAgRU5E",
+  "IElGOwoKICBJTlNFUlQgSU5UTyBwX21vbnRobHlfYXBwcm92YWxfbG9nICgKICAgIHJlcG9ydF9pZCwg",
+  "YWN0aW9uLCBzdGVwX25vLCBhY3Rvcl9waW4sIGFjdG9yX25hbWUsCiAgICB0YXJnZXRfcGluLCB0YXJn",
+  "ZXRfbmFtZSwgY29tbWVudAogICkgVkFMVUVTICgKICAgIHBfcmVwb3J0X2lkLAogICAgQ0FTRSBXSEVO",
+  "IHBfc3RlcD00IFRIRU4gJ0NPTVBMRVRFJyBFTFNFICdGT1JXQVJEJyBFTkQsCiAgICBwX3N0ZXAsIHBf",
+  "YWN0b3JfcGluLCBwX2FjdG9yX25hbWUsIHZfbmV4dF9waW4sIHZfbmV4dF9uYW1lLCBwX2NvbW1lbnQK",
+  "ICApOwoKICBSRVRVUk4ganNvbl9idWlsZF9vYmplY3QoJ29rJywgdHJ1ZSwgJ25ld19zdGF0dXMnLCB2",
+  "X25ld19zdGF0dXMsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICduZXh0X3BpbicsIHZfbmV4dF9w",
+  "aW4sICduZXh0X25hbWUnLCB2X25leHRfbmFtZSk7CkVORDsKJCQgTEFOR1VBR0UgcGxwZ3NxbDsKCgot",
+  "LSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT0KLS0gOCkg67CY66CkCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PQpDUkVBVEUgT1IgUkVQTEFDRSBGVU5DVElPTiByZWplY3RfcmVwb3J0",
+  "KAogIHBfcmVwb3J0X2lkIGJpZ2ludCwgcF9zdGVwIHNtYWxsaW50LAogIHBfYWN0b3JfcGluIHRleHQs",
+  "IHBfYWN0b3JfbmFtZSB0ZXh0LCBwX3JlYXNvbiB0ZXh0CikgUkVUVVJOUyBqc29uIEFTICQkCkJFR0lO",
+  "CiAgVVBEQVRFIHBfbW9udGhseV9yZXBvcnQgU0VUCiAgICBzdGF0dXMgPSAnUkVKRUNURUQnLCByZWpl",
+  "Y3RlZF9zdGVwID0gcF9zdGVwLAogICAgcmVqZWN0ZWRfcmVhc29uID0gcF9yZWFzb24sIHJlamVjdGVk",
+  "X2F0ID0gbm93KCksCiAgICBuZXh0X2FwcHJvdmVyX3BpbiA9IE5VTEwsIG5leHRfYXBwcm92ZXJfbmFt",
+  "ZSA9IE5VTEwsCiAgICB1cGRhdGVkX2F0ID0gbm93KCkKICBXSEVSRSBpZCA9IHBfcmVwb3J0X2lkOwoK",
+  "ICBJTlNFUlQgSU5UTyBwX21vbnRobHlfYXBwcm92YWxfbG9nICgKICAgIHJlcG9ydF9pZCwgYWN0aW9u",
+  "LCBzdGVwX25vLCBhY3Rvcl9waW4sIGFjdG9yX25hbWUsIGNvbW1lbnQKICApIFZBTFVFUyAocF9yZXBv",
+  "cnRfaWQsICdSRUpFQ1QnLCBwX3N0ZXAsIHBfYWN0b3JfcGluLCBwX2FjdG9yX25hbWUsIHBfcmVhc29u",
+  "KTsKICBSRVRVUk4ganNvbl9idWlsZF9vYmplY3QoJ29rJywgdHJ1ZSk7CkVORDsKJCQgTEFOR1VBR0Ug",
+  "cGxwZ3NxbDsKCgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT0KLS0gOSkg7LWc7KKFIOyKueyduOuzuCDsnqDquIgg7Yq466as6rGwCi0tID09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQpD",
+  "UkVBVEUgT1IgUkVQTEFDRSBGVU5DVElPTiBibG9ja19jb21wbGV0ZWRfcmVwb3J0X21vZGlmeSgpClJF",
+  "VFVSTlMgVFJJR0dFUiBBUyAkJApCRUdJTgogIElGIE9MRC5zdGF0dXMgPSAnQ09NUExFVEVEJyBUSEVO",
+  "CiAgICBJRiBORVcuc3VtbWFyeV9jb21tZW50IElTIERJU1RJTkNUIEZST00gT0xELnN1bW1hcnlfY29t",
+  "bWVudAogICAgICAgT1IgTkVXLmltcHJvdmVtZW50X2FjdGlvbiBJUyBESVNUSU5DVCBGUk9NIE9MRC5p",
+  "bXByb3ZlbWVudF9hY3Rpb24KICAgICAgIE9SIE5FVy5zdGVwMV9zaWduYXR1cmUgSVMgRElTVElOQ1Qg",
+  "RlJPTSBPTEQuc3RlcDFfc2lnbmF0dXJlCiAgICAgICBPUiBORVcuc3RlcDJfc2lnbmF0dXJlIElTIERJ",
+  "U1RJTkNUIEZST00gT0xELnN0ZXAyX3NpZ25hdHVyZQogICAgICAgT1IgTkVXLnN0ZXAzX3NpZ25hdHVy",
+  "ZSBJUyBESVNUSU5DVCBGUk9NIE9MRC5zdGVwM19zaWduYXR1cmUKICAgICAgIE9SIE5FVy5zdGVwNF9z",
+  "aWduYXR1cmUgSVMgRElTVElOQ1QgRlJPTSBPTEQuc3RlcDRfc2lnbmF0dXJlCiAgICAgICBPUiBORVcu",
+  "c3RhdHVzIElTIERJU1RJTkNUIEZST00gT0xELnN0YXR1cyBUSEVOCiAgICAgIFJBSVNFIEVYQ0VQVElP",
+  "TiAn7LWc7KKFIOyKueyduOuQnCDrs7Tqs6DshJzripQg7IiY7KCV7ZWgIOyImCDsl4bsirXri4jri6Qn",
+  "OwogICAgRU5EIElGOwogIEVORCBJRjsKICBSRVRVUk4gTkVXOwpFTkQ7CiQkIExBTkdVQUdFIHBscGdz",
+  "cWw7CgpEUk9QIFRSSUdHRVIgSUYgRVhJU1RTIHRyZ19ibG9ja19jb21wbGV0ZWQgT04gcF9tb250aGx5",
+  "X3JlcG9ydDsKQ1JFQVRFIFRSSUdHRVIgdHJnX2Jsb2NrX2NvbXBsZXRlZApCRUZPUkUgVVBEQVRFIE9O",
+  "IHBfbW9udGhseV9yZXBvcnQKRk9SIEVBQ0ggUk9XIEVYRUNVVEUgRlVOQ1RJT04gYmxvY2tfY29tcGxl",
+  "dGVkX3JlcG9ydF9tb2RpZnkoKTsKCgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0g7IKs7JqpIOyYiOyLnAotLSA9PT09PT09PT09PT09",
+  "PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gMSkg6rKw7J6s",
+  "7ISgIOuTseuhnSAo7KCQ6rKA7ZGc66eI64ukIDHtmowg7IWL7JeFKQotLSAgICBVUERBVEUgcF9jaGVj",
+  "a19hcHByb3ZhbF9yb3V0ZSBTRVQKLS0gICAgICBzdGVwMV9waW49J0EwMDEnLCBzdGVwMV9uYW1lPSfq",
+  "sJXrs5Hso7wnLAotLSAgICAgIHN0ZXAyX3Bpbj0nQjAwMScsIHN0ZXAyX25hbWU9J+ydtOuwmOyepScs",
+  "Ci0tICAgICAgc3RlcDNfcGluPSdDMDAxJywgc3RlcDNfbmFtZT0n67CV7YyA7J6lJywKLS0gICAgICBz",
+  "dGVwNF9waW49J0QwMDEnLCBzdGVwNF9uYW1lPSfquYDqs7XsnqXsnqUnCi0tICAgIFdIRVJFIHRlbXBs",
+  "YXRlX2NvZGU9J1BNJzsKLS0KLS0gMikg67O06rOg7IScIOyekOuPmSDsg53shLEv7Ya16rOEIOqwseyL",
+  "oAotLSAgICBTRUxFQ1QgcmVmcmVzaF9tb250aGx5X3JlcG9ydCgnUE0nLCAyMDI2OjpzbWFsbGludCwg",
+  "NTo6c21hbGxpbnQpOwotLQotLSAzKSDsgqzsnbggKOuLpOydjCDqsrDsnqzsnpDripQg7J6Q64+ZIOqy",
+  "sOyerOyEoCDrp4jsiqTthLDsl5DshJwg6rCA7KC47Ji0KQotLSAgICBTRUxFQ1Qgc2lnbl9hbmRfZm9y",
+  "d2FyZCgxLCAxLCAnQTAwMScsICfqsJXrs5Hso7wnLCAnZGF0YTppbWFnZS9wbmc7YmFzZTY0LC4uLics",
+  "ICfsm5Trs7Qg7J6R7ISxJyk7Ci0tCi0tIDQpIOygkOqygCDsm5Drs7gg7KGw7ZqMCi0tICAgIFNFTEVD",
+  "VCAqIEZST00gZ2V0X21vbnRobHlfY2hlY2tfZGF0YSgnUE0nLCAyMDI2LCA1KTsKLS0KLS0gNSkg64K0",
+  "IOqysOyerO2VqAotLSAgICBTRUxFQ1QgKiBGUk9NIHBfbW9udGhseV9yZXBvcnQKLS0gICAgV0hFUkUg",
+  "bmV4dF9hcHByb3Zlcl9waW4gPSAn64K0UElOJwotLSAgICAgIEFORCBzdGF0dXMgSU4gKCdSRVZJRVdJ",
+  "TkcnLCdDT05GSVJNSU5HJywnQVBQUk9WSU5HJyk7Cg=="
+].join("");
+
+const LS_KEY = 'P_MONTHLY_V3_SETTINGS';
+const STEP_NAMES = ['','작성','검토','확인','승인'];
+const STATUS_NAMES = {
+  DRAFT:'작성중', REVIEWING:'검토 결재중', CONFIRMING:'확인 결재중',
+  APPROVING:'승인 결재중', COMPLETED:'✅ 최종 완료', REJECTED:'❌ 반려'
+};
+const STATUS_BADGE_CLS = {
+  DRAFT:'draft', REVIEWING:'reviewing', CONFIRMING:'confirming',
+  APPROVING:'approving', COMPLETED:'completed', REJECTED:'rejected'
+};
+const TPL_ICONS = {
+  PM:'🔧'
+};
+
+function getCfg(){ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
+function saveCfg(o){ localStorage.setItem(LS_KEY, JSON.stringify(o)); }
+function getSbUrl(){ return getCfg().sb_url || ''; }
+function getSbKey(){ return getCfg().sb_key || ''; }
+function getMyPin(){ return getCfg().my_pin || ''; }
+function getMyName(){ return getCfg().my_name || ''; }
+function isCfg(){ return !!(getSbUrl()&&getSbKey()); }
+
+// =========================================================
+// Supabase REST
+// =========================================================
+async function sbReq(method, path, body){
+  if(!isCfg()) throw new Error('Supabase 미설정 — ⚙ 설정 탭');
+  const opt = {
+    method,
+    headers:{
+      'apikey':getSbKey(),
+      'Authorization':'Bearer '+getSbKey(),
+      'Content-Type':'application/json',
+      'Prefer':(method==='POST'||method==='PATCH')?'return=representation':''
+    }
+  };
+  if(body) opt.body = JSON.stringify(body);
+  const res = await fetch(getSbUrl()+'/rest/v1/'+path, opt);
+  if(!res.ok){ const t=await res.text(); throw new Error(`${res.status}: ${t}`); }
+  if(res.status===204) return null;
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+async function sbSelect(t,q=''){ return sbReq('GET', t+(q?'?'+q:'')); }
+async function sbInsert(t,row){ return sbReq('POST', t, row); }
+async function sbUpdate(t,q,patch){ return sbReq('PATCH', t+'?'+q, patch); }
+async function sbRpc(fn, args){
+  if(!isCfg()) throw new Error('Supabase 미설정');
+  const res = await fetch(getSbUrl()+'/rest/v1/rpc/'+fn,{
+    method:'POST',
+    headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey(),'Content-Type':'application/json'},
+    body: JSON.stringify(args||{})
+  });
+  if(!res.ok) throw new Error(await res.text());
+  const txt = await res.text();
+  try{ return JSON.parse(txt); } catch(e){ return txt; }
+}
+
+// =========================================================
+// 탭
+// =========================================================
+function swTab(i){
+  document.querySelectorAll('.tab').forEach((el,idx)=>el.classList.toggle('on', idx===i));
+  document.querySelectorAll('.pnl').forEach((el,idx)=>el.classList.toggle('on', idx===i));
+  if(i===0 && isCfg() && getMyPin()) loadInbox();
+  if(i===1 && isCfg()){ loadTemplateGrid(); loadDraftList(); }
+  if(i===3 && isCfg()) searchReports();
+  if(i===4 && isCfg()){ loadRoutes(); populateDiagSelect(); }
+}
+
+// =========================================================
+// 상태
+// =========================================================
+let currentReport = null;
+let currentChecks = [];
+let currentTemplate = null;     // 현재 보고서의 점검표 정보
+let currentStepForSign = 0;
+let templateCache = [];         // 점검표 마스터 캐시
+let routeCache = [];            // 결재선 마스터 캐시
+let selectedTplCode = '';       // 작성 탭에서 선택한 점검표
+
+// =========================================================
+// 초기화
+// =========================================================
+window.apprInit = function apprInit(){
+  initYearSelects();
+  apprLoadAllSettings();
+  refreshUserBadge();
+  if(isCfg()){
+    loadTemplates().then(()=>{
+      loadInbox();
+      loadTemplateGrid();
+    });
+  }
+};
+
+function initYearSelects(){
+  const y = new Date().getFullYear();
+  const opts = [];
+  for(let i=y+1; i>=y-3; i--) opts.push(`<option value="${i}">${i}년</option>`);
+  ['newYear','searchYear'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.innerHTML = opts.join('');
+    el.value = y;
+  });
+  document.getElementById('newMonth').value = new Date().getMonth()+1;
+}
+
+function apprLoadAllSettings(){
+  const c = getCfg();
+  document.getElementById('apprCfgSbUrl').value = c.sb_url||'';
+  document.getElementById('apprCfgSbKey').value = c.sb_key||'';
+  document.getElementById('cfgMyPin').value = c.my_pin||'';
+  document.getElementById('cfgMyName').value = c.my_name||'';
+
+  // ESG 메인페이지 PIN 자동 인식
+  if(!c.my_pin){
+    try{
+      const sess = JSON.parse(sessionStorage.getItem('ESG_USER')||'null');
+      if(sess && sess.pin){
+        c.my_pin = sess.pin; c.my_name = sess.name||'';
+        saveCfg(c);
+        document.getElementById('cfgMyPin').value = c.my_pin;
+        document.getElementById('cfgMyName').value = c.my_name;
+      }
+    }catch(e){}
+  }
+  updateConnStatus();
+}
+
+function refreshUserBadge(){
+  const b = document.getElementById('hdrUserBadge');
+  const lp = document.getElementById('loginPin');
+  const pin = getMyPin(), name = getMyName();
+  if(pin){
+    b.textContent = `👤 ${name||'-'} (${pin})`;
+    b.style.display = 'inline-block';
+    lp.textContent = pin;
+  }else{
+    b.style.display = 'none';
+    lp.textContent = '미로그인';
+  }
+}
+
+async function saveLogin(){
+  const c = getCfg();
+  c.my_pin  = document.getElementById('cfgMyPin').value.trim();
+  c.my_name = document.getElementById('cfgMyName').value.trim();
+  if(!c.my_pin || !c.my_name){ alert('PIN과 이름은 필수입니다'); return; }
+  saveCfg(c);
+  refreshUserBadge();
+  alert('로그인 정보 저장됨');
+  if(isCfg()) loadInbox();
+}
+
+async function saveSettings(){
+  const c = getCfg();
+  c.sb_url = document.getElementById('apprCfgSbUrl').value.trim();
+  c.sb_key = document.getElementById('apprCfgSbKey').value.trim();
+  saveCfg(c);
+  updateConnStatus();
+  try{
+    await sbSelect('p_monthly_report','select=id&limit=1');
+    document.getElementById('connStatus').innerHTML = '🟢 연결 정상';
+    await loadTemplates();
+    await loadRoutes();
+    populateSearchTpl();
+  }catch(e){
+    document.getElementById('connStatus').innerHTML = '🔴 연결 실패: '+e.message;
+  }
+}
+function updateConnStatus(){
+  const el = document.getElementById('connStatus');
+  el.textContent = isCfg() ? '🟡 설정됨 (저장 클릭 시 테스트)' : '⚪ 미설정';
+}
+
+// =========================================================
+// SQL 스키마 (설정 탭 - 복사/다운로드/미리보기)
+// =========================================================
+function getSchemaSQL(){
+  try{
+    const bytes = atob(SCHEMA_SQL_B64);
+    // UTF-8 안전 디코딩 (한글 보존)
+    const arr = new Uint8Array(bytes.length);
+    for(let i=0; i<bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(arr);
+  }catch(e){
+    console.error('SQL 디코딩 실패:', e);
+    return '-- SQL 디코딩 실패: ' + e.message;
+  }
+}
+
+async function copySchemaSQL(){
+  const sql = getSchemaSQL();
+  const status = document.getElementById('sqlCopyStatus');
+  try{
+    await navigator.clipboard.writeText(sql);
+    status.textContent = `✅ ${Math.round(sql.length/1024)}KB 클립보드에 복사됨`;
+    status.style.color = 'var(--ok)';
+  }catch(e){
+    // 폴백: 임시 textarea (HTTP 환경 대비)
+    const ta = document.createElement('textarea');
+    ta.value = sql; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{
+      document.execCommand('copy');
+      status.textContent = '✅ 복사됨 (폴백 방식)';
+      status.style.color = 'var(--ok)';
+    }catch(err){
+      status.textContent = '❌ 복사 실패 — 미리보기에서 수동 복사';
+      status.style.color = 'var(--ng)';
+    }
+    document.body.removeChild(ta);
+  }
+  setTimeout(()=>{ status.textContent=''; }, 5000);
+}
+
+function downloadSchemaSQL(){
+  const sql = getSchemaSQL();
+  const blob = new Blob([sql], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'p_monthly_v3_schema.sql';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  const status = document.getElementById('sqlCopyStatus');
+  status.textContent = '⬇ 다운로드됨';
+  status.style.color = 'var(--info)';
+  setTimeout(()=>{ status.textContent=''; }, 3000);
+}
+
+function toggleSqlPreview(){
+  const pre = document.getElementById('sqlPreview');
+  if(pre.style.display === 'none' || !pre.style.display){
+    if(!pre.textContent) pre.textContent = getSchemaSQL();
+    pre.style.display = 'block';
+  }else{
+    pre.style.display = 'none';
+  }
+}
+
+// =========================================================
+// 진단 (점검표별 원본 테이블 상태 점검)
+// =========================================================
+function populateDiagSelect(){
+  const sel = document.getElementById('diagTplCode');
+  if(!sel || !templateCache.length) return;
+  sel.innerHTML = templateCache.map(t=>
+    `<option value="${t.code}">${TPL_ICONS[t.code]||'📋'} ${t.name} (${t.code})</option>`
+  ).join('');
+}
+
+async function runDiagnostic(){
+  const code = document.getElementById('diagTplCode').value;
+  const out = document.getElementById('diagResult');
+  out.style.display = 'block';
+  out.textContent = '🔄 진단 중...';
+  if(!isCfg()){ out.textContent = '⚠ Supabase 미설정'; return; }
+  if(!code){ out.textContent = '⚠ 점검표 선택'; return; }
+
+  try{
+    // diag_check_template RPC 호출
+    let diagRes = null;
+    try{
+      diagRes = await sbRpc('diag_check_template', {p_template_code: code});
+    }catch(e){
+      out.textContent =
+        '⚠ diag_check_template 함수가 없습니다.\n\n' +
+        '→ 위에서 [📋 SQL 전체 복사] 후 Supabase SQL Editor에 붙여넣어 실행하세요.\n\n' +
+        '에러: ' + e.message;
+      return;
+    }
+    if(!diagRes || (Array.isArray(diagRes) && diagRes.length===0)){
+      out.textContent = '⚠ 점검표를 찾을 수 없음 ('+code+')';
+      return;
+    }
+    const r = Array.isArray(diagRes) ? diagRes[0] : diagRes;
+
+    // 원본 테이블 최근 5건 직접 조회 (컬럼 키 확인용)
+    let recent = [];
+    try{
+      recent = await sbSelect(r.source_table, `select=*&order=${r.date_col}.desc&limit=5`) || [];
+    }catch(e){ recent = [{__error: e.message}]; }
+
+    const lines = [];
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    lines.push(`📊 ${r.template_code} 진단 결과`);
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    lines.push(`원본 테이블:    ${r.source_table}`);
+    lines.push(`테이블 존재:    ${r.table_exists ? '✅ YES' : '❌ NO'}`);
+    lines.push(`전체 행 수:     ${r.total_rows}건`);
+    lines.push('');
+    lines.push('컬럼 매핑:');
+    lines.push(`  date_col:    ${r.date_col}`);
+    lines.push(`  machine_col: ${r.machine_col || '(미설정)'}`);
+    lines.push(`  result_col:  ${r.result_col}`);
+    lines.push('');
+    lines.push(`샘플 호기:      ${r.sample_machines || '(없음)'}`);
+    lines.push(`최근 점검일:    ${r.recent_dates || '(없음)'}`);
+    lines.push('');
+    if(recent.length && !recent[0].__error){
+      lines.push('최근 5건 컬럼 키:');
+      lines.push('  ' + Object.keys(recent[0]).join(', '));
+    } else if(recent[0]?.__error){
+      lines.push(`⚠ 원본 테이블 조회 오류: ${recent[0].__error}`);
+    }
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+    // 진단 메시지
+    if(!r.table_exists){
+      lines.push('💡 원본 테이블이 없습니다. 점검 데이터 수집 테이블 먼저 생성 필요.');
+    } else if(r.total_rows === 0){
+      lines.push('💡 데이터가 0건. 점검표 사용 여부 확인 필요.');
+    } else if(!r.machine_col || !r.sample_machines){
+      const candidates = recent[0] && !recent[0].__error
+        ? Object.keys(recent[0]).filter(k=>!['id','check_date','result','memo','created_at','enter_date'].includes(k)).slice(0,5).join(' / ')
+        : '?';
+      lines.push(`💡 호기 정보를 못 찾음.`);
+      lines.push(`   machine_col을 다음 중 하나로 변경: ${candidates}`);
+      lines.push(`   UPDATE p_check_template SET machine_col='???' WHERE code='${code}';`);
+    } else {
+      lines.push('✅ 정상 — 매트릭스가 비어보이면 통계 재계산 후 재확인');
+    }
+    out.textContent = lines.join('\n');
+  }catch(e){
+    out.textContent = '❌ 진단 실패: '+e.message;
+  }
+}
+
+// =========================================================
+// 점검표 마스터 로드
+// =========================================================
+async function loadTemplates(){
+  if(!isCfg()) return [];
+  try{
+    templateCache = await sbSelect('p_check_template',
+      'select=*&is_active=eq.true&order=display_order.asc') || [];
+    populateSearchTpl();
+    return templateCache;
+  }catch(e){
+    console.error('점검표 로드 실패:', e);
+    return [];
+  }
+}
+
+function populateSearchTpl(){
+  const sel = document.getElementById('searchTpl');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">전체 점검표</option>' +
+    templateCache.map(t=>`<option value="${t.code}">${TPL_ICONS[t.code]||'📋'} ${t.name}</option>`).join('');
+}
+
+function loadTemplateGrid(){
+  const grid = document.getElementById('tplGrid');
+  if(!templateCache.length){
+    grid.innerHTML = '<div class="empty-state"><div class="ico">📭</div>점검표가 없습니다 (Supabase 연결 필요)</div>';
+    return;
+  }
+  grid.innerHTML = templateCache.map(t=>`
+    <div class="tpl-card ${t.code===selectedTplCode?'selected':''}" onclick="selectTemplate('${t.code}')">
+      <div class="ico">${TPL_ICONS[t.code]||'📋'}</div>
+      <div class="name">${t.name}</div>
+      <div class="code">${t.code}</div>
+    </div>
+  `).join('');
+}
+
+function selectTemplate(code){
+  selectedTplCode = code;
+  loadTemplateGrid();
+}
+
+// =========================================================
+// 결재선 마스터 로드/저장
+// =========================================================
+async function loadRoutes(){
+  if(!isCfg()) return;
+  try{
+    routeCache = await sbSelect('p_check_approval_route','select=*&order=template_code.asc') || [];
+    renderRouteList();
+  }catch(e){
+    document.getElementById('routeList').innerHTML =
+      '<div class="empty-state"><div class="ico">❌</div>'+e.message+'</div>';
+  }
+}
+
+function renderRouteList(){
+  const wrap = document.getElementById('routeList');
+  if(!templateCache.length){ wrap.innerHTML = '<div class="empty-state">점검표 마스터가 비어있습니다</div>'; return; }
+
+  // 점검표별로 결재선 매핑
+  const html = templateCache.map(t=>{
+    const route = routeCache.find(r=>r.template_code===t.code) || {};
+    const ico = TPL_ICONS[t.code]||'📋';
+    return `<div class="route-card" data-code="${t.code}">
+      <div class="route-card-hdr">
+        <div class="route-card-name">${ico} ${t.name}</div>
+        <div style="font-size:10px;color:var(--text3)">${t.code}</div>
+      </div>
+      <!-- HTML URL 입력 -->
+      <div style="margin-bottom:10px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px">
+        <div style="font-size:10px;color:var(--text3);font-weight:700;margin-bottom:4px">📄 점검표 HTML 파일 (URL 또는 파일명)</div>
+        <input type="text" data-code="${t.code}" data-tpl-field="source_url"
+               placeholder="예: P_machine_check.html  또는  https://.../P_machine_check.html"
+               value="${t.source_url||''}"
+               style="font-size:11px;padding:6px 8px">
+        ${t.source_url ? `<div style="margin-top:4px"><a href="${t.source_url}" target="_blank" style="font-size:10px;color:var(--info)">🔗 미리보기 →</a></div>` : ''}
+      </div>
+      <div class="route-card-grid">
+        ${[1,2,3,4].map(s=>`
+          <div class="route-step">
+            <div class="step-lbl">${s}차 · ${STEP_NAMES[s]}</div>
+            <input type="text" placeholder="이름" data-code="${t.code}" data-step="${s}" data-field="name"
+                   value="${route['step'+s+'_name']||''}">
+            <input type="text" placeholder="PIN" data-code="${t.code}" data-step="${s}" data-field="pin"
+                   value="${route['step'+s+'_pin']||''}">
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML = html;
+}
+
+async function saveAllRoutes(){
+  if(!isCfg()){ alert('Supabase 미설정'); return; }
+  // 결재선(route) 데이터 수집
+  const routeData = {};
+  document.querySelectorAll('#routeList input[data-step]').forEach(inp=>{
+    const code = inp.dataset.code, step = inp.dataset.step, field = inp.dataset.field;
+    if(!routeData[code]) routeData[code] = {};
+    routeData[code][`step${step}_${field}`] = inp.value.trim() || null;
+  });
+  // 점검표(template) URL 등 수집
+  const tplData = {};
+  document.querySelectorAll('#routeList input[data-tpl-field]').forEach(inp=>{
+    const code = inp.dataset.code, field = inp.dataset.tplField;
+    if(!tplData[code]) tplData[code] = {};
+    tplData[code][field] = inp.value.trim() || null;
+  });
+
+  try{
+    let saved = 0;
+    // 결재선 upsert
+    for(const code in routeData){
+      const exists = routeCache.find(r=>r.template_code===code);
+      if(exists){
+        await sbUpdate('p_check_approval_route', `template_code=eq.${encodeURIComponent(code)}`, 
+          {...routeData[code], updated_at: new Date().toISOString()});
+      }else{
+        await sbInsert('p_check_approval_route', {template_code: code, ...routeData[code]});
+      }
+      saved++;
+    }
+    // 점검표 source_url 업데이트
+    for(const code in tplData){
+      await sbUpdate('p_check_template', `code=eq.${encodeURIComponent(code)}`, tplData[code]);
+    }
+    alert(`✅ 결재선 ${saved}개 + 점검표 URL 저장 완료`);
+    await loadTemplates();
+    await loadRoutes();
+  }catch(e){ alert('저장 실패: '+e.message); }
+}
+
+// =========================================================
+// 결재함
+// =========================================================
+async function loadInbox(){
+  if(!isCfg()){
+    document.getElementById('inboxList').innerHTML =
+      '<div class="empty-state"><div class="ico">⚙</div>먼저 ⚙ 설정 탭에서 Supabase 연결</div>';
+    return;
+  }
+  const myPin = getMyPin();
+  if(!myPin){
+    document.getElementById('inboxList').innerHTML =
+      '<div class="empty-state"><div class="ico">👤</div>설정 탭에서 본인 PIN 입력</div>';
+    return;
+  }
+  try{
+    const inbox = await sbSelect('p_monthly_report',
+      `select=*&next_approver_pin=eq.${encodeURIComponent(myPin)}&order=updated_at.desc`);
+    renderInbox(inbox);
+
+    const mine = await sbSelect('p_monthly_report',
+      `select=*&step1_pin=eq.${encodeURIComponent(myPin)}&order=updated_at.desc&limit=10`);
+    renderMyUploads(mine);
+  }catch(e){
+    document.getElementById('inboxList').innerHTML =
+      '<div class="empty-state"><div class="ico">❌</div>'+e.message+'</div>';
+  }
+}
+
+function renderInbox(rows){
+  const badge = document.getElementById('inboxBadge');
+  if(!rows||!rows.length){
+    document.getElementById('inboxList').innerHTML =
+      '<div class="empty-state"><div class="ico">📭</div>결재 대기 보고서가 없습니다</div>';
+    badge.style.display='none';
+    return;
+  }
+  badge.style.display='inline-block'; badge.textContent = rows.length;
+  document.getElementById('inboxList').innerHTML = rows.map(r=>{
+    const ico = TPL_ICONS[r.template_code]||'📋';
+    return `<div class="inbox-item urgent" onclick="openReport(${r.id})">
+      <div class="inbox-hdr">
+        <div class="inbox-title">${ico} ${r.template_name||r.template_code}</div>
+        <span class="badge ${STATUS_BADGE_CLS[r.status]}">${STATUS_NAMES[r.status]}</span>
+      </div>
+      <div class="inbox-meta">
+        <span><span class="tpl-tag">${r.target_year}.${String(r.target_month).padStart(2,'0')}</span></span>
+        <span>요청자: <b>${r.step1_name||'-'}</b></span>
+        <span>현재: <b style="color:var(--accent)">${STEP_NAMES[r.current_step]}</b></span>
+        <span class="ng">NG <b>${r.ng_count||0}</b>건</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMyUploads(rows){
+  const wrap = document.getElementById('myUploadList');
+  if(!rows||!rows.length){
+    wrap.innerHTML = '<div style="text-align:center;padding:14px;color:var(--text3);font-size:12px">최근 작성 보고서 없음</div>';
+    return;
+  }
+  wrap.innerHTML = rows.map(r=>{
+    const ico = TPL_ICONS[r.template_code]||'📋';
+    const stepLabel = r.status==='COMPLETED'?'완료':r.status==='REJECTED'?'반려':`${STEP_NAMES[r.current_step]} 결재중`;
+    return `<div class="inbox-item" onclick="openReport(${r.id})">
+      <div class="inbox-hdr">
+        <div class="inbox-title" style="font-size:13px">${ico} ${r.template_name||r.template_code} · ${r.target_year}.${String(r.target_month).padStart(2,'0')}</div>
+        <span class="badge ${STATUS_BADGE_CLS[r.status]}">${STATUS_NAMES[r.status]}</span>
+      </div>
+      <div class="inbox-meta">
+        <span>현재: <b>${stepLabel}</b></span>
+        <span>다음: <b>${r.next_approver_name||'-'}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// =========================================================
+// 보고서 생성/열기
+// =========================================================
+async function createOrOpenReport(){
+  if(!isCfg()){ alert('Supabase 미설정'); return; }
+  if(!selectedTplCode){ alert('점검표를 먼저 선택하세요'); return; }
+  const y = parseInt(document.getElementById('newYear').value);
+  const m = parseInt(document.getElementById('newMonth').value);
+
+  try{
+    const id = await sbRpc('refresh_monthly_report', {
+      p_template_code: selectedTplCode,
+      p_year: y, p_month: m
+    });
+    await openReport(parseInt(id));
+    await loadDraftList();
+  }catch(e){ alert('생성 실패: '+e.message); }
+}
+
+async function loadDraftList(){
+  if(!isCfg()) return;
+  try{
+    const rows = await sbSelect('p_monthly_report',
+      'select=*&status=in.(DRAFT,REVIEWING,CONFIRMING,APPROVING,REJECTED)&order=updated_at.desc&limit=20') || [];
+    document.getElementById('draftList').innerHTML = rows.map(r=>{
+      const ico = TPL_ICONS[r.template_code]||'📋';
+      const stepLabel = r.status==='REJECTED'?'반려됨':r.status==='DRAFT'?'작성중':`${STEP_NAMES[r.current_step]} 결재중`;
+      // 삭제 가능: DRAFT(작성중), REJECTED(반려) 만 - 결재 진행중/완료는 보존
+      const canDelete = (r.status==='DRAFT' || r.status==='REJECTED');
+      const safeName = (r.template_name||r.template_code).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const delBtn = canDelete
+        ? `<button onclick="event.stopPropagation();deleteReport(${r.id},'${safeName}',${r.target_year},${r.target_month})"
+                   style="background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);padding:4px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px"
+                   title="보고서 삭제">🗑 삭제</button>`
+        : '';
+      return `<div class="inbox-item" onclick="openReport(${r.id})">
+        <div class="inbox-hdr">
+          <div class="inbox-title">${ico} ${r.template_name||r.template_code} · ${r.target_year}.${String(r.target_month).padStart(2,'0')}</div>
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+            <span class="badge ${STATUS_BADGE_CLS[r.status]}">${STATUS_NAMES[r.status]}</span>
+            ${delBtn}
+          </div>
+        </div>
+        <div class="inbox-meta">
+          <span>현재: <b>${stepLabel}</b></span>
+          <span class="ng">NG <b>${r.ng_count||0}</b>건</span>
+          <span>다음: <b>${r.next_approver_name||'-'}</b></span>
+        </div>
+      </div>`;
+    }).join('') || '<div class="empty-state"><div class="ico">📭</div>진행중 보고서가 없습니다</div>';
+  }catch(e){
+    document.getElementById('draftList').innerHTML = '<div class="empty-state"><div class="ico">❌</div>'+e.message+'</div>';
+  }
+}
+
+// 보고서 삭제 (DRAFT/REJECTED만 가능)
+async function deleteReport(id, name, y, m){
+  if(!isCfg()){ alert('Supabase 미설정'); return; }
+  // 1차 확인
+  if(!confirm(`아래 보고서를 삭제하시겠습니까?\n\n${name} · ${y}.${String(m).padStart(2,'0')}\n\n⚠ 결재 이력도 함께 삭제됩니다\n복구할 수 없습니다.`)) return;
+  // 2차 확인 (안전장치)
+  const confirmText = `${y}.${m}`;
+  const userInput = prompt(`정말 삭제하려면 다음을 그대로 입력하세요:\n\n${confirmText}`);
+  if(userInput !== confirmText){
+    alert('확인 문자열이 다릅니다. 삭제 취소.');
+    return;
+  }
+  try{
+    // 상태 재확인 (그 사이 결재 진행되었을 수도)
+    const cur = await sbSelect('p_monthly_report', `select=status&id=eq.${id}`);
+    if(!cur || !cur.length){ alert('이미 삭제되었거나 없습니다'); await loadDraftList(); return; }
+    if(cur[0].status !== 'DRAFT' && cur[0].status !== 'REJECTED'){
+      alert(`상태가 변경되어 삭제할 수 없습니다 (현재: ${STATUS_NAMES[cur[0].status]||cur[0].status})`);
+      await loadDraftList();
+      return;
+    }
+    // 결재 로그 먼저 삭제 (cascade가 있긴 하지만 명시적으로)
+    await sbReq('DELETE', `p_monthly_approval_log?report_id=eq.${id}`);
+    // 보고서 삭제
+    await sbReq('DELETE', `p_monthly_report?id=eq.${id}`);
+    alert('🗑 보고서가 삭제되었습니다.');
+    await loadDraftList();
+  }catch(e){
+    alert('삭제 실패: '+e.message);
+  }
+}
+
+async function openReport(id){
+  try{
+    const r = await sbSelect('p_monthly_report', `select=*&id=eq.${id}`);
+    if(!r||!r.length) throw new Error('보고서를 찾을 수 없습니다');
+    currentReport = r[0];
+
+    // 점검표 메타데이터
+    currentTemplate = templateCache.find(t=>t.code===currentReport.template_code) || {};
+
+    // ====== PM 점검표는 KV 스토어 직접 조회로 분기 ======
+    if(currentReport.template_code === 'PM'){
+      try{
+        _pmDataCache = await loadPMDataFromKV(currentReport.target_year, currentReport.target_month);
+        console.log('[openReport·PM] KV 데이터 로드',
+          `설비 ${(_pmDataCache.equip||[]).length}대,`,
+          `이력 ${_pmDataCache.history.length}건,`,
+          `체크 ${Object.keys(_pmDataCache.insChk||{}).length}대`);
+        currentChecks = []; // PM 모드에선 미사용
+        renderPMPaperReport(_pmDataCache);
+      }catch(e){
+        console.error('[openReport·PM] KV 로드 실패', e);
+        alert('PM 데이터 로딩 실패: '+e.message+'\n\n기본 렌더로 폴백합니다.');
+        currentChecks = await loadCheckData(currentReport, currentTemplate);
+        renderPaperReport();
+      }
+    }else{
+      // 기본 흐름: RPC 또는 폴백 SELECT
+      currentChecks = await loadCheckData(currentReport, currentTemplate);
+      console.log(`[openReport] 점검데이터 ${currentChecks.length}건 로드`, currentChecks.slice(0,3));
+      renderPaperReport();
+    }
+
+    document.getElementById('tabReport').style.display='';
+    swTab(2);
+  }catch(e){ alert('열기 실패: '+e.message); }
+}
+
+// 점검 원본 데이터 로딩 (RPC 우선, 실패 시 직접 테이블 조회)
+async function loadCheckData(report, tpl){
+  const y = report.target_year, m = report.target_month;
+  const d1 = `${y}-${String(m).padStart(2,'0')}-01`;
+  const nm = m==12 ? 1 : m+1, ny = m==12 ? y+1 : y;
+  const d2 = `${ny}-${String(nm).padStart(2,'0')}-01`;
+
+  // 1차: RPC 시도
+  try{
+    const rows = await sbRpc('get_monthly_check_data',{
+      p_template_code: report.template_code,
+      p_year: y, p_month: m
+    });
+    if(Array.isArray(rows) && rows.length>0){
+      // 호기 정보가 비어있으면 raw_row에서 자동 탐지
+      const fixed = rows.map(r => ({...r, machine: pickMachine(r.machine, r.raw_row)}));
+      const okMachineCount = fixed.filter(r => r.machine && r.machine !== '-').length;
+      console.log(`[loadCheckData] RPC 성공: ${rows.length}건 (호기 식별: ${okMachineCount}건)`);
+      return fixed;
+    }
+    console.warn('[loadCheckData] RPC 빈 결과 → 직접 SELECT 폴백');
+  }catch(e){
+    console.warn('[loadCheckData] RPC 실패 → 폴백:', e.message);
+  }
+
+  // 2차: 폴백 - 원본 테이블 직접 조회
+  const srcTable = tpl.source_table || 'p_machine_check';
+  const dateCol  = tpl.date_col || 'check_date';
+  try{
+    const rows = await sbSelect(srcTable,
+      `select=*&${dateCol}=gte.${d1}&${dateCol}=lt.${d2}&order=${dateCol}.asc&limit=5000`);
+    if(!Array.isArray(rows)){ console.warn('[loadCheckData] 폴백 응답 비배열'); return []; }
+    console.log('[loadCheckData] 폴백 성공:', rows.length+'건');
+    // RPC 결과와 동일 형태로 변환 + 호기/결과 자동 탐지
+    return rows.map(r=>({
+      check_date: r[dateCol],
+      machine:    pickMachine(r[tpl.machine_col || 'machine'], r),
+      inspector:  r[tpl.inspector_col || 'inspector'] || r.checker || r.worker || '-',
+      result:     pickResult(r[tpl.result_col || 'result'], r),
+      ng_count:   r[tpl.ng_count_col || 'ng_count'] || 0,
+      memo:       r[tpl.memo_col || 'memo'] || r.note || '',
+      raw_row:    r
+    }));
+  }catch(e){
+    console.error('[loadCheckData] 폴백도 실패:', e.message);
+    return [];
+  }
+}
+
+// 호기/설비/라인 식별: 우선순위대로 raw_row에서 첫 비어있지 않은 값 사용
+//  ① 마스터에서 받은 값  ② machine  ③ machine_name  ④ equipment_name
+//  ⑤ line  ⑥ machine_code  ⑦ equip_no  ⑧ resource_code
+function pickMachine(primary, raw){
+  if(primary && String(primary).trim() && primary !== '-') return String(primary).trim();
+  if(!raw || typeof raw !== 'object') return '-';
+  const candidates = ['machine','machine_name','equipment_name','equipment',
+                      'line','line_name','machine_code','equip_no','resource_code',
+                      'press_no','machine_no','line_no'];
+  for(const k of candidates){
+    if(raw[k] != null && String(raw[k]).trim() !== ''){
+      return String(raw[k]).trim();
+    }
+  }
+  return '-';
+}
+
+// 결과 판정: result 컬럼 없으면 raw_row의 chk_* 컬럼들 중 하나라도 NG면 NG
+function pickResult(primary, raw){
+  if(primary && (primary==='OK' || primary==='NG')) return primary;
+  if(!raw || typeof raw !== 'object') return '';
+  // ng_count, bad_count 등이 있으면
+  const ngCnt = raw.ng_count ?? raw.bad_count ?? raw.fail_count ?? 0;
+  if(typeof ngCnt === 'number' && ngCnt > 0) return 'NG';
+  // chk_* 항목들 중 NG 있으면
+  for(const k of Object.keys(raw)){
+    if(k.startsWith('chk_') && raw[k] === 'NG') return 'NG';
+  }
+  // 그래도 없으면 OK로 (점검은 했으니까)
+  return primary || 'OK';
+}
+
+
+// =========================================================
+// PM 전용 데이터 로더 + 페이퍼 렌더러 (KV 스토어 직접 조회)
+// =========================================================
+// PM_checksheet 앱은 데이터를 'pm:' prefix 로 kv_store 테이블에 저장한다.
+// 이 함수들은 결재 모듈이 'PM' 점검표 보고서를 열 때 호출된다.
+
+const PM_KV_NS = 'pm:';
+
+// kv_store 단일 키 조회
+async function pmKvGet(localKey){
+  const cloudKey = PM_KV_NS + localKey;
+  try{
+    const rows = await sbSelect('kv_store', `select=value&key=eq.${encodeURIComponent(cloudKey)}&limit=1`);
+    if(rows && rows.length) return rows[0].value;
+  }catch(e){
+    console.warn('[pmKvGet]', localKey, e.message);
+  }
+  return null;
+}
+
+// kv_store prefix 패턴 일치 모든 키 조회 (INS_CHK_*)
+async function pmKvLike(localPrefix){
+  const cloudPrefix = PM_KV_NS + localPrefix;
+  try{
+    // PostgREST: key=like.{prefix}* (별표 = SQL의 % 와이일드카드)
+    // ':' 등 특수문자는 그대로 두는 게 안전 (encodeURIComponent하면 PostgREST가 인식 못함)
+    const rows = await sbSelect('kv_store',
+      `select=key,value&key=like.${cloudPrefix}*&limit=2000`);
+    return rows || [];
+  }catch(e){
+    console.warn('[pmKvLike]', localPrefix, e.message);
+    return [];
+  }
+}
+
+// PM 보고서용 데이터 일괄 로드
+async function loadPMDataFromKV(year, month){
+  // 1) 설비 마스터 (해당 년도)
+  const equip = (await pmKvGet(`eq_master_${year}`)) || [];
+  // 2) 보전계획표 (해당 년도)
+  const plan = (await pmKvGet(`eq_plans_${year}`)) || {};
+  // 3) 점검완료 데이터 (해당 년도)
+  const checks = (await pmKvGet(`eq_checks_${year}`)) || {};
+  // 4) 보전이력 (전체 - 월로 필터)
+  const history = (await pmKvGet('maint_history')) || [];
+  // 5) 노트 (해당 년도)
+  const notes = (await pmKvGet(`eq_notes_${year}`)) || '';
+
+  // 6) 체크시트 INS_CHK_* (해당 년도) - 모든 설비별 체크 이력
+  const chkRows = await pmKvLike('INS_CHK_');
+  const insChk = {}; // {eqKey: {ckey: {date, ...}, ...}, ...}
+  chkRows.forEach(r => {
+    const localKey = r.key.substring(PM_KV_NS.length); // INS_CHK_xxx_2026
+    // INS_CHK_{eqKey}_{year} 형식 파싱: 마지막 _숫자4자리가 year
+    const m = localKey.match(/^INS_CHK_(.+)_(\d{4})$/);
+    if(!m) return;
+    const eqKey = m[1], y = m[2];
+    if(parseInt(y) !== parseInt(year)) return;
+    insChk[eqKey] = r.value || {};
+  });
+
+  return {
+    equip,
+    plan,
+    checks,
+    history: Array.isArray(history) ? history : [],
+    notes,
+    insChk
+  };
+}
+
+// PM 보고서 페이퍼 렌더링 (renderPaperReport 대체)
+function renderPMPaperReport(pmData){
+  const r = currentReport;
+  const myPin = getMyPin();
+  const tpl = currentTemplate || {};
+  const y = r.target_year, m = r.target_month;
+  const daysInMonth = new Date(y, m, 0).getDate();
+
+  // ============ 1. 보전계획표 집계 ============
+  // 각 설비의 m월 w2/w4 계획 + 완료 여부
+  const planRows = [];
+  let planTotal = 0, planDone = 0;
+  (pmData.equip||[]).forEach(eq => {
+    const eqPlan = (pmData.plan||{})[eq.id] || {};
+    const monthPlan = eqPlan[m] || {};
+    const w2plan = monthPlan.w2 || '';
+    const w4plan = monthPlan.w4 || '';
+    if(!w2plan && !w4plan) return;
+    const w2key = `${eq.id}_${m}_w2`, w4key = `${eq.id}_${m}_w4`;
+    const w2done = !!(pmData.checks||{})[w2key];
+    const w4done = !!(pmData.checks||{})[w4key];
+    const w2date = w2done ? ((pmData.checks[w2key]||{}).date||'-') : '';
+    const w4date = w4done ? ((pmData.checks[w4key]||{}).date||'-') : '';
+    if(w2plan){ planTotal++; if(w2done) planDone++; }
+    if(w4plan){ planTotal++; if(w4done) planDone++; }
+    planRows.push({eq, w2plan, w4plan, w2done, w4done, w2date, w4date});
+  });
+  const planRate = planTotal>0 ? (planDone*100/planTotal).toFixed(1) : '0.0';
+
+  // ============ 2. 보전이력 (해당 월) ============
+  const histMonth = (pmData.history||[]).filter(h => {
+    if(!h.date) return false;
+    const d = new Date(h.date);
+    return d.getFullYear()===y && (d.getMonth()+1)===m;
+  });
+  const histCost = histMonth.reduce((s,h)=>s+(parseInt(h.cost)||0),0);
+
+  // ============ 3. 체크시트 (INS_CHK_*) 해당 월 ============
+  // ckey가 보통 'chk_xxx_YYYYMMDD' 형태. 날짜로 월 필터링
+  const chkRowsByEq = {};
+  let chkTotal = 0, chkDone = 0;
+  Object.keys(pmData.insChk||{}).forEach(eqKey => {
+    const store = pmData.insChk[eqKey] || {};
+    const items = [];
+    Object.keys(store).forEach(ckey => {
+      const v = store[ckey];
+      if(!v) return;
+      // v.date 가 있으면 기준, 없으면 ckey 끝 8자리에서 파싱 시도
+      let dStr = v.date || '';
+      if(!dStr){
+        const m2 = ckey.match(/(\d{8})$/);
+        if(m2){
+          dStr = m2[1].substring(0,4)+'-'+m2[1].substring(4,6)+'-'+m2[1].substring(6,8);
+        }
+      }
+      if(!dStr) return;
+      const d = new Date(dStr);
+      if(d.getFullYear()!==y || (d.getMonth()+1)!==m) return;
+      items.push({ckey, date: dStr.substring(0,10), val: v});
+      chkTotal++; chkDone++;
+    });
+    if(items.length) chkRowsByEq[eqKey] = items;
+  });
+
+  // ============ 종합 의견 / 개선조치 (편집 가능) ============
+  const editable = (r.status === 'DRAFT' || r.status === 'REJECTED');
+  const commentHtml = editable
+    ? `<textarea id="paperSummary" class="paper-comment editable" style="width:100%;font-family:inherit" rows="3" placeholder="이번 달 점검 종합 의견">${r.summary_comment||''}</textarea>`
+    : `<div class="paper-comment">${(r.summary_comment||'(작성 없음)').replace(/\n/g,'<br>')}</div>`;
+  const improveHtml = editable
+    ? `<textarea id="paperImprove" class="paper-comment editable" style="width:100%;font-family:inherit" rows="3" placeholder="개선조치 사항">${r.improvement_action||''}</textarea>`
+    : `<div class="paper-comment">${(r.improvement_action||'(작성 없음)').replace(/\n/g,'<br>')}</div>`;
+
+  // ============ 결재란 ============
+  const apprHtml = renderApprovalBlock();
+
+  // ============ 반려 사유 ============
+  let rejectedHtml = '';
+  if(r.status==='REJECTED'){
+    rejectedHtml = `<div style="margin:10px 0;padding:12px;background:#fee2e2;border:2px solid #b91c1c;border-radius:4px;color:#7f1d1d">
+      <b>❌ 반려됨</b> (${STEP_NAMES[r.rejected_step]} 단계)<br>
+      사유: ${r.rejected_reason||'-'}<br>
+      반려일: ${(r.rejected_at||'').substring(0,16).replace('T',' ')}
+    </div>`;
+  }
+
+  // ============ 1. 보전계획표 표 ============
+  let planTableHtml = '';
+  if(planRows.length===0){
+    planTableHtml = `<div style="text-align:center;padding:18px;color:#94a3b8;background:#f8fafc;border:1px solid #94a3b8;border-radius:4px">${m}월 보전계획이 등록된 설비가 없습니다</div>`;
+  }else{
+    let body = '';
+    planRows.forEach((row, i) => {
+      const w2cell = row.w2plan
+        ? (row.w2done
+            ? `<td class="ok" style="font-size:10px">▣ 완료<br>${row.w2date}</td>`
+            : `<td style="background:#fef3c7;color:#b45309;font-size:10px">□ 미완료<br>(${row.w2plan})</td>`)
+        : `<td style="color:#cbd5e1">-</td>`;
+      const w4cell = row.w4plan
+        ? (row.w4done
+            ? `<td class="ok" style="font-size:10px">▣ 완료<br>${row.w4date}</td>`
+            : `<td style="background:#fef3c7;color:#b45309;font-size:10px">□ 미완료<br>(${row.w4plan})</td>`)
+        : `<td style="color:#cbd5e1">-</td>`;
+      body += `<tr>
+        <td style="text-align:center">${i+1}</td>
+        <td style="text-align:left;font-weight:700">${row.eq.id||'-'}</td>
+        <td style="text-align:left">${row.eq.name||'-'}</td>
+        <td style="text-align:center;font-size:10px">${row.eq.tonnage||'-'}</td>
+        <td style="text-align:center">${row.eq.grade||'-'}</td>
+        ${w2cell}
+        ${w4cell}
+      </tr>`;
+    });
+    planTableHtml = `<table class="ng-tbl">
+      <thead><tr>
+        <th style="width:40px">#</th>
+        <th style="width:80px">설비ID</th>
+        <th>설비명</th>
+        <th style="width:70px">사양</th>
+        <th style="width:50px">등급</th>
+        <th style="width:120px">2주차</th>
+        <th style="width:120px">4주차</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  // ============ 2. 보전이력 표 ============
+  let histHtml = '';
+  if(histMonth.length===0){
+    histHtml = `<div style="text-align:center;padding:14px;color:#475569;background:#f8fafc;border:1px solid #cbd5e1;border-radius:4px">${m}월 보전이력 없음</div>`;
+  }else{
+    let body = '';
+    histMonth.forEach((h,i) => {
+      const eq = (pmData.equip||[]).find(e=>e.id===h.eqId);
+      const typeColor = (h.type==='고장보전') ? '#dc2626'
+                      : (h.type==='정기보전') ? '#2563eb'
+                      : (h.type==='예방보전') ? '#16a34a'
+                      : (h.type==='개선보전') ? '#7c3aed'
+                      : '#6b7280';
+      body += `<tr>
+        <td style="text-align:center">${i+1}</td>
+        <td style="text-align:center;white-space:nowrap">${(h.date||'').substring(0,10)}</td>
+        <td style="text-align:center;font-weight:700">${h.eqId||'-'}</td>
+        <td style="text-align:left">${(eq && eq.name) || '-'}</td>
+        <td style="text-align:center"><span style="background:${typeColor};color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700">${h.type||'-'}</span></td>
+        <td style="text-align:left">${(h.work||'').substring(0,80)}</td>
+        <td style="text-align:right">${h.hours||0}h</td>
+        <td style="text-align:right">${h.cost?((h.cost/10000).toFixed(1)+'만원'):'-'}</td>
+        <td style="text-align:center;font-size:10px">${h.result||'-'}</td>
+      </tr>`;
+    });
+    histHtml = `<table class="ng-tbl">
+      <thead><tr>
+        <th style="width:32px">#</th>
+        <th style="width:80px">일자</th>
+        <th style="width:70px">설비ID</th>
+        <th>설비명</th>
+        <th style="width:70px">유형</th>
+        <th>점검내용</th>
+        <th style="width:50px">시간</th>
+        <th style="width:80px">비용</th>
+        <th style="width:60px">결과</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  // ============ 3. 체크시트 정기점검 (해당 월) ============
+  let chkHtml = '';
+  const chkEqKeys = Object.keys(chkRowsByEq);
+  if(chkEqKeys.length===0){
+    chkHtml = `<div style="text-align:center;padding:14px;color:#475569;background:#f8fafc;border:1px solid #cbd5e1;border-radius:4px">${m}월 정기점검 체크시트 이력이 없습니다</div>`;
+  }else{
+    let body = '';
+    chkEqKeys.forEach((eqKey, i) => {
+      const items = chkRowsByEq[eqKey];
+      const dates = Array.from(new Set(items.map(it => it.date))).sort();
+      const dateStr = dates.join(', ');
+      body += `<tr>
+        <td style="text-align:center">${i+1}</td>
+        <td style="text-align:left;font-weight:700">${eqKey}</td>
+        <td style="text-align:center">${items.length}건</td>
+        <td style="text-align:left;font-size:10px">${dateStr}</td>
+      </tr>`;
+    });
+    chkHtml = `<table class="ng-tbl">
+      <thead><tr>
+        <th style="width:40px">#</th>
+        <th style="width:120px">설비</th>
+        <th style="width:80px">점검 항목</th>
+        <th>점검일자</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  // ============ 점검표 바로가기 버튼 ============
+  const sourceUrl = (tpl && tpl.source_url) ? tpl.source_url : '';
+  const sourceBtn = sourceUrl
+    ? `<a href="${sourceUrl}" target="_blank" rel="noopener"
+         class="no-print"
+         style="display:inline-block;padding:5px 12px;background:#1e40af;color:#fff;text-decoration:none;border-radius:4px;font-size:11px;font-weight:700;margin-left:8px">
+         🔗 점검표 바로가기
+       </a>`
+    : `<button onclick="(function(){var b=document.querySelector('[data-tab=\\'plan\\']');if(b)b.click();})()"
+         class="no-print"
+         style="display:inline-block;padding:5px 12px;background:#1e40af;color:#fff;border:none;border-radius:4px;font-size:11px;font-weight:700;margin-left:8px;cursor:pointer">
+         🔗 점검표 바로가기
+       </button>`;
+
+  // ============ 최종 HTML ============
+  const ico = TPL_ICONS[r.template_code]||'🔧';
+  const html = `
+    <div class="paper-wrap" id="paperContent">
+      <div class="paper-title">${ico} 설비 정기점검표 월간 결과 보고서${sourceBtn}</div>
+      <div class="paper-sub">${y}년 ${m}월 · 보전계획 + 정기점검 체크시트 통합</div>
+      ${rejectedHtml}
+
+      <div class="paper-info">
+        <div class="l">보고서 번호</div><div class="v">PMR-${String(r.id).padStart(5,'0')}</div>
+        <div class="l">점검표 코드</div><div class="v">${r.template_code}</div>
+        <div class="l">대상기간</div><div class="v">${y}.${String(m).padStart(2,'0')}.01 ~ ${String(daysInMonth).padStart(2,'0')}</div>
+        <div class="l">작성일자</div><div class="v">${(r.created_at||'').substring(0,10)}</div>
+        <div class="l">작성자</div><div class="v">${r.step1_name||'(미사인)'}</div>
+        <div class="l">진행상태</div><div class="v">${STATUS_NAMES[r.status]||r.status}</div>
+        <div class="l">현재단계</div><div class="v">${r.status==='COMPLETED'?'완료':STEP_NAMES[r.current_step]+' 단계'}</div>
+        <div class="l">다음 결재자</div><div class="v">${r.next_approver_name||'-'}</div>
+      </div>
+
+      <div class="paper-section-title">1. 월간 점검 통계</div>
+      <div class="paper-kpi">
+        <div class="l">대상 설비</div><div class="l">계획 건수</div><div class="l">완료 건수</div><div class="l">달성률</div>
+        <div class="v">${planRows.length}대</div>
+        <div class="v">${planTotal}건</div>
+        <div class="v ok">${planDone}건</div>
+        <div class="v ${planRate>=80?'ok':'ng'}">${planRate}%</div>
+        <div class="l">보전이력</div><div class="l">정기점검</div><div class="l">총 비용</div><div class="l">미완료</div>
+        <div class="v">${histMonth.length}건</div>
+        <div class="v">${chkTotal}건</div>
+        <div class="v">${histCost?(histCost/10000).toFixed(1)+'만원':'-'}</div>
+        <div class="v ng">${planTotal-planDone}건</div>
+      </div>
+
+      <div class="paper-section-title">2. 월간 보전계획 및 점검완료 현황</div>
+      <div style="font-size:10px;color:#475569;margin-bottom:4px">
+        <span style="background:#dcfce7;color:#15803d;padding:1px 5px;border-radius:2px">▣ 완료</span>
+        &nbsp;&nbsp;<span style="background:#fef3c7;color:#b45309;padding:1px 5px;border-radius:2px">□ 미완료</span>
+        &nbsp;&nbsp;<span style="color:#cbd5e1">- 계획없음</span>
+      </div>
+      ${planTableHtml}
+
+      <div class="paper-section-title">3. 월간 보전이력 (${histMonth.length}건)</div>
+      ${histHtml}
+
+      <div class="paper-section-title">4. 정기점검 체크시트 (${chkTotal}건)</div>
+      ${chkHtml}
+
+      <div class="paper-section-title">5. 월간 종합 의견</div>
+      ${commentHtml}
+
+      <div class="paper-section-title">6. 개선조치 사항</div>
+      ${improveHtml}
+
+      <div class="paper-section-title">7. 결&nbsp;재&nbsp;선</div>
+      ${apprHtml}
+    </div>
+  `;
+  document.getElementById('paperArea').innerHTML = html;
+
+  // 액션바
+  document.getElementById('actionBar').style.display='flex';
+  document.getElementById('btnDraft').style.display = editable ? '' : 'none';
+
+  const canSign = (r.status==='DRAFT' && (!r.step1_pin || r.step1_pin===myPin))
+                  || (r.next_approver_pin === myPin && r.status!=='COMPLETED' && r.status!=='REJECTED');
+  document.getElementById('btnSign').style.display = canSign ? '' : 'none';
+
+  const canReject = r.next_approver_pin===myPin && r.current_step >= 2 && r.status!=='COMPLETED' && r.status!=='REJECTED';
+  document.getElementById('btnReject').style.display = canReject ? '' : 'none';
+}
+
+// PM 데이터 캐시 (보고서 한 번 열 때 한 번만 로드)
+let _pmDataCache = null;
+
+
+
+// =========================================================
+// 1회성 DB 정리: PM 외 7개 점검표 + 그에 연결된 데이터 삭제
+// =========================================================
+async function cleanupNonPMTemplates(){
+  const codes = ['P_MACHINE','QC_MACHINE','WASH','SHIPPING','LOAD_MON','LINE','SAFETY'];
+  const statusEl = document.getElementById('cleanupStatus');
+  const setStatus = (msg, color) => {
+    if(statusEl){
+      statusEl.innerHTML = msg;
+      statusEl.style.color = color || 'var(--text2)';
+    }
+  };
+
+  if(!isCfg()){ alert('Supabase 미설정'); return; }
+  if(!confirm('⚠ 정말로 PM 외 7개 점검표 데이터를 모두 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.\n\n삭제 대상:\n• 점검표 7개 (p_check_template)\n• 그에 연결된 모든 결재선 (p_check_approval_route)\n• 그에 연결된 모든 월별 보고서 (p_monthly_report)\n• 그에 연결된 모든 결재 이력 (p_monthly_approval_log)')) return;
+  if(!confirm('정말 정말 확실하신가요? 마지막 확인입니다.')) return;
+
+  setStatus('🔄 삭제 진행 중...', '#fbbf24');
+  let deletedRoutes = 0, deletedLogs = 0, deletedReports = 0, deletedTpls = 0;
+  let errors = [];
+
+  try{
+    // 1) 결재 이력 삭제 (보고서 ID 기준 - 보고서를 먼저 조회해서 ID 목록 추출)
+    const reportIds = [];
+    for(const code of codes){
+      try{
+        const rs = await sbSelect('p_monthly_report', 
+          `select=id&template_code=eq.${encodeURIComponent(code)}&limit=10000`);
+        if(Array.isArray(rs)) rs.forEach(r => reportIds.push(r.id));
+      }catch(e){ errors.push(`보고서 조회(${code}): ${e.message}`); }
+    }
+    if(reportIds.length){
+      // in.(1,2,3) 형식
+      const idList = reportIds.join(',');
+      try{
+        await sbReq('DELETE', `p_monthly_approval_log?report_id=in.(${idList})`);
+        deletedLogs = reportIds.length; // 정확한 수치는 알기 어려움 - 보고서 수로 표기
+      }catch(e){ errors.push(`이력 삭제: ${e.message}`); }
+    }
+
+    // 2) 월별 보고서 삭제
+    for(const code of codes){
+      try{
+        const rs = await sbSelect('p_monthly_report',
+          `select=id&template_code=eq.${encodeURIComponent(code)}&limit=10000`);
+        const cnt = Array.isArray(rs) ? rs.length : 0;
+        if(cnt){
+          await sbReq('DELETE', `p_monthly_report?template_code=eq.${encodeURIComponent(code)}`);
+          deletedReports += cnt;
+        }
+      }catch(e){ errors.push(`보고서 삭제(${code}): ${e.message}`); }
+    }
+
+    // 3) 결재선 삭제
+    for(const code of codes){
+      try{
+        const rs = await sbSelect('p_check_approval_route',
+          `select=id&template_code=eq.${encodeURIComponent(code)}&limit=100`);
+        const cnt = Array.isArray(rs) ? rs.length : 0;
+        if(cnt){
+          await sbReq('DELETE', `p_check_approval_route?template_code=eq.${encodeURIComponent(code)}`);
+          deletedRoutes += cnt;
+        }
+      }catch(e){ errors.push(`결재선 삭제(${code}): ${e.message}`); }
+    }
+
+    // 4) 점검표 마스터 삭제
+    for(const code of codes){
+      try{
+        const rs = await sbSelect('p_check_template',
+          `select=id&code=eq.${encodeURIComponent(code)}&limit=10`);
+        const cnt = Array.isArray(rs) ? rs.length : 0;
+        if(cnt){
+          await sbReq('DELETE', `p_check_template?code=eq.${encodeURIComponent(code)}`);
+          deletedTpls += cnt;
+        }
+      }catch(e){ errors.push(`점검표 삭제(${code}): ${e.message}`); }
+    }
+
+    // 결과 표시
+    let msg = `✅ 정리 완료<br>
+      • 점검표 ${deletedTpls}개<br>
+      • 결재선 ${deletedRoutes}개<br>
+      • 보고서 ${deletedReports}개<br>
+      • 결재 이력 (보고서당 자동 삭제)`;
+    if(errors.length){
+      msg += `<br><br>⚠ 일부 오류:<br>` + errors.slice(0,5).map(e=>'• '+e).join('<br>');
+      setStatus(msg, '#fbbf24');
+    }else{
+      setStatus(msg, '#86efac');
+    }
+
+    // 캐시 갱신
+    await loadTemplates();
+    await loadRoutes();
+    populateSearchTpl();
+  }catch(e){
+    setStatus('❌ 정리 실패: '+e.message, '#fca5a5');
+  }
+}
+
+
+function closeReport(){
+  currentReport = null; currentChecks = []; currentTemplate = null;
+  _pmDataCache = null;
+  document.getElementById('paperArea').innerHTML = '';
+  document.getElementById('actionBar').style.display='none';
+  document.getElementById('tabReport').style.display='none';
+  swTab(0);
+}
+
+// =========================================================
+// 페이퍼 양식 렌더링
+// =========================================================
+function renderPaperReport(){
+  const r = currentReport;
+  const myPin = getMyPin();
+  const tpl = currentTemplate||{};
+
+  // 매트릭스
+  const daysInMonth = new Date(r.target_year, r.target_month, 0).getDate();
+  const machineSet = new Set(currentChecks.map(c=>c.machine).filter(Boolean));
+  const machines = Array.from(machineSet).sort((a,b)=>{
+    const na = parseInt((String(a).match(/\d+/)||[0])[0]);
+    const nb = parseInt((String(b).match(/\d+/)||[0])[0]);
+    return na-nb;
+  });
+  const map = {};
+  currentChecks.forEach(c=>{
+    const ds = c.check_date||'';
+    const dStr = (typeof ds==='string') ? ds : (ds.toISOString?ds.toISOString():String(ds));
+    const d = parseInt((dStr||'').substring(8,10));
+    if(!c.machine || !d) return;
+    if(!map[c.machine]) map[c.machine]={};
+    if(c.result==='NG' || !map[c.machine][d]) map[c.machine][d] = c.result;
+  });
+
+  let mtxHead = '<tr><th>호기/설비</th>';
+  for(let d=1; d<=daysInMonth; d++) mtxHead += `<th>${d}</th>`;
+  mtxHead += '<th style="background:#15803d">OK</th><th style="background:#b91c1c">NG</th></tr>';
+
+  let mtxBody = '';
+  if(machines.length===0){
+    // 진단 메시지: 데이터가 0건인지 / 데이터는 있는데 machine 컬럼이 비었는지 구분
+    const totalRows = currentChecks.length;
+    const noMachine = currentChecks.filter(c=>!c.machine || c.machine==='-').length;
+    let diag = '해당 월 점검 데이터가 없습니다';
+    if(totalRows>0){
+      diag = `점검 데이터는 ${totalRows}건 있지만 호기(설비) 정보가 없어 매트릭스에 표시할 수 없습니다.<br>
+        <span style="font-size:10px">(machine 컬럼 누락: ${noMachine}/${totalRows})<br>
+        ⚙ 설정 탭에서 점검표의 'machine_col' 설정을 확인하거나 원본 테이블에 호기 데이터가 있는지 확인하세요.</span>`;
+    }
+    mtxBody = `<tr><td colspan="${daysInMonth+3}" style="padding:18px;color:#94a3b8;text-align:center;line-height:1.6">${diag}</td></tr>`;
+  }else{
+    machines.forEach(m=>{
+      let row = `<tr><td class="mc">${m}</td>`;
+      let ok=0, ng=0;
+      for(let d=1; d<=daysInMonth; d++){
+        const v = (map[m]||{})[d];
+        if(v==='OK'){ row+='<td class="ok">●</td>'; ok++; }
+        else if(v==='NG'){ row+='<td class="ng">✕</td>'; ng++; }
+        else row+='<td class="na">-</td>';
+      }
+      row += `<td class="sum">${ok}</td><td class="sum" style="color:#b91c1c">${ng}</td></tr>`;
+      mtxBody += row;
+    });
+  }
+
+  // NG 상세 (점검표별 check_items 사용)
+  const checkItems = (tpl.check_items||[]);
+  const ngList = currentChecks.filter(c=>c.result==='NG');
+  let ngHtml;
+  if(ngList.length===0){
+    ngHtml = '<div style="text-align:center;padding:14px;color:#15803d;font-weight:700;background:#dcfce7;border:1.5px solid #15803d;border-radius:4px">✓ 이번달 NG 발생 없음</div>';
+  }else{
+    let body = '';
+    ngList.forEach(c=>{
+      // raw_row 에서 NG 항목 추출 (check_items 기반)
+      let ngItems = '-';
+      if(c.raw_row && checkItems.length){
+        const ng = checkItems.filter(it=> c.raw_row[it.key]==='NG').map(it=>it.name);
+        if(ng.length) ngItems = ng.join(', ');
+      }
+      const ds = String(c.check_date||'').substring(0,10);
+      body += `<tr>
+        <td style="text-align:center;white-space:nowrap">${ds}</td>
+        <td style="text-align:center">${c.machine||'-'}</td>
+        <td style="text-align:center">${c.inspector||'-'}</td>
+        <td class="ng-it">${ngItems}</td>
+        <td style="font-size:10px">${(c.memo||'').substring(0,60)}</td>
+      </tr>`;
+    });
+    ngHtml = `<table class="ng-tbl">
+      <thead><tr><th style="width:90px">일자</th><th style="width:120px">호기/설비</th><th style="width:80px">점검자</th><th>NG 항목</th><th style="width:200px">비고</th></tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  // 종합의견 / 개선조치
+  const editable = (r.status === 'DRAFT' || r.status === 'REJECTED');
+  const commentHtml = editable
+    ? `<textarea id="paperSummary" class="paper-comment editable" style="width:100%;font-family:inherit" rows="3" placeholder="이번 달 점검 종합 의견">${r.summary_comment||''}</textarea>`
+    : `<div class="paper-comment">${(r.summary_comment||'(작성 없음)').replace(/\n/g,'<br>')}</div>`;
+  const improveHtml = editable
+    ? `<textarea id="paperImprove" class="paper-comment editable" style="width:100%;font-family:inherit" rows="3" placeholder="개선조치 사항">${r.improvement_action||''}</textarea>`
+    : `<div class="paper-comment">${(r.improvement_action||'(작성 없음)').replace(/\n/g,'<br>')}</div>`;
+
+  // 결재란
+  const apprHtml = renderApprovalBlock();
+
+  // 반려 사유
+  let rejectedHtml = '';
+  if(r.status==='REJECTED'){
+    rejectedHtml = `<div style="margin:10px 0;padding:12px;background:#fee2e2;border:2px solid #b91c1c;border-radius:4px;color:#7f1d1d">
+      <b>❌ 반려됨</b> (${STEP_NAMES[r.rejected_step]} 단계)<br>
+      사유: ${r.rejected_reason||'-'}<br>
+      반려일: ${(r.rejected_at||'').substring(0,16).replace('T',' ')}
+    </div>`;
+  }
+
+  const okRate = r.total_performed>0 ? ((r.ok_count*100/r.total_performed).toFixed(1)) : '0.0';
+  const ico = TPL_ICONS[r.template_code]||'📋';
+  const sourceUrl = (tpl && tpl.source_url) ? tpl.source_url : '';
+
+  // 점검표 바로가기 버튼 (보고서 작성/검토 시 원본 점검표 페이지 새 탭 열기)
+  const sourceBtn = sourceUrl
+    ? `<a href="${sourceUrl}" target="_blank" rel="noopener"
+         class="no-print"
+         style="display:inline-block;padding:5px 12px;background:#1e40af;color:#fff;text-decoration:none;border-radius:4px;font-size:11px;font-weight:700;margin-left:8px">
+         🔗 점검표 바로가기
+       </a>`
+    : '';
+
+  const html = `
+    <div class="paper-wrap" id="paperContent">
+      <div class="paper-title">${ico} ${r.template_name || r.template_code} 월간 결과 보고서${sourceBtn}</div>
+      <div class="paper-sub">${r.target_year}년 ${r.target_month}월</div>
+      ${rejectedHtml}
+
+      <div class="paper-info">
+        <div class="l">보고서 번호</div><div class="v">PMR-${String(r.id).padStart(5,'0')}</div>
+        <div class="l">점검표 코드</div><div class="v">${r.template_code}</div>
+        <div class="l">대상기간</div><div class="v">${r.target_year}.${String(r.target_month).padStart(2,'0')}.01 ~ ${String(daysInMonth).padStart(2,'0')}</div>
+        <div class="l">작성일자</div><div class="v">${(r.created_at||'').substring(0,10)}</div>
+        <div class="l">작성자</div><div class="v">${r.step1_name||'(미사인)'}</div>
+        <div class="l">진행상태</div><div class="v">${STATUS_NAMES[r.status]||r.status}</div>
+        <div class="l">현재단계</div><div class="v">${r.status==='COMPLETED'?'완료':STEP_NAMES[r.current_step]+' 단계'}</div>
+        <div class="l">다음 결재자</div><div class="v">${r.next_approver_name||'-'}</div>
+      </div>
+
+      <div class="paper-section-title">1. 월간 점검 통계</div>
+      <div class="paper-kpi">
+        <div class="l">대상 설비</div><div class="l">점검 일수</div><div class="l">총 점검</div><div class="l">정상</div>
+        <div class="v">${r.total_machines||0}대</div>
+        <div class="v">${r.total_workdays||0}일</div>
+        <div class="v">${r.total_performed||0}건</div>
+        <div class="v ok">${r.ok_count||0}건</div>
+        <div class="l">NG 건수</div><div class="l">NG율</div><div class="l">양호율</div><div class="l">평균 점검</div>
+        <div class="v ng">${r.ng_count||0}건</div>
+        <div class="v ng">${(r.ng_rate||0).toFixed(1)}%</div>
+        <div class="v ok">${okRate}%</div>
+        <div class="v">${(r.total_machines>0&&r.total_workdays>0)?(r.total_performed/(r.total_machines*r.total_workdays)).toFixed(2):'-'}</div>
+      </div>
+
+      <div class="paper-section-title">2. 호기별·일자별 점검 매트릭스</div>
+      <div style="font-size:10px;color:#475569;margin-bottom:4px">
+        <span style="background:#dcfce7;color:#15803d;padding:1px 5px;border-radius:2px">●</span> 정상
+        &nbsp;&nbsp;<span style="background:#fee2e2;color:#b91c1c;padding:1px 5px;border-radius:2px">✕</span> NG
+        &nbsp;&nbsp;<span style="color:#94a3b8">-</span> 미점검
+      </div>
+      <div class="mtx-wrap">
+        <table class="mtx">
+          <thead>${mtxHead}</thead>
+          <tbody>${mtxBody}</tbody>
+        </table>
+      </div>
+
+      <div class="paper-section-title">3. NG 발생 상세 (${ngList.length}건)</div>
+      ${ngHtml}
+
+      <div class="paper-section-title">4. 월간 종합 의견</div>
+      ${commentHtml}
+
+      <div class="paper-section-title">5. 개선조치 사항</div>
+      ${improveHtml}
+
+      <div class="paper-section-title">6. 결&nbsp;재&nbsp;선</div>
+      ${apprHtml}
+    </div>
+  `;
+  document.getElementById('paperArea').innerHTML = html;
+
+  // 액션바
+  document.getElementById('actionBar').style.display='flex';
+  document.getElementById('btnDraft').style.display = editable ? '' : 'none';
+
+  const canSign = (r.status==='DRAFT' && (!r.step1_pin || r.step1_pin===myPin))
+                  || (r.next_approver_pin === myPin && r.status!=='COMPLETED' && r.status!=='REJECTED');
+  document.getElementById('btnSign').style.display = canSign ? '' : 'none';
+
+  const canReject = r.next_approver_pin===myPin && r.current_step >= 2 && r.status!=='COMPLETED' && r.status!=='REJECTED';
+  document.getElementById('btnReject').style.display = canReject ? '' : 'none';
+}
+
+function renderApprovalBlock(){
+  const r = currentReport;
+  const myPin = getMyPin();
+  const cells = [];
+  for(let s=1; s<=4; s++){
+    const sig  = r['step'+s+'_signature'];
+    const name = r['step'+s+'_name'];
+    const at   = r['step'+s+'_at'];
+    const done = !!sig;
+    const isCurrent = (r.current_step===s && r.status!=='COMPLETED' && r.status!=='REJECTED' && (s===1?!sig:true));
+
+    let sigContent;
+    if(done){ sigContent = `<img src="${sig}" alt="sign">`; }
+    else if(isCurrent){
+      const isMe = (s===1 && (!r.step1_pin || r.step1_pin===myPin)) || (s>=2 && r.next_approver_pin===myPin);
+      sigContent = isMe ? '<span class="empty" style="color:#d97706;font-weight:700">✍ 사인 대기 (탭)</span>' : '<span class="empty">결재 대기</span>';
+    } else { sigContent = '<span class="empty">-</span>'; }
+
+    const sigCls = done ? 'locked' : (isCurrent ? 'current' : '');
+    const nameDisplay = name || (isCurrent && r.next_approver_name ? r.next_approver_name : '');
+    cells.push(`<div class="appr-cell">
+      <div class="appr-role">${STEP_NAMES[s]}</div>
+      <div class="appr-sig ${sigCls}" onclick="${isCurrent?`tryStartSign(${s})`:''}">${sigContent}</div>
+      <div class="appr-name">${nameDisplay||'&nbsp;'}</div>
+      <div class="appr-date">${at?String(at).substring(5,16).replace('T',' '):'&nbsp;'}</div>
+    </div>`);
+  }
+  return `<div class="approval-row">${cells.join('')}</div>`;
+}
+
+function tryStartSign(step){
+  const r = currentReport;
+  const myPin = getMyPin();
+  if(!myPin){ alert('설정 탭에서 본인 PIN 입력하세요'); return; }
+  if(r.status==='COMPLETED' || r.status==='REJECTED'){ alert('완료/반려된 보고서입니다'); return; }
+  if(step !== r.current_step){ alert(`현재 ${STEP_NAMES[r.current_step]} 단계입니다`); return; }
+  if(step===1 && r.step1_pin && r.step1_pin!==myPin){ alert('다른 작성자가 진행중입니다'); return; }
+  if(step>=2 && r.next_approver_pin !== myPin){ alert('지정된 결재자가 아닙니다'); return; }
+  openSignModal();
+}
+
+// =========================================================
+// 통계 재계산 / 임시저장
+// =========================================================
+async function recalcStats(){
+  if(!currentReport) return;
+  try{
+    // PM 점검표는 RPC 호출 대신 KV 재조회만 수행
+    if(currentReport.template_code === 'PM'){
+      _pmDataCache = await loadPMDataFromKV(currentReport.target_year, currentReport.target_month);
+      renderPMPaperReport(_pmDataCache);
+      const planCnt = (_pmDataCache.equip||[]).filter(eq=>{
+        const ep = (_pmDataCache.plan||{})[eq.id]||{};
+        const mp = ep[currentReport.target_month]||{};
+        return mp.w2 || mp.w4;
+      }).length;
+      alert(`✅ PM 데이터 재집계 완료\n\n설비 ${(_pmDataCache.equip||[]).length}대\n계획 ${planCnt}대\n이력 ${_pmDataCache.history.length}건`);
+      return;
+    }
+
+    await sbRpc('refresh_monthly_report',{
+      p_template_code: currentReport.template_code,
+      p_year: currentReport.target_year,
+      p_month: currentReport.target_month
+    });
+    await openReport(currentReport.id);
+    // 진단 정보 포함 알림
+    const total = currentChecks.length;
+    const withMachine = currentChecks.filter(c=>c.machine && c.machine!=='-').length;
+    const ngs = currentChecks.filter(c=>c.result==='NG').length;
+    alert(`✅ 통계 재계산 완료\n\n점검 데이터: ${total}건\n호기 식별: ${withMachine}건\nNG: ${ngs}건\n\n` +
+          (total===0 ? '⚠ 원본 테이블에 데이터가 없거나 컬럼 매핑이 다를 수 있습니다. F12 콘솔을 확인하세요.' : '') +
+          (total>0 && withMachine===0 ? '\n⚠ 호기 정보를 못 찾았습니다. ⚙ 설정에서 machine_col 확인 필요' : ''));
+  }catch(e){ alert('재계산 실패: '+e.message); }
+}
+
+async function saveDraft(){
+  if(!currentReport) return;
+  if(currentReport.status!=='DRAFT' && currentReport.status!=='REJECTED'){
+    alert('제출된 보고서는 수정할 수 없습니다'); return;
+  }
+  try{
+    const sum = (document.getElementById('paperSummary')||{}).value||'';
+    const imp = (document.getElementById('paperImprove')||{}).value||'';
+    await sbUpdate('p_monthly_report', `id=eq.${currentReport.id}`,{
+      summary_comment: sum, improvement_action: imp,
+      updated_at: new Date().toISOString()
+    });
+    currentReport.summary_comment = sum;
+    currentReport.improvement_action = imp;
+    alert('💾 임시저장 완료');
+  }catch(e){ alert('저장 실패: '+e.message); }
+}
+
+// =========================================================
+// 사인 모달
+// =========================================================
+let sigCtx, sigDrawing=false, sigEmpty=true;
+
+function openSignModal(){
+  if(!currentReport) return;
+  const r = currentReport;
+  const myPin = getMyPin();
+  if(!myPin || !getMyName()){ alert('설정 탭에서 PIN/이름 입력하세요'); return; }
+  if(r.status==='COMPLETED' || r.status==='REJECTED'){ alert('완료/반려된 보고서입니다'); return; }
+
+  const step = r.current_step;
+  if(step===1){
+    if(r.step1_pin && r.step1_pin !== myPin){
+      if(!confirm(`이미 다른 작성자(${r.step1_name})가 작성중입니다. 작성 권한을 가져가시겠습니까?`)) return;
+    }
+  }else{
+    if(r.next_approver_pin !== myPin){ alert('지정된 결재자가 아닙니다'); return; }
+  }
+
+  currentStepForSign = step;
+  document.getElementById('signModalTitle').textContent = `${STEP_NAMES[step]} 사인`;
+  document.getElementById('signModalRole').textContent = `${step}단계 - ${STEP_NAMES[step]} (${getMyName()})`;
+  document.getElementById('signComment').value = '';
+
+  // 다음 결재자 정보 (결재선 마스터에서 자동 조회 표시)
+  const route = routeCache.find(rt=>rt.template_code===r.template_code) || {};
+  let nextName='-', nextPin='';
+  if(step===1){ nextName = route.step2_name||'-'; nextPin = route.step2_pin||''; }
+  else if(step===2){ nextName = route.step3_name||'-'; nextPin = route.step3_pin||''; }
+  else if(step===3){ nextName = route.step4_name||'-'; nextPin = route.step4_pin||''; }
+  else { nextName = '없음 (최종승인)'; nextPin = ''; }
+
+  document.getElementById('nextApproverName').textContent = nextName;
+  document.getElementById('nextApproverPin').textContent = nextPin?` (${nextPin})`:'';
+  document.getElementById('nextApproverInfo').style.display = (step<4)?'':'none';
+  document.getElementById('btnConfirmSign').textContent = (step<4) ? '✅ 사인 + 다음 결재자에게' : '✅ 최종 승인 + 저장';
+
+  document.getElementById('signModal').classList.add('show');
+  setTimeout(initSigPad, 50);
+}
+
+function closeSignModal(){ document.getElementById('signModal').classList.remove('show'); }
+
+function initSigPad(){
+  const cv = document.getElementById('sigCanvas');
+  const rect = cv.getBoundingClientRect();
+  const dpr = window.devicePixelRatio||1;
+  cv.width = rect.width*dpr; cv.height = rect.height*dpr;
+  sigCtx = cv.getContext('2d');
+  sigCtx.scale(dpr,dpr);
+  sigCtx.lineWidth = 2.5; sigCtx.lineCap='round'; sigCtx.strokeStyle='#000';
+  clearSig();
+  const start = e=>{ sigDrawing=true; sigEmpty=false; const p=getPos(cv,e); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); e.preventDefault(); };
+  const move  = e=>{ if(!sigDrawing) return; const p=getPos(cv,e); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); e.preventDefault(); };
+  const end   = ()=>{ sigDrawing=false; };
+  cv.onmousedown=start; cv.onmousemove=move; document.onmouseup=end;
+  cv.ontouchstart=start; cv.ontouchmove=move; cv.ontouchend=end;
+}
+function getPos(cv,e){
+  const r = cv.getBoundingClientRect();
+  const x = (e.clientX ?? e.touches[0].clientX) - r.left;
+  const y = (e.clientY ?? e.touches[0].clientY) - r.top;
+  return {x,y};
+}
+function clearSig(){
+  if(!sigCtx) return;
+  const cv = document.getElementById('sigCanvas');
+  sigCtx.fillStyle='#fff'; sigCtx.fillRect(0,0,cv.width,cv.height);
+  sigEmpty=true;
+}
+
+async function confirmSign(){
+  if(!currentReport) return;
+  if(sigEmpty){ alert('사인을 그려주세요'); return; }
+  const step = currentStepForSign;
+
+  // 1차: 본문 저장
+  if(step===1){
+    const sum = (document.getElementById('paperSummary')||{}).value||'';
+    const imp = (document.getElementById('paperImprove')||{}).value||'';
+    if(!sum.trim()){
+      if(!confirm('종합의견이 비어있습니다. 그대로 진행할까요?')) return;
+    }
+    try{
+      await sbUpdate('p_monthly_report', `id=eq.${currentReport.id}`,{
+        summary_comment: sum, improvement_action: imp
+      });
+    }catch(e){ alert('본문 저장 실패: '+e.message); return; }
+  }
+
+  // 결재선 마스터 검증 (1~3차에서 다음 결재자가 있는지)
+  if(step<4){
+    const route = routeCache.find(rt=>rt.template_code===currentReport.template_code);
+    const nextPinKey = `step${step+1}_pin`;
+    if(!route || !route[nextPinKey]){
+      alert(`설정 탭에서 ${STEP_NAMES[step+1]} 단계 결재자를 먼저 등록하세요`); return;
+    }
+  }
+
+  const cv = document.getElementById('sigCanvas');
+  const sigUrl = cv.toDataURL('image/png');
+  const comment = document.getElementById('signComment').value;
+
+  try{
+    const result = await sbRpc('sign_and_forward',{
+      p_report_id: currentReport.id,
+      p_step: step,
+      p_actor_pin: getMyPin(),
+      p_actor_name: getMyName(),
+      p_signature: sigUrl,
+      p_comment: comment
+    });
+    closeSignModal();
+    if(step<4){
+      alert(`✅ 사인 완료. 다음 결재자(${result.next_name||'-'})에게 전달됨.`);
+    }else{
+      alert('🎉 최종 승인 완료! 보고서가 영구 저장되었습니다.');
+    }
+    await openReport(currentReport.id);
+  }catch(e){ alert('사인 처리 실패: '+e.message); }
+}
+
+// =========================================================
+// 반려
+// =========================================================
+function openRejectModal(){
+  if(!currentReport) return;
+  document.getElementById('rejectReason').value = '';
+  document.getElementById('rejectModal').classList.add('show');
+}
+function closeRejectModal(){ document.getElementById('rejectModal').classList.remove('show'); }
+
+async function confirmReject(){
+  const reason = document.getElementById('rejectReason').value.trim();
+  if(!reason){ alert('반려 사유를 입력하세요'); return; }
+  if(!confirm('정말 반려하시겠습니까? 작성자가 재작성해야 합니다.')) return;
+  try{
+    await sbRpc('reject_report',{
+      p_report_id: currentReport.id,
+      p_step: currentReport.current_step,
+      p_actor_pin: getMyPin(),
+      p_actor_name: getMyName(),
+      p_reason: reason
+    });
+    closeRejectModal();
+    alert('❌ 반려 처리되었습니다');
+    await openReport(currentReport.id);
+  }catch(e){ alert('반려 실패: '+e.message); }
+}
+
+// =========================================================
+// 인쇄 / PDF
+// =========================================================
+function printReport(){ if(!currentReport){ alert('보고서가 없습니다'); return; } document.body.classList.add('appr-printing'); window.print(); setTimeout(()=>document.body.classList.remove('appr-printing'),500); }
+
+async function downloadPDF(){
+  if(!currentReport){ alert('보고서가 없습니다'); return; }
+  const el = document.getElementById('paperContent');
+  if(!el){ alert('보고서 영역을 찾을 수 없습니다'); return; }
+  try{
+    const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff', useCORS:true});
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+    const imgW = pdfW - 16;
+    const imgH = canvas.height * imgW / canvas.width;
+    if(imgH < pdfH - 16){
+      pdf.addImage(imgData, 'PNG', 8, 8, imgW, imgH);
+    }else{
+      let remaining = imgH, srcY = 0;
+      const pageImgH = pdfH - 16;
+      while(remaining > 0){
+        const sliceH = Math.min(pageImgH, remaining);
+        const sliceCv = document.createElement('canvas');
+        sliceCv.width = canvas.width;
+        sliceCv.height = sliceH * canvas.width / imgW;
+        const sctx = sliceCv.getContext('2d');
+        sctx.drawImage(canvas, 0, srcY, canvas.width, sliceCv.height,
+                       0, 0, sliceCv.width, sliceCv.height);
+        pdf.addImage(sliceCv.toDataURL('image/png'),'PNG', 8, 8, imgW, sliceH);
+        srcY += sliceCv.height; remaining -= sliceH;
+        if(remaining > 0) pdf.addPage();
+      }
+    }
+    pdf.save(`보고서_${currentReport.template_code}_${currentReport.target_year}-${String(currentReport.target_month).padStart(2,'0')}.pdf`);
+  }catch(e){ alert('PDF 생성 실패: '+e.message); console.error(e); }
+}
+
+// =========================================================
+// 검색
+// =========================================================
+async function searchReports(){
+  if(!isCfg()){ alert('Supabase 미설정'); return; }
+  const tpl = document.getElementById('searchTpl').value;
+  const y   = document.getElementById('searchYear').value;
+  const m   = document.getElementById('searchMonth').value;
+  const s   = document.getElementById('searchStatus').value;
+  const a   = document.getElementById('searchApprover').value.trim();
+
+  let q = `select=*&target_year=eq.${y}&order=target_year.desc,target_month.desc,template_code.asc&limit=300`;
+  if(tpl) q += `&template_code=eq.${encodeURIComponent(tpl)}`;
+  if(m)   q += `&target_month=eq.${m}`;
+  if(s)   q += `&status=eq.${s}`;
+
+  try{
+    let rows = await sbSelect('p_monthly_report', q) || [];
+    if(a){
+      const lower = a.toLowerCase();
+      rows = rows.filter(r=>{
+        return [r.step1_name,r.step2_name,r.step3_name,r.step4_name]
+          .filter(Boolean).some(n=>n.toLowerCase().includes(lower));
+      });
+    }
+    renderSearchResults(rows);
+  }catch(e){
+    document.getElementById('searchResults').innerHTML = '<div class="empty-state"><div class="ico">❌</div>'+e.message+'</div>';
+  }
+}
+
+function renderSearchResults(rows){
+  document.getElementById('searchCount').textContent = rows ? `(${rows.length}건)` : '';
+  if(!rows||!rows.length){
+    document.getElementById('searchResults').innerHTML = '<div class="empty-state"><div class="ico">🔍</div>검색 결과 없음</div>';
+    return;
+  }
+  document.getElementById('searchResults').innerHTML = rows.map(r=>{
+    const ico = TPL_ICONS[r.template_code]||'📋';
+    const approvers = [r.step1_name,r.step2_name,r.step3_name,r.step4_name]
+      .filter(Boolean).join(' › ');
+    return `<div class="inbox-item" onclick="openReport(${r.id})">
+      <div class="inbox-hdr">
+        <div class="inbox-title">${ico} ${r.template_name||r.template_code} · ${r.target_year}.${String(r.target_month).padStart(2,'0')}</div>
+        <span class="badge ${STATUS_BADGE_CLS[r.status]}">${STATUS_NAMES[r.status]}</span>
+      </div>
+      <div class="inbox-meta">
+        <span>NG <b class="ng">${r.ng_count||0}</b>건 (${(r.ng_rate||0).toFixed(1)}%)</span>
+        <span>점검 <b>${r.total_performed||0}</b>건</span>
+        <span>설비 <b>${r.total_machines||0}</b>대</span>
+      </div>
+      <div class="inbox-meta" style="margin-top:4px">
+        <span>결재선: <b>${approvers||'-'}</b></span>
+      </div>
+      ${r.status==='COMPLETED' ? `<div class="inbox-meta" style="margin-top:4px"><span>완료일: <b style="color:#86efac">${(r.step4_at||'').substring(0,10)}</b></span></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+
+
+// ===== expose to window =====
+if(typeof swTab!=='undefined') window.swTab = swTab;
+if(typeof loadInbox!=='undefined') window.loadInbox = loadInbox;
+if(typeof createOrOpenReport!=='undefined') window.createOrOpenReport = createOrOpenReport;
+if(typeof closeReport!=='undefined') window.closeReport = closeReport;
+if(typeof recalcStats!=='undefined') window.recalcStats = recalcStats;
+if(typeof saveDraft!=='undefined') window.saveDraft = saveDraft;
+if(typeof openSignModal!=='undefined') window.openSignModal = openSignModal;
+if(typeof openRejectModal!=='undefined') window.openRejectModal = openRejectModal;
+if(typeof printReport!=='undefined') window.printReport = printReport;
+if(typeof downloadPDF!=='undefined') window.downloadPDF = downloadPDF;
+if(typeof searchReports!=='undefined') window.searchReports = searchReports;
+if(typeof openReport!=='undefined') window.openReport = openReport;
+if(typeof deleteReport!=='undefined') window.deleteReport = deleteReport;
+if(typeof saveLogin!=='undefined') window.saveLogin = saveLogin;
+if(typeof saveSettings!=='undefined') window.saveSettings = saveSettings;
+if(typeof copySchemaSQL!=='undefined') window.copySchemaSQL = copySchemaSQL;
+if(typeof downloadSchemaSQL!=='undefined') window.downloadSchemaSQL = downloadSchemaSQL;
+if(typeof toggleSqlPreview!=='undefined') window.toggleSqlPreview = toggleSqlPreview;
+if(typeof runDiagnostic!=='undefined') window.runDiagnostic = runDiagnostic;
+if(typeof saveAllRoutes!=='undefined') window.saveAllRoutes = saveAllRoutes;
+if(typeof closeSignModal!=='undefined') window.closeSignModal = closeSignModal;
+if(typeof clearSig!=='undefined') window.clearSig = clearSig;
+if(typeof confirmSign!=='undefined') window.confirmSign = confirmSign;
+if(typeof closeRejectModal!=='undefined') window.closeRejectModal = closeRejectModal;
+if(typeof confirmReject!=='undefined') window.confirmReject = confirmReject;
+if(typeof selectTemplate!=='undefined') window.selectTemplate = selectTemplate;
+if(typeof cleanupNonPMTemplates!=='undefined') window.cleanupNonPMTemplates = cleanupNonPMTemplates;
+if(typeof apprInit!=='undefined') window.apprInit = apprInit;
+
+})();
 </script>
 </body>
 </html>
