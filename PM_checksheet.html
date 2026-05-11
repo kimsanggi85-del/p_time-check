@@ -881,9 +881,9 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 
 
 <div class="hdr">
-  <h1>📋 보고서 결재 v3.6</h1>
+  <h1>📋 보고서 결재 v3.7</h1>
   <p>점검표 통합 월별 결재 시스템 · 4단계 (작성·검토·확인·승인)</p>
-  <div class="v">v3.6 · 설정 탭에 SQL 스키마 복사 + 진단 도구 내장</div>
+  <div class="v">v3.7 · 🔒 Supabase 자동 연결 고정 (모든 PC 공통)</div>
   <div id="hdrUserBadge" class="user-badge" style="display:none">👤 -</div>
 </div>
 
@@ -1065,11 +1065,14 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   </div>
 
   <div class="card">
-    <div class="card-title">🔧 Supabase 연결</div>
-    <div class="fg"><label class="lbl">URL</label><input type="text" id="apprCfgSbUrl" placeholder="https://xxxxx.supabase.co"></div>
-    <div class="fg"><label class="lbl">Anon Key</label><input type="text" id="apprCfgSbKey" placeholder="sb_publishable_..."></div>
-    <button class="btn btn-info btn-block" onclick="saveSettings()">💾 저장 + 연결 테스트</button>
-    <div style="font-size:11px;color:var(--text2);margin-top:10px;line-height:1.6" id="connStatus">미연결</div>
+    <div class="card-title">🔧 Supabase 연결 <span style="font-size:11px;color:var(--ok);font-weight:600;margin-left:8px">🔒 자동 연결 (고정값)</span></div>
+    <div class="fg"><label class="lbl">URL</label><input type="text" id="apprCfgSbUrl" placeholder="https://xxxxx.supabase.co" readonly disabled style="opacity:.65;cursor:not-allowed;background:rgba(255,255,255,.04)"></div>
+    <div class="fg"><label class="lbl">Anon Key</label><input type="text" id="apprCfgSbKey" placeholder="sb_publishable_..." readonly disabled style="opacity:.65;cursor:not-allowed;background:rgba(255,255,255,.04)"></div>
+    <button class="btn btn-info btn-block" onclick="testApprConnection()">🔗 연결 상태 확인</button>
+    <div style="font-size:11px;color:var(--text2);margin-top:10px;line-height:1.6" id="connStatus">자동 연결 확인 중...</div>
+    <div style="font-size:11px;color:var(--ok);margin-top:6px;line-height:1.5">
+      ℹ️ 시스템 관리자에 의해 고정되어 있습니다. 모든 PC에서 즉시 자동 연결됩니다.
+    </div>
   </div>
 
   <!-- DB 정리 (1회성 마이그레이션 도구) -->
@@ -1289,27 +1292,29 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
     <div class="settings-section" style="border:2px solid #2563eb;background:#eff6ff">
       <h3>☁️ 클라우드 동기화 설정 (PC ↔ 핸드폰) <span id="syncSettingsStatus" style="font-size:13px;color:var(--muted);font-weight:500;margin-left:auto"></span></h3>
       <div style="background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:14px;line-height:1.7;margin-bottom:14px">
-        <b style="color:var(--accent)">✅ 자동 연결되어 있습니다.</b><br>
+        <b style="color:var(--accent)">✅ 모든 PC에서 자동 연결됩니다.</b><br>
         • Supabase 프로젝트 <code>ebthltdmxpzlkfwvdloz</code>의 <code>kv_store</code> 테이블 자동 사용<br>
         • PM 앱 데이터는 모두 <code>pm:</code> prefix로 격리되므로 다른 앱과 충돌하지 않습니다<br>
         • PC와 핸드폰이 같은 URL로 접속하면 <b>자동으로 동기화</b>됩니다<br>
-        • 아래 입력란은 다른 Supabase 프로젝트로 전환할 때만 사용하세요
+        • URL/KEY는 시스템에 고정되어 있어 사용자가 변경할 수 없습니다 (관리자 고정)
       </div>
       <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px">
         <div>
-          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase URL (기본값 사용 권장)</label>
-          <input type="text" id="cfgSbUrl" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace" placeholder="https://xxxxx.supabase.co">
+          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase URL <span style="color:var(--ok);font-weight:700">🔒 자동 연결 (고정값)</span></label>
+          <input type="text" id="cfgSbUrl" readonly disabled style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace;background:#f1f5f9;color:#64748b;cursor:not-allowed" placeholder="https://xxxxx.supabase.co">
         </div>
         <div>
-          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase KEY (기본값 사용 권장)</label>
-          <input type="text" id="cfgSbKey" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace" placeholder="sb_publishable_... 또는 eyJ...">
+          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase KEY <span style="color:var(--ok);font-weight:700">🔒 자동 연결 (고정값)</span></label>
+          <input type="text" id="cfgSbKey" readonly disabled style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace;background:#f1f5f9;color:#64748b;cursor:not-allowed" placeholder="sb_publishable_... 또는 eyJ...">
         </div>
       </div>
+      <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px 12px;font-size:12px;color:#065f46;line-height:1.6;margin-bottom:12px">
+        🔒 <b>관리자 고정 모드</b> — 위 URL/KEY는 시스템에 고정되어 있어 변경할 수 없습니다.<br>
+        모든 PC에서 동일한 Supabase 프로젝트로 자동 연결되어 데이터가 공유됩니다.
+      </div>
       <div class="settings-actions">
-        <button class="btn btn-primary" onclick="saveSyncConfig()">💾 설정 변경 (고급)</button>
         <button class="btn btn-secondary" onclick="manualSync()">🔄 지금 동기화</button>
         <button class="btn btn-secondary" onclick="forcePushAll()" style="background:#fef3c7;color:#b45309;border-color:#fbbf24">⬆️ 로컬 데이터 서버에 강제 푸시</button>
-        <button class="btn btn-danger btn-sm" onclick="clearSyncConfig()">기본값으로 복원</button>
       </div>
       <details style="margin-top:12px">
         <summary style="cursor:pointer;font-weight:600;color:var(--accent)">▶ kv_store 테이블이 없을 때만 실행할 SQL 보기</summary>
@@ -1966,15 +1971,9 @@ function refreshSyncConfigUI(){
   if(urlEl) urlEl.value = getSupabaseUrl();
   if(keyEl) keyEl.value = getSupabaseKey();
   if(st){
-    const customUrl = localStorage.getItem('pm_sb_url');
-    const customKey = localStorage.getItem('pm_sb_key');
-    if(customUrl || customKey){
-      st.textContent = '🔧 사용자 지정 설정';
-      st.style.color = 'var(--orange)';
-    } else {
-      st.textContent = '✅ 기본값(자동 연결)';
-      st.style.color = 'var(--green)';
-    }
+    // ★ v3.7: 항상 자동 연결 상태로 표시 (사용자 변경 불가)
+    st.textContent = '🟢 자동 연결됨 (모든 PC 공통)';
+    st.style.color = 'var(--green)';
   }
 }
 window.refreshSyncConfigUI = refreshSyncConfigUI;
@@ -2476,8 +2475,9 @@ initFromURL();
  * ============================================================ */
 // --- 유틸 ---
 function _mask(v){if(!v)return'';if(v.length<=8)return'••••';return v.slice(0,4)+'••••'+v.slice(-4);}
-function _getSbUrl(){return(typeof SUPABASE_URL!=='undefined'?SUPABASE_URL:'')||localStorage.getItem('sb_url')||'';}
-function _getSbKey(){return(typeof SUPABASE_KEY!=='undefined'?SUPABASE_KEY:'')||localStorage.getItem('sb_key')||'';}
+// ★ v3.7: 자동 연결 — DEFAULT_SUPABASE_URL/KEY를 최후 fallback으로 사용 (모든 PC 자동 연결)
+function _getSbUrl(){return(typeof SUPABASE_URL!=='undefined'?SUPABASE_URL:'')||localStorage.getItem('sb_url')||DEFAULT_SUPABASE_URL||'';}
+function _getSbKey(){return(typeof SUPABASE_KEY!=='undefined'?SUPABASE_KEY:'')||localStorage.getItem('sb_key')||DEFAULT_SUPABASE_KEY||'';}
 function _sbHeaders(){var k=_getSbKey();return{'Content-Type':'application/json','apikey':k,'Authorization':'Bearer '+k};}
 function _getTgToken(){return(typeof TELEGRAM_BOT_TOKEN!=='undefined'?TELEGRAM_BOT_TOKEN:'')||localStorage.getItem('tg_token')||'';}
 function _esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -5663,8 +5663,9 @@ const TPL_ICONS = {
 
 function getCfg(){ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }
 function saveCfg(o){ localStorage.setItem(LS_KEY, JSON.stringify(o)); }
-function getSbUrl(){ return getCfg().sb_url || ''; }
-function getSbKey(){ return getCfg().sb_key || ''; }
+// ★ v3.7: 자동 연결 — DEFAULT_SUPABASE_URL/KEY를 최후 fallback으로 사용 (모든 PC 자동 연결)
+function getSbUrl(){ return getCfg().sb_url || (typeof DEFAULT_SUPABASE_URL!=='undefined'?DEFAULT_SUPABASE_URL:'') || ''; }
+function getSbKey(){ return getCfg().sb_key || (typeof DEFAULT_SUPABASE_KEY!=='undefined'?DEFAULT_SUPABASE_KEY:'') || ''; }
 function getMyPin(){ return getCfg().my_pin || ''; }
 function getMyName(){ return getCfg().my_name || ''; }
 function isCfg(){ return !!(getSbUrl()&&getSbKey()); }
@@ -5757,8 +5758,9 @@ function initYearSelects(){
 
 function apprLoadAllSettings(){
   const c = getCfg();
-  document.getElementById('apprCfgSbUrl').value = c.sb_url||'';
-  document.getElementById('apprCfgSbKey').value = c.sb_key||'';
+  // ★ v3.7: 자동 연결 — 사용자 저장값 없으면 DEFAULT 값을 보여줌 (실제로 그게 쓰이고 있으므로)
+  document.getElementById('apprCfgSbUrl').value = c.sb_url || (typeof DEFAULT_SUPABASE_URL!=='undefined'?DEFAULT_SUPABASE_URL:'');
+  document.getElementById('apprCfgSbKey').value = c.sb_key || (typeof DEFAULT_SUPABASE_KEY!=='undefined'?DEFAULT_SUPABASE_KEY:'');
   document.getElementById('cfgMyPin').value = c.my_pin||'';
   document.getElementById('cfgMyName').value = c.my_name||'';
 
@@ -5775,7 +5777,27 @@ function apprLoadAllSettings(){
     }catch(e){}
   }
   updateConnStatus();
+  // ★ v3.7: 페이지 진입 시 자동으로 연결 테스트 1회 실행
+  testApprConnection();
 }
+
+// ★ v3.7: 보고서결재 자동 연결 테스트 (사용자가 직접 저장하지 않아도 됨)
+async function testApprConnection(){
+  const el = document.getElementById('connStatus');
+  if(!el) return;
+  el.innerHTML = '🟡 자동 연결 테스트 중...';
+  try{
+    await sbSelect('p_monthly_report','select=id&limit=1');
+    el.innerHTML = '🟢 자동 연결 정상 (모든 PC 공통)';
+    // 첫 진입 시 템플릿/결재선 자동 로드
+    try{ await loadTemplates(); }catch(e){}
+    try{ await loadRoutes(); }catch(e){}
+    try{ populateSearchTpl(); }catch(e){}
+  }catch(e){
+    el.innerHTML = '🔴 연결 실패: '+e.message+'<br><span style="color:var(--text2)">네트워크 또는 Supabase 상태를 확인하세요.</span>';
+  }
+}
+window.testApprConnection = testApprConnection;
 
 function refreshUserBadge(){
   const b = document.getElementById('hdrUserBadge');
@@ -5820,7 +5842,8 @@ async function saveSettings(){
 }
 function updateConnStatus(){
   const el = document.getElementById('connStatus');
-  el.textContent = isCfg() ? '🟡 설정됨 (저장 클릭 시 테스트)' : '⚪ 미설정';
+  // ★ v3.7: 자동 연결 — isCfg()는 항상 true이므로 항상 자동연결 표시
+  el.innerHTML = isCfg() ? '🟢 자동 연결됨 (모든 PC 공통)' : '⚪ 미설정';
 }
 
 // =========================================================
