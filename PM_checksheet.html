@@ -7418,6 +7418,10 @@ function renderSearchResults(rows){
     const ico = TPL_ICONS[r.template_code]||'📋';
     const approvers = [r.step1_name,r.step2_name,r.step3_name,r.step4_name]
       .filter(Boolean).join(' › ');
+    // 완료일: 점검월 다음 달 1일 (예: 1월 점검 → 2월 1일)
+    const ny = r.target_month===12 ? r.target_year+1 : r.target_year;
+    const nm = r.target_month===12 ? 1 : r.target_month+1;
+    const nextMonthDate = `${ny}-${String(nm).padStart(2,'0')}-01`;
     return `<div class="inbox-item" onclick="openReport(${r.id})">
       <div class="inbox-hdr">
         <div class="inbox-title">${ico} ${r.template_name||r.template_code} · ${r.target_year}.${String(r.target_month).padStart(2,'0')}</div>
@@ -7425,13 +7429,11 @@ function renderSearchResults(rows){
       </div>
       <div class="inbox-meta">
         <span>NG <b class="ng">${r.ng_count||0}</b>건 (${(r.ng_rate||0).toFixed(1)}%)</span>
-        <span>점검 <b>${r.total_performed||0}</b>건</span>
-        <span>설비 <b>${r.total_machines||0}</b>대</span>
       </div>
       <div class="inbox-meta" style="margin-top:4px">
         <span>결재선: <b>${approvers||'-'}</b></span>
       </div>
-      ${r.status==='COMPLETED' ? `<div class="inbox-meta" style="margin-top:4px"><span>완료일: <b style="color:#86efac">${(r.step4_at||'').substring(0,10)}</b></span></div>` : ''}
+      ${r.status==='COMPLETED' ? `<div class="inbox-meta" style="margin-top:4px"><span>완료일: <b style="color:#86efac">${nextMonthDate}</b></span></div>` : ''}
     </div>`;
   }).join('');
 }
