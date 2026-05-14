@@ -2014,6 +2014,722 @@ code,pre,kbd,samp{
 /* ─────────────────────────────────────────────
    인쇄 시 라이트 테마로 복원 (인쇄/PDF용)
    ───────────────────────────────────────────── */
+
+/* NOW 컬럼(현재월) 다크 강제 - 라이트 #e0f2fe 덮어쓰기 */
+#pmPlanTab .eq-table th.v4p-current-month,
+#pmPlanTab .eq-table td.v4p-current-month{
+  background:rgba(59,130,246,0.18) !important;
+  color:#bfdbfe !important;
+}
+#pmPlanTab .eq-table thead tr:first-child th.v4p-current-month{
+  background:#1d4ed8 !important;
+  color:#fff !important;
+}
+#pmPlanTab .eq-table thead tr:first-child th.v4p-current-month::after{
+  color:#fff !important;
+}
+
+/* 글자색 톤다운 (핸드폰 가독성 - 너무 새하얗지 않게) */
+body,
+#pmPlanTab,
+#pmPlanTab .eq-table td,
+.v4d-card-row .v4d-label{
+  color:#cbd5e1 !important;
+}
+h1,h2,h3,h4,h5,h6,
+.v4d-section-title,
+.v4plan-section-title,
+.page-header h1,
+.page-header h2{
+  color:#e2e8f0 !important;
+}
+.v4d-card-title,
+.v4d-summary-item .num{
+  color:#e2e8f0 !important;
+}
+#pmPlanTab .eq-table th,
+.eq-table th,
+table th{
+  color:#e2e8f0 !important;
+}
+
+/* 글로벌 라이트 영역 다크화 (#fff, #fafafa, #f8f9fb 등 하드코딩 잡기) */
+.controls,
+.detail-panel,
+.history-list,
+.eq-card,
+.info-grid,
+.image-item{
+  background:#1e293b !important;
+  border-color:#334155 !important;
+  color:#cbd5e1 !important;
+}
+.controls select,
+.controls input{
+  background:#0f172a !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+}
+.btn-secondary{
+  background:#334155 !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+}
+
+/* 체크시트 영역 (.check-table, .chk-cell) */
+.check-table{
+  background:#1e293b !important;
+  color:#cbd5e1 !important;
+}
+.check-table th{
+  background:#334155 !important;
+  color:#e2e8f0 !important;
+  border-color:#475569 !important;
+}
+.check-table td{
+  background:transparent !important;
+  color:#cbd5e1 !important;
+  border-color:#334155 !important;
+}
+.chk-cell{
+  background:#334155 !important;
+  border:1px solid #475569 !important;
+  color:#cbd5e1 !important;
+}
+.chk-cell:hover{
+  background:#475569 !important;
+}
+.chk-cell.checked,
+.chk-cell.ok{
+  background:rgba(34,197,94,0.2) !important;
+  border-color:#22c55e !important;
+  color:#4ade80 !important;
+}
+.chk-cell.ng{
+  background:rgba(239,68,68,0.2) !important;
+  border-color:#ef4444 !important;
+  color:#f87171 !important;
+}
+
+/* 보전이력관리 영역 (.history-list, .history-item) */
+.history-list,
+.history-item,
+.hist-table-wrap,
+.hist-table{
+  background:#1e293b !important;
+  color:#cbd5e1 !important;
+  border-color:#334155 !important;
+}
+.hist-table th{
+  background:#334155 !important;
+  color:#e2e8f0 !important;
+  border-color:#475569 !important;
+}
+.hist-table td{
+  background:transparent !important;
+  color:#cbd5e1 !important;
+  border-color:#334155 !important;
+}
+.hist-table tbody tr:nth-child(even){
+  background:rgba(255,255,255,0.02) !important;
+}
+.hist-table tbody tr:hover,
+.hist-table tbody tr:hover td{
+  background:rgba(59,130,246,0.12) !important;
+}
+
+/* 모달 헤더/본문 라이트 배경 */
+.modal h1,.modal h2,.modal h3,
+.modal-box h1,.modal-box h2,.modal-box h3,
+.modal-header,
+[class*="modal-"][class*="header"]{
+  background:#334155 !important;
+  color:#e2e8f0 !important;
+  border-color:#475569 !important;
+}
+.modal-body,
+[class*="modal-"][class*="body"]{
+  background:#1e293b !important;
+  color:#cbd5e1 !important;
+}
+.modal-search,
+[class*="modal-"][class*="search"]{
+  background:#0f172a !important;
+  color:#e2e8f0 !important;
+  border-color:#475569 !important;
+}
+
+/* eq-card 호버 (설비카드) */
+.eq-card:hover{
+  background:#334155 !important;
+  border-color:#475569 !important;
+}
+
+/* legend 범례 색상 */
+.legend,
+#pmPlanTab .legend{
+  color:#cbd5e1 !important;
+}
+
+/* ─────────────────────────────────────────────
+   보전이력관리(.mh-*, .hist-*) 영역 다크화
+   ───────────────────────────────────────────── */
+.mh-summary,
+.mh-summary-card,
+#pmPlanTab .mh-summary-card{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.mh-summary-card .label,
+.mh-summary-card .num,
+.mh-summary-card *{
+  color:#e2e8f0 !important;
+}
+.mh-form-box,
+.mh-form-overlay,
+.mh-form-grid,
+#pmPlanTab .mh-form-box{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.mh-form-overlay{
+  background:rgba(0,0,0,0.7) !important;
+}
+.mh-form-title{
+  color:#e2e8f0 !important;
+}
+.mh-form-field label{
+  color:#cbd5e1 !important;
+}
+.mh-input,
+#pmPlanTab .mh-input{
+  background:#0f172a !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+}
+.mh-input:focus{
+  border-color:#3b82f6 !important;
+  outline:none;
+}
+.mh-input option{
+  background:#1e293b;
+  color:#e2e8f0;
+}
+.mh-badge{
+  background:#334155 !important;
+  color:#cbd5e1 !important;
+}
+
+/* 보전이력 테이블 */
+.mh-table,
+#pmPlanTab .mh-table{
+  background:#1e293b !important;
+  color:#cbd5e1 !important;
+}
+.mh-table th,
+#pmPlanTab .mh-table th{
+  background:#334155 !important;
+  color:#e2e8f0 !important;
+  border-color:#475569 !important;
+}
+.mh-table td,
+#pmPlanTab .mh-table td{
+  background:transparent !important;
+  color:#cbd5e1 !important;
+  border-color:#334155 !important;
+}
+.mh-table tbody tr:nth-child(even){
+  background:rgba(255,255,255,0.02) !important;
+}
+.mh-table tbody tr:hover,
+.mh-table tbody tr:hover td{
+  background:rgba(59,130,246,0.12) !important;
+}
+
+/* 빠른조회 버튼, 컨트롤 */
+.hist-btn,
+.hist-field input[type="date"],
+.hist-row,
+.hist-grid{
+  background:#334155 !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+}
+.hist-btn:hover{
+  background:#475569 !important;
+}
+.hist-btn.delete{
+  background:#7f1d1d !important;
+  border-color:#991b1b !important;
+  color:#fecaca !important;
+}
+.hist-btn.delete:hover{
+  background:#991b1b !important;
+}
+.hist-field label,
+.hist-field{
+  color:#cbd5e1 !important;
+}
+.hist-field input[type="date"]{
+  background:#0f172a !important;
+}
+.hist-empty{
+  background:#1e293b !important;
+  border:1px dashed #475569 !important;
+  color:#94a3b8 !important;
+}
+
+/* 보전이력 KPI 카드 (193 총 보전건수 등) */
+.hist-summary,
+.hist-summary-card,
+.mh-stat,
+.mh-kpi{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.hist-summary-card .num,
+.hist-summary .num,
+.mh-stat .num,
+.mh-kpi .num{
+  color:#e2e8f0 !important;
+}
+.hist-summary-card .label,
+.hist-summary .label,
+.mh-stat .label,
+.mh-kpi .label{
+  color:#94a3b8 !important;
+}
+.hist-table-wrap{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+}
+
+/* ─────────────────────────────────────────────
+   설정(.settings-*, .set-*) 영역 다크화
+   ───────────────────────────────────────────── */
+.settings-section,
+#pmPlanTab .settings-section{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.settings-section h2,
+.settings-section h3,
+.settings-section .title,
+.settings-section legend{
+  color:#e2e8f0 !important;
+}
+.settings-actions{
+  background:transparent !important;
+}
+
+/* 설비 관리표 */
+.set-table,
+#pmPlanTab .set-table{
+  background:#1e293b !important;
+  color:#cbd5e1 !important;
+}
+.set-table th,
+#pmPlanTab .set-table th{
+  background:#334155 !important;
+  color:#e2e8f0 !important;
+  border-color:#475569 !important;
+}
+.set-table td,
+#pmPlanTab .set-table td{
+  background:transparent !important;
+  color:#cbd5e1 !important;
+  border-color:#334155 !important;
+}
+.set-table tbody tr:nth-child(even){
+  background:rgba(255,255,255,0.02) !important;
+}
+.set-table tbody tr:hover,
+.set-table tbody tr:hover td{
+  background:rgba(59,130,246,0.12) !important;
+}
+
+/* 안내 박스 (점검 년도 안내문 등) */
+[class*="notice"],
+[class*="info-box"],
+[class*="alert"]:not(.alert-danger):not(.alert-warning):not(.alert-success),
+.guide-text,
+.help-text,
+.notes-box,
+#pmPlanTab .notes-box{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+
+/* 데이터 관리/백업 영역 */
+[class*="backup"],
+[class*="data-mgr"],
+.year-mgr,
+.year-manage,
+[id*="legacy"]:not(:has(script)){
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+
+/* 디테일 패널/항목 */
+.detail-item,
+#pmPlanTab .detail-item{
+  background:#334155 !important;
+  border:1px solid #475569 !important;
+  color:#cbd5e1 !important;
+}
+.detail-item label,
+.detail-item .label{
+  color:#94a3b8 !important;
+}
+.detail-item .value{
+  color:#e2e8f0 !important;
+}
+
+/* 진행률 바 */
+.progress-bar,
+#pmPlanTab .progress-bar{
+  background:#334155 !important;
+}
+.progress-bar-fill{
+  background:#3b82f6 !important;
+}
+
+/* 점검계획 편집 셀 */
+.mp-cell,
+.pe-month,
+.pe-week-row,
+#pmPlanTab .mp-cell,
+#pmPlanTab .pe-month{
+  background:#334155 !important;
+  border-color:#475569 !important;
+  color:#cbd5e1 !important;
+}
+.pe-week-row select,
+#pmPlanTab .pe-week-row select{
+  background:#0f172a !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+}
+
+/* 등급 레전드 */
+.grade-legend,
+#pmPlanTab .grade-legend{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.grade-c{color:#fbbf24 !important}
+.grade-d{color:#fb923c !important}
+.grade-e{color:#f87171 !important}
+
+/* ─────────────────────────────────────────────
+   설비 카드(.eq-card) 텍스트 가독성 강화
+   ───────────────────────────────────────────── */
+.eq-card{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.eq-card:hover{
+  border-color:#475569 !important;
+  background:#334155 !important;
+}
+.eq-card.active{
+  background:#1e293b !important;
+  border-color:#3b82f6 !important;
+}
+.eq-card h4{
+  color:#60a5fa !important;
+  font-weight:700;
+}
+.eq-card p,
+.eq-card div,
+.eq-card span:not(.age):not([class*="grade"]){
+  color:#cbd5e1 !important;
+}
+.eq-card .age,
+.eq-card .year,
+.eq-card .meta,
+.eq-card small{
+  color:#94a3b8 !important;
+}
+
+/* ─────────────────────────────────────────────
+   등급 배지(grade-a/b/c/d/e) 다크 친화 색상
+   ───────────────────────────────────────────── */
+.grade-a,
+#pmPlanTab .grade-a{
+  background:rgba(34,197,94,0.2) !important;
+  color:#4ade80 !important;
+}
+.grade-b,
+#pmPlanTab .grade-b{
+  background:rgba(59,130,246,0.2) !important;
+  color:#60a5fa !important;
+}
+.grade-c,
+#pmPlanTab .grade-c{
+  background:rgba(245,158,11,0.22) !important;
+  color:#fcd34d !important;
+}
+.grade-d,
+#pmPlanTab .grade-d{
+  background:rgba(249,115,22,0.22) !important;
+  color:#fdba74 !important;
+}
+.grade-e,
+#pmPlanTab .grade-e{
+  background:rgba(239,68,68,0.22) !important;
+  color:#fca5a5 !important;
+}
+/* 등급 배지 공통 스타일 (가독성 향상) */
+[class^="grade-"]:not(.grade-legend){
+  font-weight:700 !important;
+  padding:3px 8px !important;
+  border-radius:6px !important;
+  display:inline-block;
+}
+
+/* ─────────────────────────────────────────────
+   점검 년도 안내문(.chk-year-*) 다크화
+   ───────────────────────────────────────────── */
+.chk-year-box{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+  border-radius:10px !important;
+}
+.chk-year-row{
+  color:#cbd5e1 !important;
+}
+.chk-year-label{
+  color:#e2e8f0 !important;
+}
+.chk-year-info{
+  color:#94a3b8 !important;
+}
+.chk-year-hint{
+  background:#0f172a !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+  padding:12px 14px !important;
+  border-radius:8px !important;
+  line-height:1.7 !important;
+}
+.chk-year-hint b{
+  color:#e2e8f0 !important;
+}
+.chk-year-actions{
+  background:transparent !important;
+}
+
+/* ─────────────────────────────────────────────
+   보고서결재(.appr-app) 입력 가독성 강화
+   ───────────────────────────────────────────── */
+.appr-app input::placeholder,
+.appr-app textarea::placeholder,
+.appr-app select::placeholder{
+  color:#64748b !important;
+  opacity:1;
+}
+.appr-app input,
+.appr-app select,
+.appr-app textarea{
+  color:#e2e8f0 !important;
+}
+.appr-app label,
+.appr-app .form-label,
+.appr-app .label{
+  color:#cbd5e1 !important;
+}
+.appr-app select option{
+  background:#1e293b;
+  color:#e2e8f0;
+}
+.appr-app .muted,
+.appr-app [class*="hint"],
+.appr-app [class*="note"]{
+  color:#94a3b8 !important;
+}
+
+/* ─────────────────────────────────────────────
+   KPI 카드(.v4p-kpi) 가독성 + 텍스트 겹침 해결
+   ───────────────────────────────────────────── */
+.v4p-kpi{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  min-height:88px !important;
+  padding:14px 16px 14px 22px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:space-between !important;
+  gap:4px !important;
+}
+.v4p-kpi .label{
+  color:#cbd5e1 !important;
+  font-size:13px !important;
+  margin-bottom:0 !important;
+}
+.v4p-kpi .label .ico{
+  background:rgba(255,255,255,0.08) !important;
+}
+.v4p-kpi .value{
+  font-size:24px !important;
+  line-height:1.1 !important;
+  margin-top:2px !important;
+  margin-bottom:2px !important;
+}
+.v4p-kpi[data-tone="plan"]   .value{color:#60a5fa !important}
+.v4p-kpi[data-tone="done"]   .value{color:#4ade80 !important}
+.v4p-kpi[data-tone="late"]   .value{color:#f87171 !important}
+.v4p-kpi[data-tone="soon"]   .value{color:#fbbf24 !important}
+.v4p-kpi[data-tone="plan"]   .label .ico{color:#60a5fa !important;background:rgba(59,130,246,0.18) !important}
+.v4p-kpi[data-tone="done"]   .label .ico{color:#4ade80 !important;background:rgba(34,197,94,0.18) !important}
+.v4p-kpi[data-tone="late"]   .label .ico{color:#f87171 !important;background:rgba(239,68,68,0.18) !important}
+.v4p-kpi[data-tone="soon"]   .label .ico{color:#fbbf24 !important;background:rgba(245,158,11,0.18) !important}
+.v4p-kpi .sub{
+  font-size:11px !important;
+  color:#94a3b8 !important;
+  margin-top:0 !important;
+  line-height:1.4 !important;
+}
+.v4p-kpi::before{
+  width:3px !important;
+}
+
+/* ─────────────────────────────────────────────
+   1~이전월 월별 실적 미니 라인(.v4d-monthly-row)
+   ───────────────────────────────────────────── */
+.v4d-monthly-row{
+  display:grid;
+  grid-template-columns:repeat(12, 1fr);
+  gap:6px;
+  margin:14px 0 16px;
+  padding:12px 14px;
+  background:rgba(0,0,0,0.25);
+  border:1px solid #334155;
+  border-radius:10px;
+}
+.v4d-monthly-cell{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:8px 4px;
+  background:#1e293b;
+  border:1px solid #334155;
+  border-radius:7px;
+  font-size:11px;
+  color:#cbd5e1;
+  min-height:54px;
+  transition:transform .15s;
+}
+.v4d-monthly-cell:hover{
+  transform:translateY(-1px);
+  border-color:#475569;
+}
+.v4d-monthly-cell.is-now{
+  background:#1d4ed8;
+  border-color:#3b82f6;
+  color:#fff;
+  font-weight:600;
+}
+.v4d-monthly-cell.is-future{
+  opacity:0.55;
+}
+.v4d-monthly-cell .m{
+  font-size:11px;
+  color:#94a3b8;
+  font-weight:500;
+}
+.v4d-monthly-cell.is-now .m{color:#bfdbfe}
+.v4d-monthly-cell .v{
+  font-size:14px;
+  font-weight:700;
+  color:#e2e8f0;
+}
+.v4d-monthly-cell.is-now .v{color:#fff}
+.v4d-monthly-cell .badge{
+  font-size:9px;
+  padding:1px 5px;
+  border-radius:8px;
+  font-weight:600;
+}
+.v4d-monthly-cell.t-done .badge{background:rgba(34,197,94,0.25);color:#4ade80}
+.v4d-monthly-cell.t-late .badge{background:rgba(239,68,68,0.25);color:#f87171}
+.v4d-monthly-cell.t-partial .badge{background:rgba(245,158,11,0.25);color:#fbbf24}
+.v4d-monthly-cell.t-none .badge{background:rgba(100,116,139,0.2);color:#94a3b8}
+
+@media (max-width:720px){
+  .v4d-monthly-row{
+    grid-template-columns:repeat(6, 1fr);
+    gap:5px;
+  }
+}
+
+/* 폼 입력 요소 글로벌 강제 (어디에 있든 다크) */
+.controls input,
+.controls select,
+.controls textarea,
+input[type="date"],
+input[type="time"],
+input[type="month"],
+input[type="datetime-local"]{
+  background:#0f172a !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+  color-scheme:dark;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator{
+  filter:invert(0.8);
+}
+select option{
+  background:#1e293b;
+  color:#e2e8f0;
+}
+
+/* 안내문 약한 텍스트 가독성 향상 */
+.muted,
+[class*="muted"],
+[class*="hint"],
+[class*="caption"],
+small,
+.note,
+.subtitle{
+  color:#94a3b8 !important;
+}
+ul li,
+ol li{
+  color:#cbd5e1 !important;
+}
+
+/* 일반 카드/박스/패널 (와일드 포괄) */
+[class*="-card"]:not(.v4d-card):not(.v4d-card-row):not(.v4d-card-head):not(.v4d-card-title):not(.v4d-card-grade):not(.appr-app *):not(.btn),
+[class*="-box"]:not(.modal-box):not(.appr-app *){
+  background:#1e293b;
+  border-color:#334155;
+}
+
+/* 코드/태그/마크 */
+mark,
+.tag,
+.chip,
+[class*="badge"]:not(.v4d-badge):not(.mh-badge){
+  background:#334155 !important;
+  color:#cbd5e1 !important;
+}
+
+/* ─────────────────────────────────────────────
+   인쇄 시 라이트 테마로 복원 (인쇄/PDF용)
+   ───────────────────────────────────────────── */
 @media print{
   body{background:#fff !important;color:#000 !important}
   .page,.page-header,.eq-table-wrap,.check-table,.checksheet,
@@ -2507,12 +3223,13 @@ code,pre,kbd,samp{
   </div>
 
   <div class="main-tabs">
-    <div class="main-tab active" id="mainTab_plan" onclick="switchMainTab('plan')">📊 보전계획실적</div>
+    <div class="main-tab active" id="mainTab_planTable" onclick="switchMainTab('planTable')">📅 <span id="planTableTabLabel">설비정기점검계획</span></div>
+    <div class="main-tab" id="mainTab_plan" onclick="switchMainTab('plan')">📊 보전계획실적</div>
     <div class="main-tab" id="mainTab_history" onclick="switchMainTab('history')">📝 보전이력관리</div>
     <div class="main-tab" id="mainTab_settings" onclick="switchMainTab('settings')">⚙️ 설정</div>
   </div>
 
-  <div id="view_plan">
+  <div id="view_plan" style="display:none">
     <div class="vol-tabs" id="volTabs"></div>
     <div class="legend">
       <span><span class="sym" style="color:#2563eb">□</span> 계획</span>
@@ -2521,6 +3238,10 @@ code,pre,kbd,samp{
       <span style="color:var(--muted);font-size:13px">| □ 클릭 → 점검완료 + 이력 자동등록</span>
     </div>
     <div id="eqContent"></div>
+  </div>
+
+  <div id="view_planTable">
+    <!-- 12개월 보전계획표가 JS에 의해 여기로 이동됨 -->
   </div>
 
   <div id="view_history" style="display:none">
@@ -4859,7 +5580,7 @@ let currentNotes = getNotes(currentYear);
 let maintHistory = getHistory();
 let _mhNextId = maintHistory.length?Math.max(...maintHistory.map(h=>h.id||0))+1:1;
 let currentVol = 0;
-let currentMainTab = 'plan';
+let currentMainTab = 'planTable';
 
 
 
@@ -5008,11 +5729,21 @@ function deleteCurrentYear(){
 // ================================================================
 function switchMainTab(tab){
   currentMainTab = tab;
-  ['plan','history','settings'].forEach(t=>{
-    document.getElementById('view_'+t).style.display = t===tab?'':'none';
-    document.getElementById('mainTab_'+t).className = 'main-tab'+(t===tab?' active':'');
+  ['plan','planTable','history','settings'].forEach(t=>{
+    const v = document.getElementById('view_'+t);
+    if(v) v.style.display = t===tab?'':'none';
+    const m = document.getElementById('mainTab_'+t);
+    if(m) m.className = 'main-tab'+(t===tab?' active':'');
   });
   if(tab==='plan') renderVolTabs();
+  if(tab==='planTable'){
+    // 12개월 표를 view_planTable로 이동 (v4-PLAN-WRAP이 처리)
+    if(typeof window.v4PlanWrapRefresh === 'function'){
+      window.v4PlanWrapRefresh();
+    }
+    // 표가 view_plan에서 렌더된 후 옮길 수 있도록 renderEqTable 한 번 호출
+    if(typeof renderEqTable === 'function') renderEqTable();
+  }
   if(tab==='history'){initMaintHistory();renderMaintHistory()}
   if(tab==='settings') renderSettings();
 }
@@ -9579,6 +10310,93 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     return {total, normal, pending, overdue};
   }
   
+  // 월별(1~12월) 실적 통계 - 올해 누적
+  function computeMonthlyStats(list){
+    const today = new Date();
+    const curMonth = today.getMonth() + 1;
+    const stats = [];
+    
+    for(let m = 1; m <= 12; m++){
+      let plannedEquips = 0;  // 계획 있는 설비 수
+      let doneEquips = 0;     // 완전히 완료된 설비 수
+      let lateEquips = 0;     // 계획 있는데 미완료(과거 월)
+      let partialEquips = 0;  // 일부만 완료
+      
+      for(const eq of list){
+        const plan = getPlanForEq(eq.id);
+        const checks = getChecksAll();
+        const monthPlan = plan[m] || {};
+        const plannedWeeks = [];
+        for(const w in monthPlan){
+          if(monthPlan[w] === true) plannedWeeks.push(parseInt(w));
+        }
+        if(plannedWeeks.length === 0) continue;  // 계획 없으면 스킵
+        
+        plannedEquips++;
+        let doneCount = 0;
+        for(const w of plannedWeeks){
+          const k = getCheckKeyFor(eq.id, m, w);
+          if(k && checks[k]) doneCount++;
+        }
+        
+        if(doneCount === plannedWeeks.length) doneEquips++;
+        else if(doneCount > 0) partialEquips++;
+        else if(m < curMonth) lateEquips++;
+        else if(m === curMonth) partialEquips++;  // 이번달 미완료는 진행중
+      }
+      
+      // 월별 상태 결정
+      let tone = 'none';
+      if(plannedEquips === 0) tone = 'none';
+      else if(m > curMonth) tone = 'none';  // 미래 = 예정
+      else if(doneEquips === plannedEquips) tone = 'done';
+      else if(lateEquips > 0) tone = 'late';
+      else tone = 'partial';
+      
+      stats.push({
+        month: m,
+        planned: plannedEquips,
+        done: doneEquips,
+        partial: partialEquips,
+        late: lateEquips,
+        tone: tone,
+        isNow: m === curMonth,
+        isFuture: m > curMonth
+      });
+    }
+    return stats;
+  }
+  
+  // 월별 라인 HTML 생성
+  function renderMonthlyRow(monthlyStats){
+    let cells = '';
+    for(const s of monthlyStats){
+      const classes = ['v4d-monthly-cell', 't-' + s.tone];
+      if(s.isNow) classes.push('is-now');
+      if(s.isFuture) classes.push('is-future');
+      
+      let badgeText = '';
+      let valText = '-';
+      if(s.planned === 0){
+        valText = '-';
+        badgeText = '';
+      } else {
+        valText = s.done + '/' + s.planned;
+        if(s.tone === 'done') badgeText = '완료';
+        else if(s.tone === 'late') badgeText = '지연';
+        else if(s.tone === 'partial') badgeText = s.isNow ? '진행' : '미완';
+        else if(s.isFuture) badgeText = '예정';
+      }
+      
+      cells += '<div class="' + classes.join(' ') + '" title="' + s.month + '월: 계획 ' + s.planned + '대, 완료 ' + s.done + '대' + (s.late > 0 ? ', 지연 ' + s.late + '대' : '') + '">'
+        + '<span class="m">' + s.month + '월</span>'
+        + '<span class="v">' + valText + '</span>'
+        + (badgeText ? '<span class="badge">' + badgeText + '</span>' : '')
+        + '</div>';
+    }
+    return '<div class="v4d-monthly-row">' + cells + '</div>';
+  }
+  
   // ----------------------------------------------------------
   // 렌더링
   // ----------------------------------------------------------
@@ -9629,6 +10447,8 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     
     const months = getThreeMonths();
     const stats = computeStats(list, months);
+    const monthlyStats = computeMonthlyStats(list);
+    const monthlyRowHtml = renderMonthlyRow(monthlyStats);
     
     const cards = list.map(eq => renderCard(eq, months)).join('');
     
@@ -9640,7 +10460,7 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
       +       '<span class="ico">📊</span>'
       +       '<div>'
       +         months.cur.y + '년 ' + months.cur.m + '월 점검 대시보드'
-      +         '<div class="v4d-section-sub">전월 · 이번달 · 다음달 · 카드 클릭하여 상세 보기</div>'
+      +         '<div class="v4d-section-sub">올해 월별 실적 + 전월 · 이번달 · 다음달 · 카드 클릭하여 상세 보기</div>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -9655,6 +10475,7 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
       +     '<button class="v4d-collapse-btn" onclick="(function(){ var g=document.querySelector(\'.v4d-section .v4d-grid\'); if(g) g.style.display = (g.style.display===\'none\'?\'\':\'none\'); })()" style="margin-left:8px">접기/펼치기</button>'
       +   '</div>'
       + '</div>'
+      + monthlyRowHtml
       + '<div class="v4d-legend">'
       +   '<span class="v4d-legend-item done">완료</span>'
       +   '<span class="v4d-legend-item pending">진행중</span>'
@@ -9744,55 +10565,76 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
 <!-- [v4-DASHBOARD END] -->
 
 <!-- ============================================================
-     [v4-PLAN-WRAP START] 12개월 보전계획표를 별도 토글 박스로 분리
+     [v4-PLAN-WRAP START] 12개월 보전계획표를 별도 서브 탭으로 이동
      ============================================================ -->
 <script>
 (function(){
   'use strict';
   
-  // 12개월 표(.eq-table-wrap)를 .v4plan-section 박스로 감싸기
-  function wrapPlanTable(){
+  // 현재 연도 가져오기 (제목 동적 생성용)
+  function getCurYearSafe(){
+    try{ if(window.__v4 && window.__v4.currentYear) return window.__v4.currentYear; }catch(_){}
+    try{
+      const raw = localStorage.getItem('cur_year_v3');
+      if(raw){ const n = parseInt(raw); if(!isNaN(n)) return n; }
+    }catch(_){}
+    return new Date().getFullYear();
+  }
+  
+  // 12개월 표(.eq-table-wrap)를 view_planTable로 이동 + 헤더 박스로 감싸기
+  function wrapAndMoveTable(){
     const tableWrap = document.querySelector('#pmPlanTab .eq-table-wrap');
+    const targetView = document.getElementById('view_planTable');
+    if(!targetView) return false;
     if(!tableWrap) return false;
-    // 이미 감쌌으면 skip (재감싸기 방지)
-    if(tableWrap.closest('.v4plan-section')) return true;
     
-    // 별도 섹션 컨테이너 생성
-    const section = document.createElement('div');
-    section.className = 'v4plan-section';
-    section.innerHTML =
-      '<div class="v4plan-section-head">'
-      + '<div>'
-      +   '<div class="v4plan-section-title">'
-      +     '<span class="ico">📋</span>'
-      +     '<div>12개월 보전계획표'
-      +       '<div class="v4plan-section-sub">전체 연간 점검 일정 · 셀 클릭으로 점검완료 처리 · 인쇄용</div>'
-      +     '</div>'
-      +   '</div>'
-      + '</div>'
-      + '<button class="v4plan-toggle" type="button">접기</button>'
-      + '</div>'
-      + '<div class="v4plan-body"></div>';
+    const cy = getCurYearSafe();
+    const tabLabelEl = document.getElementById('planTableTabLabel');
+    if(tabLabelEl) tabLabelEl.textContent = cy + '년 설비정기점검계획';
     
-    // 테이블을 새 컨테이너 body로 이동
+    // 이미 view_planTable 안에 있고 정상적으로 감싸졌으면 제목만 갱신
+    if(tableWrap.closest('#view_planTable') && tableWrap.closest('.v4plan-section')){
+      const titleNode = targetView.querySelector('.v4plan-section-title > div > div:first-child');
+      if(titleNode) titleNode.firstChild.textContent = cy + '년 설비정기점검계획';
+      return true;
+    }
+    
+    // 기존 분리 박스가 view_planTable에 있으면 그 안으로만 이동
+    let section = targetView.querySelector('.v4plan-section');
+    
+    if(!section){
+      // 새 박스 생성
+      section = document.createElement('div');
+      section.className = 'v4plan-section';
+      section.innerHTML =
+        '<div class="v4plan-section-head">'
+        + '<div>'
+        +   '<div class="v4plan-section-title">'
+        +     '<span class="ico">📅</span>'
+        +     '<div><span class="v4plan-title-year">' + cy + '</span>년 설비정기점검계획'
+        +       '<div class="v4plan-section-sub">전체 연간 점검 일정 · 셀 클릭으로 점검완료 처리 · 인쇄/결재용</div>'
+        +     '</div>'
+        +   '</div>'
+        + '</div>'
+        + '<button class="v4plan-toggle" type="button" onclick="window.print()">🖨️ 인쇄</button>'
+        + '</div>'
+        + '<div class="v4plan-body"></div>';
+      targetView.appendChild(section);
+    } else {
+      // 기존 박스의 제목 갱신
+      const yearSpan = section.querySelector('.v4plan-title-year');
+      if(yearSpan) yearSpan.textContent = cy;
+    }
+    
     const body = section.querySelector('.v4plan-body');
-    const parent = tableWrap.parentNode;
-    parent.insertBefore(section, tableWrap);
+    // 테이블을 박스 body로 이동
     body.appendChild(tableWrap);
     
-    // 토글 버튼 이벤트
-    const btn = section.querySelector('.v4plan-toggle');
-    btn.addEventListener('click', function(){
-      const hidden = body.style.display === 'none';
-      body.style.display = hidden ? '' : 'none';
-      btn.textContent = hidden ? '접기' : '펼치기';
-    });
-    
-    console.log('[v4-PLAN-WRAP] ✅ 12개월 보전계획표 별도 박스로 분리 완료');
+    console.log('[v4-PLAN-WRAP] ✅ 12개월 표를 ' + cy + '년 설비정기점검계획 탭으로 이동 완료');
     return true;
   }
   
-  // 재시도 로직 (보전계획표 탭이 나중에 활성화될 수 있음)
+  // 재시도 로직
   const RETRY_DELAYS = [400, 600, 1000, 1500, 2000, 2000, 2000, 2000, 2000, 2000];
   function tryWrap(attempt){
     attempt = attempt || 0;
@@ -9800,33 +10642,23 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
       console.warn('[v4-PLAN-WRAP] 최대 재시도 도달');
       return;
     }
-    const result = wrapPlanTable();
+    const result = wrapAndMoveTable();
     if(result === false){
       setTimeout(function(){ tryWrap(attempt + 1); }, RETRY_DELAYS[attempt]);
     }
   }
   
-  // renderEqTable 후킹 (테이블이 재생성될 때마다 다시 감싸기)
+  // renderEqTable 후킹 (테이블이 재생성되면 다시 이동)
   function hookRenderEqTable(){
     if(typeof window.renderEqTable === 'function' && !window.__v4pw_hooked){
       const _orig = window.renderEqTable;
       window.renderEqTable = function(){
         const r = _orig.apply(this, arguments);
-        // 테이블이 재렌더되면 v4plan-section 안에서 빠져나오므로 다시 감싸야 함
+        // 테이블이 view_plan에 새로 생기면 view_planTable로 옮겨야 함
         setTimeout(function(){
-          // 새 .eq-table-wrap이 .v4plan-section 밖에 생겼는지 확인
           const wrap = document.querySelector('#pmPlanTab .eq-table-wrap');
-          if(wrap && !wrap.closest('.v4plan-section')){
-            // 기존 분리 박스가 있으면 그 안으로 옮기기, 없으면 새로 생성
-            const existingSection = document.querySelector('.v4plan-section');
-            if(existingSection){
-              const body = existingSection.querySelector('.v4plan-body');
-              if(body){
-                body.appendChild(wrap);
-                return;
-              }
-            }
-            wrapPlanTable();
+          if(wrap && !wrap.closest('#view_planTable')){
+            wrapAndMoveTable();
           }
         }, 220);
         return r;
@@ -9842,15 +10674,16 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     setTimeout(function(){ tryWrap(0); }, 800);
   });
   
-  // 탭 전환 감지
+  // 탭 전환 시 (보전계획표 메인 탭 진입 / planTable 서브 탭 진입)
   document.addEventListener('click', function(e){
-    const target = e.target.closest('[onclick*="switchTopTab(\'plan\')"], [onclick*="switchMainTab(\'plan\')"]');
+    const target = e.target.closest('[onclick*="switchTopTab(\'plan\')"], [onclick*="switchMainTab(\'plan\')"], [onclick*="switchMainTab(\'planTable\')"]');
     if(target){
       setTimeout(function(){ tryWrap(0); }, 700);
     }
   });
   
-  window.v4PlanWrapRefresh = wrapPlanTable;
+  // 외부 호출용
+  window.v4PlanWrapRefresh = wrapAndMoveTable;
 })();
 </script>
 <!-- [v4-PLAN-WRAP END] -->
