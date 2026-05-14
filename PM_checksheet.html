@@ -1598,6 +1598,32 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
    [v4-FOCUS END]
    ============================================================ */
 
+/* 리비전 배지 (제목 옆) */
+.rev-badge{
+  display:inline-flex;
+  align-items:center;
+  font-size:12px;
+  font-weight:700;
+  padding:3px 10px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+  color:#fff;
+  letter-spacing:0.3px;
+  box-shadow:0 1px 3px rgba(29,78,216,0.3);
+  line-height:1.2;
+  white-space:nowrap;
+  vertical-align:middle;
+  position:relative;
+  top:-2px;
+}
+@media print{
+  .rev-badge{
+    background:#1d4ed8 !important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1607,8 +1633,11 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 <div class="page">
   <div class="page-header no-print">
     <div>
-      <h2>🔧 설비정기점검 기준 및 체크시트</h2>
-      <div class="subtitle">(주)태진다이텍 · 2026 프레스 설비 정기점검 매뉴얼 · ☁️ 클라우드 동기화 v3.0</div>
+      <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span>🔧 설비정기점검 기준 및 체크시트</span>
+        <span class="rev-badge" title="리비전 v3.0">v3.0</span>
+      </h2>
+      <div class="subtitle">(주)태진다이텍 · 2026 프레스 설비 정기점검 매뉴얼 · ☁️ 클라우드 동기화</div>
     </div>
     <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <span id="syncStatus" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:#f3f4f6;font-size:13px;font-weight:600;color:#6b7280" title="클릭하면 수동으로 동기화합니다">
@@ -9165,11 +9194,9 @@ try{
 
   // 메인 렌더 - 4개월 압축 뷰 섹션 생성
   function renderFocusView(){
-    console.log('[v4-FOCUS] renderFocusView called');
-    
     const tblWrap = document.querySelector('#pmPlanTab .eq-table-wrap');
     if(!tblWrap){
-      console.warn('[v4-FOCUS] .eq-table-wrap not found - 보전계획표가 아직 렌더되지 않음');
+      // 보전계획표가 아직 렌더 전 - 재시도 대기 (로그 생략)
       return false;
     }
     
@@ -9177,12 +9204,51 @@ try{
     const existing = document.querySelector('.v4f-section');
     if(existing) existing.remove();
     
-    // 설비 목록 가져오기
+    // 설비 목록 가져오기 (다단계 fallback)
     let list = [];
+    let dataSource = '';
     try{
       const cv = (typeof currentVol !== 'undefined') ? currentVol : (window.__v4 ? window.__v4.currentVol : 0);
-      let eq = (typeof EQUIP !== 'undefined') ? EQUIP : (window.__v4 ? window.__v4.EQUIP : null);
-      console.log('[v4-FOCUS] EQUIP=', eq && eq.length, 'currentVol=', cv);
+      
+      // 1순위: 전역 EQUIP 변수
+      let eq = (typeof EQUIP !== 'undefined' && EQUIP) ? EQUIP : null;
+      if(eq && Array.isArray(eq) && eq.length > 0){
+        dataSource = 'EQUIP';
+      } else {
+        eq = null;
+      }
+      
+      // 2순위: window.__v4.EQUIP
+      if(!eq && window.__v4 && window.__v4.EQUIP && window.__v4.EQUIP.length > 0){
+        eq = window.__v4.EQUIP;
+        dataSource = 'window.__v4.EQUIP';
+      }
+      
+      // 3순위: localStorage 직접 조회 (현재 연도) - LS.EQUIP 키 패턴 = `eq_master_${y}`
+      if(!eq){
+        try{
+          const cy = (typeof currentYear !== 'undefined') ? currentYear : new Date().getFullYear();
+          // LS 객체가 window에 노출되어 있으면 사용, 아니면 직접 키 패턴 사용
+          const lsKey = (window.LS && typeof window.LS.EQUIP === 'function')
+            ? window.LS.EQUIP(cy)
+            : ('eq_master_' + cy);
+          const raw = localStorage.getItem(lsKey);
+          if(raw){
+            const parsed = JSON.parse(raw);
+            if(Array.isArray(parsed) && parsed.length > 0){
+              eq = parsed;
+              dataSource = 'localStorage[' + lsKey + ']';
+            }
+          }
+        }catch(_){}
+      }
+      
+      // 4순위: DEFAULT_EQUIP (최후의 fallback)
+      if(!eq && typeof DEFAULT_EQUIP !== 'undefined' && Array.isArray(DEFAULT_EQUIP) && DEFAULT_EQUIP.length > 0){
+        eq = DEFAULT_EQUIP;
+        dataSource = 'DEFAULT_EQUIP (fallback)';
+      }
+      
       list = (eq && Array.isArray(eq))
         ? (cv === 0 ? eq : eq.filter(e => e.vol === cv))
         : [];
@@ -9190,11 +9256,16 @@ try{
       console.error('[v4-FOCUS] EQUIP 접근 실패', e);
     }
     
-    console.log('[v4-FOCUS] list.length=', list.length);
     if(list.length === 0){
-      console.warn('[v4-FOCUS] 설비 목록이 비어있음 - 포커스 뷰 생성 skip (재시도 대기)');
-      return false;  // ← 재시도 트리거
+      // 데이터가 정말 비어있는 경우 - 재시도 대기 (로그 1회만)
+      if(!window.__v4f_emptyLogged){
+        console.warn('[v4-FOCUS] 설비 목록 비어있음 - 재시도 대기');
+        window.__v4f_emptyLogged = true;
+      }
+      return false;  // 재시도 트리거
     }
+    // 성공 시 로그 플래그 리셋
+    window.__v4f_emptyLogged = false;
     
     const focus = getFocusMonths();
     const months = focus.months;
@@ -9252,7 +9323,7 @@ try{
     } else {
       tblWrap.insertAdjacentHTML('beforebegin', sectionHTML);
     }
-    console.log('[v4-FOCUS] ✅ 4개월 포커스 뷰 생성 성공');
+    console.log('[v4-FOCUS] ✅ 4개월 포커스 뷰 생성 성공 (dataSource=' + dataSource + ', list=' + list.length + ')');
     return true;
   }
 
@@ -9264,7 +9335,6 @@ try{
       setTimeout(function(){ tryRender(0); }, 100);  // 재시도 가능한 형태로 호출
       return r;
     };
-    console.log('[v4-FOCUS] renderEqTable hooked at script load');
   } else {
     document.addEventListener('DOMContentLoaded', function(){
       if(typeof window.renderEqTable === 'function'){
@@ -9274,16 +9344,17 @@ try{
           setTimeout(function(){ tryRender(0); }, 100);
           return r;
         };
-        console.log('[v4-FOCUS] renderEqTable hooked at DOMContentLoaded');
       }
     });
   }
   
   // 페이지 진입 시 + 재시도 로직 (보전계획표 탭이 나중에 보이는 경우 대비)
+  // 점진적 백오프: 빠르게 시작 → 점점 늘어남 (총 30회, 최대 약 30초)
+  const RETRY_DELAYS = [300, 300, 500, 500, 800, 800, 1000, 1000, 1500, 1500, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000];
   function tryRender(attempt){
     attempt = attempt || 0;
-    if(attempt > 15){
-      console.warn('[v4-FOCUS] 최대 재시도 도달 - 포기');
+    if(attempt >= RETRY_DELAYS.length){
+      console.warn('[v4-FOCUS] 최대 재시도 도달 - 포커스 뷰 생성 포기 (수동 새로고침 필요 시 window.v4FocusRefresh() 호출)');
       return;
     }
     
@@ -9291,8 +9362,11 @@ try{
     
     // false 반환했거나 .v4f-section이 안 그려진 경우 재시도
     if(result === false || !document.querySelector('.v4f-section')){
-      console.log(`[v4-FOCUS] 재시도 예약 (attempt=${attempt+1})`);
-      setTimeout(function(){ tryRender(attempt + 1); }, 600);
+      // 로그는 처음과 매 5회마다만 출력 (노이즈 축소)
+      if(attempt === 0 || (attempt + 1) % 5 === 0){
+        console.log('[v4-FOCUS] 재시도 중... (' + (attempt+1) + '/' + RETRY_DELAYS.length + ')');
+      }
+      setTimeout(function(){ tryRender(attempt + 1); }, RETRY_DELAYS[attempt]);
     }
   }
   
