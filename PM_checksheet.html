@@ -5987,6 +5987,20 @@ window.initPmPlan = function(){
   }catch(e){console.error('[PM_Plan init]', e);}
 };
 
+// [v4-FOCUS] 외부 스크립트 블록에서 접근 가능하도록 변수/함수를 window에 노출
+// ※ Object.defineProperty의 getter가 IIFE 내부 변수를 참조하므로 반드시 IIFE 안쪽에서 정의해야 함
+//   (밖에서 정의하면 ReferenceError 발생)
+window.__v4 = window.__v4 || {};
+Object.defineProperty(window.__v4, 'EQUIP', { get: function(){ return EQUIP; }, configurable: true });
+Object.defineProperty(window.__v4, 'currentVol', { get: function(){ return currentVol; }, configurable: true });
+Object.defineProperty(window.__v4, 'currentYear', { get: function(){ return currentYear; }, configurable: true });
+Object.defineProperty(window.__v4, 'checkData', { get: function(){ return checkData; }, configurable: true });
+window.__v4.getPlanFor = getPlanFor;
+window.__v4.getCheckKey = getCheckKey;
+// DEFAULT_EQUIP도 외부에서 접근 가능하도록 노출 (포커스 뷰 fallback용)
+window.__v4_DEFAULT_EQUIP = DEFAULT_EQUIP;
+console.log('[v4] 변수 노출 완료', window.__v4);
+
 })();
 
 
@@ -5996,17 +6010,6 @@ document.addEventListener('DOMContentLoaded', function(){
   // 체크시트 년도 UI 초기화
   if(typeof window.initChkYearUI==='function') window.initChkYearUI();
 });
-
-// [v4-FOCUS] 외부 스크립트 블록에서 접근 가능하도록 변수/함수를 window에 노출
-// (let으로 선언된 변수는 스크립트 블록 외부에서 접근 불가하므로)
-window.__v4 = window.__v4 || {};
-Object.defineProperty(window.__v4, 'EQUIP', { get: function(){ return EQUIP; }, configurable: true });
-Object.defineProperty(window.__v4, 'currentVol', { get: function(){ return currentVol; }, configurable: true });
-Object.defineProperty(window.__v4, 'currentYear', { get: function(){ return currentYear; }, configurable: true });
-Object.defineProperty(window.__v4, 'checkData', { get: function(){ return checkData; }, configurable: true });
-window.__v4.getPlanFor = getPlanFor;
-window.__v4.getCheckKey = getCheckKey;
-console.log('[v4] 변수 노출 완료', window.__v4);
 </script>
 
 <!-- ============== 📋 보고서결재 모듈 JS ============== -->
@@ -9204,56 +9207,82 @@ try{
     const existing = document.querySelector('.v4f-section');
     if(existing) existing.remove();
     
-    // 설비 목록 가져오기 (다단계 fallback)
+    // 설비 목록 가져오기 (다단계 fallback - 각 단계 독립 try-catch)
+    // ※ window.__v4.EQUIP / currentVol 은 원본 코드의 getter 버그(let이 IIFE 스코프에 갇힘)로
+    //    ReferenceError를 던질 수 있어 사용하지 않음. localStorage 직접 조회로 우회.
     let list = [];
     let dataSource = '';
+    let eq = null;
+    let cv = 0;
+    
+    // currentVol 결정: 전역 변수 → 기본값 0(전체)
     try{
-      const cv = (typeof currentVol !== 'undefined') ? currentVol : (window.__v4 ? window.__v4.currentVol : 0);
-      
-      // 1순위: 전역 EQUIP 변수
-      let eq = (typeof EQUIP !== 'undefined' && EQUIP) ? EQUIP : null;
-      if(eq && Array.isArray(eq) && eq.length > 0){
-        dataSource = 'EQUIP';
-      } else {
-        eq = null;
+      if(typeof currentVol !== 'undefined') cv = currentVol;
+    }catch(_){ cv = 0; }
+    
+    // 1순위: 전역 EQUIP 변수 (같은 스코프에서 접근 가능한 경우)
+    try{
+      if(typeof EQUIP !== 'undefined' && Array.isArray(EQUIP) && EQUIP.length > 0){
+        eq = EQUIP;
+        dataSource = 'EQUIP(global)';
       }
-      
-      // 2순위: window.__v4.EQUIP
-      if(!eq && window.__v4 && window.__v4.EQUIP && window.__v4.EQUIP.length > 0){
-        eq = window.__v4.EQUIP;
-        dataSource = 'window.__v4.EQUIP';
-      }
-      
-      // 3순위: localStorage 직접 조회 (현재 연도) - LS.EQUIP 키 패턴 = `eq_master_${y}`
-      if(!eq){
-        try{
-          const cy = (typeof currentYear !== 'undefined') ? currentYear : new Date().getFullYear();
-          // LS 객체가 window에 노출되어 있으면 사용, 아니면 직접 키 패턴 사용
-          const lsKey = (window.LS && typeof window.LS.EQUIP === 'function')
-            ? window.LS.EQUIP(cy)
-            : ('eq_master_' + cy);
-          const raw = localStorage.getItem(lsKey);
+    }catch(_){}
+    
+    // 2순위: localStorage 직접 조회 - 가장 신뢰성 높은 소스
+    if(!eq){
+      try{
+        let cy = 2026;
+        try{ if(typeof currentYear !== 'undefined') cy = currentYear; }catch(_){}
+        // LS.EQUIP 키 패턴 = `eq_master_${y}` (원본 코드 line 4349 참조)
+        const lsKey = 'eq_master_' + cy;
+        const raw = localStorage.getItem(lsKey);
+        if(raw){
+          const parsed = JSON.parse(raw);
+          if(Array.isArray(parsed) && parsed.length > 0){
+            eq = parsed;
+            dataSource = 'localStorage[' + lsKey + ']';
+          }
+        }
+      }catch(_){}
+    }
+    
+    // 3순위: 전년도 localStorage도 시도 (현재 연도가 없을 수 있음)
+    if(!eq){
+      try{
+        const years = JSON.parse(localStorage.getItem('eq_years_list') || '[2026]');
+        for(const y of years.sort((a,b)=>b-a)){
+          const raw = localStorage.getItem('eq_master_' + y);
           if(raw){
             const parsed = JSON.parse(raw);
             if(Array.isArray(parsed) && parsed.length > 0){
               eq = parsed;
-              dataSource = 'localStorage[' + lsKey + ']';
+              dataSource = 'localStorage[eq_master_' + y + ']';
+              break;
             }
           }
-        }catch(_){}
-      }
-      
-      // 4순위: DEFAULT_EQUIP (최후의 fallback)
-      if(!eq && typeof DEFAULT_EQUIP !== 'undefined' && Array.isArray(DEFAULT_EQUIP) && DEFAULT_EQUIP.length > 0){
-        eq = DEFAULT_EQUIP;
-        dataSource = 'DEFAULT_EQUIP (fallback)';
-      }
-      
+        }
+      }catch(_){}
+    }
+    
+    // 4순위: DEFAULT_EQUIP (최후의 fallback - window에 노출된 버전 사용)
+    if(!eq){
+      try{
+        const defEq = (typeof DEFAULT_EQUIP !== 'undefined') ? DEFAULT_EQUIP : window.__v4_DEFAULT_EQUIP;
+        if(defEq && Array.isArray(defEq) && defEq.length > 0){
+          eq = defEq;
+          dataSource = 'DEFAULT_EQUIP(fallback)';
+        }
+      }catch(_){}
+    }
+    
+    // 볼륨 필터링
+    try{
       list = (eq && Array.isArray(eq))
         ? (cv === 0 ? eq : eq.filter(e => e.vol === cv))
         : [];
     }catch(e){
-      console.error('[v4-FOCUS] EQUIP 접근 실패', e);
+      console.error('[v4-FOCUS] 필터링 실패', e);
+      list = [];
     }
     
     if(list.length === 0){
