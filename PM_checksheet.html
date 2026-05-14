@@ -2840,6 +2840,26 @@ table th{
   box-shadow:0 0 0 2px rgba(59,130,246,0.2) !important;
 }
 
+/* 모달의 점검자 선택 칩 (.v4-inspector-pick) */
+.v4-inspector-pick:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.15);
+  box-shadow:0 3px 8px rgba(0,0,0,0.3);
+}
+.v4-inspector-pick.selected{
+  outline:2px solid #fff;
+  outline-offset:2px;
+  transform:scale(1.05);
+}
+.v4-inspector-pick.ini-color-0{background:linear-gradient(135deg, #3b82f6, #1d4ed8)}
+.v4-inspector-pick.ini-color-1{background:linear-gradient(135deg, #10b981, #047857)}
+.v4-inspector-pick.ini-color-2{background:linear-gradient(135deg, #f59e0b, #b45309)}
+.v4-inspector-pick.ini-color-3{background:linear-gradient(135deg, #ef4444, #b91c1c)}
+.v4-inspector-pick.ini-color-4{background:linear-gradient(135deg, #8b5cf6, #6d28d9)}
+.v4-inspector-pick.ini-color-5{background:linear-gradient(135deg, #ec4899, #be185d)}
+.v4-inspector-pick.ini-color-6{background:linear-gradient(135deg, #14b8a6, #0f766e)}
+.v4-inspector-pick.ini-color-7{background:linear-gradient(135deg, #6366f1, #4338ca)}
+
 /* 폼 입력 요소 글로벌 강제 (어디에 있든 다크) */
 .controls input,
 .controls select,
@@ -6142,12 +6162,38 @@ function openAutoHistoryForm(eqId, month, week){
   const weekLabel = week==='w2'?'2주차':'4주차';
   const planSym = (currentPlan[eqId]&&currentPlan[eqId][String(month)]) ? currentPlan[eqId][String(month)][week] : '';
   const isSelfCheck = planSym==='■';
+  
+  // 등록된 점검자 마스터 가져오기
+  const inspectors = (typeof window.v4GetInspectors === 'function') ? window.v4GetInspectors() : [];
+  
+  // 점검자 칩 HTML 생성 (클릭하면 af_worker에 자동 입력)
+  let inspectorChipsHtml = '';
+  if(inspectors.length > 0){
+    const chips = inspectors.map(name => {
+      const ini = (typeof window.v4GetInitial === 'function') ? window.v4GetInitial(name) : name.slice(0,2);
+      const cIdx = (typeof window.v4GetColorIdx === 'function') ? window.v4GetColorIdx(name) : 0;
+      return `<span class="v4-inspector-pick ini-color-${cIdx}" 
+                    onclick="document.getElementById('af_worker').value='${name.replace(/'/g,"\\'")}';this.parentNode.querySelectorAll('.v4-inspector-pick').forEach(el=>el.classList.remove('selected'));this.classList.add('selected');" 
+                    title="${name}" 
+                    style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:20px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:transform .15s;user-select:none">
+                <span style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.25);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${ini}</span>
+                ${name}
+              </span>`;
+    }).join('');
+    inspectorChipsHtml = `<div class="mh-form-field" style="margin-bottom:14px">
+      <label style="color:#cbd5e1">👤 점검자 선택 (클릭하면 담당자 자동 입력)</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px;background:rgba(255,255,255,0.04);border:1px solid #334155;border-radius:8px">
+        ${chips}
+      </div>
+    </div>`;
+  }
 
-  let h = `<div class="mh-form-title">✓ 점검완료 + 보전이력 등록<button onclick="closeMaintForm()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">✕</button></div>`;
-  h += `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:14px;font-size:15px">
-    <b style="color:var(--accent)">${eq.id} · ${eq.name}</b>
-    <span style="color:var(--muted);font-size:14px">&nbsp;·&nbsp;${currentYear}년 ${month}월 ${weekLabel} ${isSelfCheck?'(자체점검)':''}</span>
+  let h = `<div class="mh-form-title">✓ 점검완료 + 보전이력 등록<button onclick="closeMaintForm()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#94a3b8">✕</button></div>`;
+  h += `<div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.4);border-radius:8px;padding:12px;margin-bottom:14px;font-size:15px;color:#cbd5e1">
+    <b style="color:#60a5fa">${eq.id} · ${eq.name}</b>
+    <span style="color:#94a3b8;font-size:14px">&nbsp;·&nbsp;${currentYear}년 ${month}월 ${weekLabel} ${isSelfCheck?'(자체점검)':''}</span>
   </div>`;
+  h += inspectorChipsHtml;
   h += `<div class="mh-form-grid">
     <div class="mh-form-field"><label>점검일자 *</label><input type="date" id="af_date" class="mh-input" value="${today}"></div>
     <div class="mh-form-field"><label>보전유형</label>
@@ -6157,7 +6203,7 @@ function openAutoHistoryForm(eqId, month, week){
         <option value="자체점검"${isSelfCheck?' selected':''}>자체점검</option>
       </select>
     </div>
-    <div class="mh-form-field"><label>담당자 *</label><input id="af_worker" class="mh-input" placeholder="예: 홍길동" value="${isSelfCheck?'자체':''}" autofocus></div>
+    <div class="mh-form-field"><label>담당자 * <span style="font-size:11px;color:#94a3b8;font-weight:400">(위 점검자 클릭 또는 직접 입력)</span></label><input id="af_worker" class="mh-input" placeholder="예: 홍길동" value="${isSelfCheck?'자체':''}"></div>
     <div class="mh-form-field"><label>소요시간 (h)</label><input type="number" step="0.5" id="af_hours" class="mh-input" placeholder="예: 1.0"></div>
     <div class="mh-form-field"><label>결과</label>
       <select id="af_result" class="mh-input">
@@ -6190,8 +6236,11 @@ function openAutoHistoryForm(eqId, month, week){
 }
 
 function confirmCheckOnly(eqId, month, week){
+  // 모달의 점검자 입력란에서 값 가져오기 (점검자 칩 클릭 또는 직접 입력)
+  const workerInput = document.getElementById('af_worker');
+  const worker = workerInput ? workerInput.value.trim() : '';
   const key = getCheckKey(eqId,month,week);
-  checkData[key] = {date: new Date().toISOString().slice(0,10), by:'', autoHistoryId: null};
+  checkData[key] = {date: new Date().toISOString().slice(0,10), by:worker, autoHistoryId: null};
   setChecks(currentYear, checkData);
   closeMaintForm();
   renderEqTable();
@@ -9692,6 +9741,11 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     const sz = size || 22;
     return `<span class="ini-badge ini-color-${cIdx}" title="${name}" style="width:${sz}px;height:${sz}px;font-size:${Math.floor(sz*0.45)}px">${ini}</span>`;
   };
+  
+  // 외부 호출용 노출 (모달 등에서 사용)
+  window.v4GetInspectors = getInspectors;
+  window.v4GetInitial = getInitial;
+  window.v4GetColorIdx = getColorIdx;
 
   // ===== 체크 데이터 호환 처리 (문자열 ↔ 객체) =====
   // 기존 데이터: "2026-05-14"  →  신규: {date:"2026-05-14", inspector:"김상기", memo:"..."}
