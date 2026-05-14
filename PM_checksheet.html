@@ -802,6 +802,802 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   body.appr-printing #tab-approval { display: block !important; padding: 0; }
 }
 
+/* ============================================================
+   [v4] 체크시트 디자인 개선 - 점검자 표시, 메모, 카드형 셀
+   ============================================================ */
+
+/* 체크 셀 - 카드형 디자인으로 업그레이드 */
+.chk-cell{
+  min-height:64px !important;
+  padding:8px 4px !important;
+  border-radius:8px !important;
+  position:relative;
+  background:#fff !important;
+  border:1.5px solid #e2e8f0 !important;
+  transition:all .2s cubic-bezier(.4,0,.2,1) !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.chk-cell:hover{
+  border-color:#3b82f6 !important;
+  background:#f0f9ff !important;
+  transform:translateY(-1px);
+  box-shadow:0 4px 8px rgba(59,130,246,.15);
+}
+.chk-cell.checked{
+  background:linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+  border-color:#10b981 !important;
+  box-shadow:0 2px 6px rgba(16,185,129,.18);
+}
+.chk-cell.checked:hover{
+  background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+}
+
+/* 체크박스는 숨김(셀 클릭으로 처리) */
+.chk-cell input[type=checkbox]{display:none !important}
+
+/* 셀 내부 라벨 */
+.chk-cell .lbl{
+  font-size:11px;
+  font-weight:700;
+  color:#64748b;
+  margin-bottom:3px;
+  letter-spacing:-.01em;
+}
+.chk-cell.checked .lbl{
+  color:#065f46;
+}
+
+/* 점검자 이니셜 아이콘 (체크된 셀 안에 표시) */
+.chk-inspector{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  margin-top:2px;
+}
+.chk-inspector .ini-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;height:22px;
+  border-radius:50%;
+  font-size:10px;
+  font-weight:800;
+  color:#fff;
+  letter-spacing:-.5px;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+  border:1.5px solid #fff;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.chk-cell .date{
+  font-size:11px !important;
+  font-weight:700 !important;
+  margin-top:1px !important;
+}
+.chk-cell.checked .date{
+  color:#065f46 !important;
+}
+.chk-cell .memo-dot{
+  position:absolute;
+  top:4px;
+  right:4px;
+  width:8px;height:8px;
+  border-radius:50%;
+  background:#f59e0b;
+  box-shadow:0 1px 3px rgba(245,158,11,.4);
+}
+
+/* 빈 셀 표시 */
+.chk-cell:not(.checked) .chk-inspector{display:none}
+
+/* ===== 체크 입력 모달 ===== */
+.v4-modal-bg{
+  position:fixed;inset:0;
+  background:rgba(15,23,42,.6);
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  backdrop-filter:blur(2px);
+}
+.v4-modal-bg.open{display:flex}
+.v4-modal{
+  background:#fff;
+  border-radius:16px;
+  width:100%;
+  max-width:440px;
+  max-height:90vh;
+  overflow-y:auto;
+  box-shadow:0 25px 50px -12px rgba(0,0,0,.3);
+  animation:v4ModalIn .25s cubic-bezier(.4,0,.2,1);
+}
+@keyframes v4ModalIn{
+  from{opacity:0;transform:translateY(20px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.v4-modal-header{
+  padding:20px 22px 16px;
+  border-bottom:1px solid #e2e8f0;
+  display:flex;align-items:center;gap:12px;
+}
+.v4-modal-header .icon{
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  flex-shrink:0;
+}
+.v4-modal-header h3{
+  font-size:17px;font-weight:800;color:#0f172a;
+  margin:0;letter-spacing:-.01em;
+}
+.v4-modal-header .sub{
+  font-size:12px;color:#64748b;margin-top:2px;font-weight:600;
+}
+.v4-modal-header .close-btn{
+  margin-left:auto;
+  background:none;border:none;
+  width:32px;height:32px;border-radius:8px;
+  color:#94a3b8;font-size:20px;cursor:pointer;
+  transition:background .15s;
+}
+.v4-modal-header .close-btn:hover{background:#f1f5f9}
+
+.v4-modal-body{padding:18px 22px 22px}
+.v4-field{margin-bottom:16px}
+.v4-field label{
+  display:block;
+  font-size:12px;
+  font-weight:700;
+  color:#475569;
+  margin-bottom:6px;
+  letter-spacing:-.01em;
+}
+.v4-field label .req{color:#ef4444;margin-left:3px}
+.v4-field input[type=text], .v4-field input[type=date], .v4-field select, .v4-field textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1.5px solid #e2e8f0;
+  border-radius:8px;
+  font-size:14px;
+  font-family:inherit;
+  background:#fff;
+  color:#0f172a;
+  transition:border-color .15s, box-shadow .15s;
+}
+.v4-field input:focus, .v4-field select:focus, .v4-field textarea:focus{
+  outline:none;
+  border-color:#3b82f6;
+  box-shadow:0 0 0 3px rgba(59,130,246,.12);
+}
+.v4-field textarea{resize:vertical;min-height:60px;line-height:1.5}
+.v4-field .hint{
+  font-size:11px;color:#94a3b8;margin-top:4px;
+}
+
+/* 점검자 칩 (모달 안) */
+.v4-inspector-chips{
+  display:flex;flex-wrap:wrap;gap:6px;
+}
+.v4-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;
+  background:#f1f5f9;
+  border:1.5px solid #e2e8f0;
+  border-radius:20px;
+  font-size:13px;font-weight:600;color:#334155;
+  cursor:pointer;
+  transition:all .15s;
+}
+.v4-chip:hover{background:#e0e7ff;border-color:#6366f1;color:#4338ca}
+.v4-chip.selected{
+  background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-color:#1d4ed8;
+  color:#fff;
+  box-shadow:0 2px 4px rgba(59,130,246,.3);
+}
+.v4-chip .ini-mini{
+  width:18px;height:18px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:800;color:#fff;
+}
+
+/* 모달 푸터 */
+.v4-modal-footer{
+  display:flex;gap:8px;
+  padding:14px 22px;
+  border-top:1px solid #e2e8f0;
+  background:#f8fafc;
+  border-radius:0 0 16px 16px;
+}
+.v4-btn{
+  flex:1;
+  padding:11px 16px;
+  border:none;border-radius:8px;
+  font-size:14px;font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+  transition:all .15s;
+}
+.v4-btn-primary{
+  background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color:#fff;
+  box-shadow:0 2px 4px rgba(59,130,246,.25);
+}
+.v4-btn-primary:hover{
+  box-shadow:0 4px 8px rgba(59,130,246,.35);
+  transform:translateY(-1px);
+}
+.v4-btn-danger{
+  background:#fff;color:#dc2626;
+  border:1.5px solid #fecaca;
+}
+.v4-btn-danger:hover{background:#fef2f2;border-color:#ef4444}
+.v4-btn-ghost{
+  background:#fff;color:#64748b;
+  border:1.5px solid #e2e8f0;
+}
+.v4-btn-ghost:hover{background:#f1f5f9}
+
+/* 점검자 마스터 관리 - 설정 섹션 */
+.v4-inspector-manage{
+  background:#fff;
+  border:1.5px solid #e2e8f0;
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:14px;
+}
+.v4-inspector-manage h4{
+  font-size:15px;font-weight:800;
+  color:#0f172a;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+  letter-spacing:-.01em;
+}
+.v4-inspector-list{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:12px;
+}
+.v4-inspector-card{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 10px 8px 8px;
+  background:#f8fafc;
+  border:1.5px solid #e2e8f0;
+  border-radius:24px;
+  font-size:13px;font-weight:700;color:#1e293b;
+}
+.v4-inspector-card .remove-btn{
+  background:none;border:none;
+  color:#94a3b8;
+  width:20px;height:20px;border-radius:50%;
+  cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;
+  font-size:14px;
+  transition:background .15s, color .15s;
+}
+.v4-inspector-card .remove-btn:hover{background:#fee2e2;color:#dc2626}
+.v4-inspector-form{
+  display:flex;gap:8px;
+  align-items:center;
+}
+.v4-inspector-form input{
+  flex:1;
+  padding:8px 12px;
+  border:1.5px solid #e2e8f0;
+  border-radius:8px;
+  font-size:14px;
+  font-family:inherit;
+}
+.v4-inspector-form input:focus{
+  outline:none;border-color:#3b82f6;
+}
+
+/* 점검자별 색상 (자동 할당) */
+.ini-color-0{background:linear-gradient(135deg, #3b82f6, #1d4ed8)}
+.ini-color-1{background:linear-gradient(135deg, #10b981, #047857)}
+.ini-color-2{background:linear-gradient(135deg, #f59e0b, #b45309)}
+.ini-color-3{background:linear-gradient(135deg, #ef4444, #b91c1c)}
+.ini-color-4{background:linear-gradient(135deg, #8b5cf6, #6d28d9)}
+.ini-color-5{background:linear-gradient(135deg, #ec4899, #be185d)}
+.ini-color-6{background:linear-gradient(135deg, #14b8a6, #0f766e)}
+.ini-color-7{background:linear-gradient(135deg, #6366f1, #4338ca)}
+
+/* 인쇄 시 모달 숨김 */
+@media print{
+  .v4-modal-bg{display:none !important}
+}
+/* ============================================================
+   [v4 END]
+   ============================================================ */
+
+/* ============================================================
+   [v4-PLAN] 보전계획표 개선 - KPI 카드, 현재월 강조, 점검자 이니셜, 지연/임박 칩
+   ============================================================ */
+
+/* KPI 카드 영역 */
+.v4p-kpi-row{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:12px;
+  margin:0 0 18px 0;
+}
+@media (max-width: 720px){
+  .v4p-kpi-row{grid-template-columns:repeat(2, 1fr);gap:8px}
+}
+.v4p-kpi{
+  background:#fff;
+  border:1.5px solid #e2e8f0;
+  border-radius:12px;
+  padding:14px 16px 14px 20px;  /* 좌측 padding 늘려서 색상 줄무늬와 안 겹치게 */
+  position:relative;
+  overflow:hidden;
+  transition:transform .2s, box-shadow .2s;
+  min-width:0;  /* grid 셀에서 글자 잘림 방지 */
+}
+.v4p-kpi:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.v4p-kpi::before{
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:4px;
+  background:var(--kpi-color, #3b82f6);
+}
+.v4p-kpi[data-tone="plan"]   {--kpi-color:#3b82f6;--kpi-bg:#eff6ff}
+.v4p-kpi[data-tone="done"]   {--kpi-color:#16a34a;--kpi-bg:#f0fdf4}
+.v4p-kpi[data-tone="late"]   {--kpi-color:#dc2626;--kpi-bg:#fef2f2}
+.v4p-kpi[data-tone="soon"]   {--kpi-color:#d97706;--kpi-bg:#fffbeb}
+
+.v4p-kpi .label{
+  font-size:12px;
+  color:#64748b;
+  font-weight:700;
+  display:flex;align-items:center;gap:6px;
+  letter-spacing:-.01em;
+}
+.v4p-kpi .label .ico{
+  width:22px;height:22px;
+  border-radius:6px;
+  background:var(--kpi-bg, #f1f5f9);
+  color:var(--kpi-color);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:13px;
+}
+.v4p-kpi .value{
+  font-size:26px;
+  font-weight:800;
+  color:var(--kpi-color);
+  margin-top:4px;
+  letter-spacing:-.02em;
+  line-height:1;
+}
+.v4p-kpi .sub{
+  font-size:11px;
+  color:#94a3b8;
+  font-weight:600;
+  margin-top:3px;
+}
+
+/* 현재 월 컬럼 강조 */
+#pmPlanTab .eq-table th.v4p-current-month,
+#pmPlanTab .eq-table td.v4p-current-month{
+  background:#e0f2fe !important;
+  position:relative;
+}
+#pmPlanTab .eq-table thead tr:first-child th.v4p-current-month{
+  background:#0284c7 !important;
+  color:#fff !important;
+  font-weight:800;
+}
+#pmPlanTab .eq-table thead tr:first-child th.v4p-current-month::after{
+  content:'NOW';
+  font-size:9px;
+  display:block;
+  margin-top:2px;
+  letter-spacing:1px;
+  opacity:.85;
+}
+
+/* 점검 완료 셀의 점검자 이니셜 배지 */
+#pmPlanTab .plan-cell .v4p-inspector{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:2px 6px 2px 2px;
+  background:#dcfce7;
+  border-radius:10px;
+  margin-top:2px;
+  border:1px solid #86efac;
+}
+#pmPlanTab .plan-cell .v4p-inspector .ini{
+  display:inline-flex;
+  align-items:center;justify-content:center;
+  width:16px;height:16px;
+  border-radius:50%;
+  font-size:8px;font-weight:800;
+  color:#fff;letter-spacing:-.5px;
+  flex-shrink:0;
+}
+#pmPlanTab .plan-cell .v4p-inspector .date-mini{
+  font-size:10px;font-weight:700;
+  color:#065f46;line-height:1;
+}
+
+/* 지연/임박 칩 (이번 달 미완료 셀에 표시) */
+#pmPlanTab .plan-cell .v4p-warn{
+  display:inline-flex;
+  align-items:center;gap:3px;
+  padding:3px 7px;
+  border-radius:10px;
+  font-size:10px;
+  font-weight:700;
+  line-height:1;
+  white-space:nowrap;
+}
+#pmPlanTab .plan-cell .v4p-warn.late{
+  background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;
+}
+#pmPlanTab .plan-cell .v4p-warn.soon{
+  background:#fef3c7;color:#92400e;border:1px solid #fbbf24;
+}
+
+/* 설비별 상태 바 (진행 컬럼에 표시) */
+#pmPlanTab .eq-table td .v4p-progress{
+  display:flex;flex-direction:column;gap:3px;
+  min-width:55px;
+}
+#pmPlanTab .eq-table td .v4p-progress .bar{
+  height:5px;
+  background:#f1f5f9;
+  border-radius:3px;
+  overflow:hidden;
+}
+#pmPlanTab .eq-table td .v4p-progress .bar > div{
+  height:100%;
+  border-radius:3px;
+  transition:width .4s ease;
+}
+#pmPlanTab .eq-table td .v4p-progress .txt{
+  font-size:10px;font-weight:800;
+  text-align:center;
+  line-height:1;
+}
+
+/* 색상 인디케이터 (위험 설비 좌측 표시) */
+#pmPlanTab .eq-table tbody tr.v4p-risk{
+  background:linear-gradient(90deg, #fee2e2 0%, #fff 4%);
+}
+#pmPlanTab .eq-table tbody tr.v4p-warn{
+  background:linear-gradient(90deg, #fef3c7 0%, #fff 4%);
+}
+
+/* 인쇄 시 KPI 카드 숨김 (인쇄용은 기존 그대로) */
+@media print{
+  .v4p-kpi-row{display:none !important}
+  #pmPlanTab .v4p-current-month{background:none !important;color:#000 !important}
+  #pmPlanTab .eq-table thead tr:first-child th.v4p-current-month::after{display:none}
+  #pmPlanTab .v4p-warn{border:none !important}
+}
+/* ============================================================
+   [v4-PLAN END]
+   ============================================================ */
+
+/* ============================================================
+   [v4-FOCUS] 4개월 압축 포커스 뷰 - 전월/현재/+1/+2
+   ============================================================ */
+
+.v4f-section{
+  background:#fff;
+  border:1.5px solid #e2e8f0;
+  border-radius:14px;
+  padding:18px 20px 16px;
+  margin:0 0 20px 0;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.v4f-section-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.v4f-section-title{
+  font-size:16px;
+  font-weight:800;
+  color:#0f172a;
+  letter-spacing:-.01em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:1;
+}
+.v4f-section-title .ico{
+  width:28px;height:28px;
+  border-radius:8px;
+  background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color:#fff;
+  display:inline-flex;
+  align-items:center;justify-content:center;
+  font-size:14px;
+  box-shadow:0 2px 6px rgba(59,130,246,.3);
+}
+.v4f-section-sub{
+  font-size:12px;
+  color:#64748b;
+  font-weight:600;
+}
+.v4f-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;
+  background:#f1f5f9;
+  border:1px solid #e2e8f0;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+  color:#475569;
+  cursor:pointer;
+  transition:all .15s;
+}
+.v4f-toggle:hover{background:#e0e7ff;border-color:#6366f1;color:#4338ca}
+
+.v4f-table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  border-radius:10px;
+  border:1px solid #e2e8f0;
+}
+.v4f-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+  min-width:680px;
+  background:#fff;
+}
+.v4f-table thead th{
+  background:#f8fafc;
+  font-weight:700;
+  color:#334155;
+  padding:12px 10px;
+  text-align:center;
+  border-bottom:1.5px solid #e2e8f0;
+  font-size:14px;
+  letter-spacing:-.01em;
+}
+.v4f-table th.v4f-id,
+.v4f-table th.v4f-name{
+  text-align:left;
+  padding-left:16px;
+}
+.v4f-table th.v4f-name{width:130px}
+.v4f-table th.v4f-id{width:60px}
+.v4f-table th.v4f-status{width:140px;text-align:center;padding:12px 10px}
+
+/* 월 헤더 색상 - 미리보기와 동일 */
+.v4f-table th.v4f-month-prev{
+  background:#fef3c7 !important;
+  color:#854d0e !important;
+}
+.v4f-table th.v4f-month-cur{
+  background:#dbeafe !important;
+  color:#1e40af !important;
+  font-weight:800;
+  border-bottom:2px solid #2563eb !important;
+}
+.v4f-table th.v4f-month-cur::after{
+  content:'●NOW';
+  display:inline-block;
+  margin-left:6px;
+  font-size:10px;
+  font-weight:800;
+  color:#2563eb;
+  vertical-align:1px;
+}
+.v4f-table th.v4f-month-next,
+.v4f-table th.v4f-month-future{
+  background:#fafbfc !important;
+  color:#475569 !important;
+}
+
+/* 셀 내부 - 2주/4주 칩들 가로로 나열 */
+.v4f-cell-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  min-height:32px;
+  justify-content:center;
+}
+
+/* 본문 셀 */
+.v4f-table tbody tr{
+  border-bottom:1px solid #f1f5f9;
+  transition:background .15s;
+}
+.v4f-table tbody tr:hover{background:#f8fafc}
+.v4f-table td{
+  padding:12px 10px;
+  text-align:center;
+  vertical-align:middle;
+  font-size:14px;
+}
+.v4f-table td.v4f-id{
+  text-align:left;
+  padding-left:16px;
+  color:#2563eb;
+  font-weight:700;
+  cursor:pointer;
+}
+.v4f-table td.v4f-id:hover{text-decoration:underline}
+.v4f-table td.v4f-name{
+  text-align:left;
+  padding-left:16px;
+  color:#1e293b;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* 셀 컬러 배경 (현재월 강조) */
+.v4f-table td.v4f-cell-cur{
+  background:#eff6ff;
+}
+.v4f-table td.v4f-cell-prev{
+  background:#fffbeb;
+}
+
+/* 상태 진행 바 */
+.v4f-status-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.v4f-status-bar .bar{
+  flex:1;
+  height:6px;
+  background:#f1f5f9;
+  border-radius:3px;
+  overflow:hidden;
+  min-width:60px;
+}
+.v4f-status-bar .bar > div{
+  height:100%;
+  border-radius:3px;
+  transition:width .4s ease;
+}
+.v4f-status-bar .pct{
+  font-size:11px;
+  font-weight:800;
+  min-width:36px;
+  text-align:right;
+  letter-spacing:-.02em;
+}
+
+/* 점검 완료 칩 (이니셜 + 날짜) */
+.v4f-done-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 9px 4px 4px;
+  background:linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border:1px solid #6ee7b7;
+  border-radius:14px;
+  cursor:pointer;
+  transition:transform .15s, box-shadow .15s;
+}
+.v4f-done-chip:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 8px rgba(16,185,129,.2);
+}
+.v4f-done-chip .ini-circle{
+  width:20px;height:20px;
+  border-radius:50%;
+  color:#fff;
+  font-size:9px;
+  font-weight:800;
+  display:inline-flex;
+  align-items:center;justify-content:center;
+  letter-spacing:-.5px;
+  border:1.5px solid #fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.1);
+}
+.v4f-done-chip .date-txt{
+  font-size:11px;
+  font-weight:800;
+  color:#065f46;
+  letter-spacing:-.02em;
+}
+
+/* 미완료 - 계획 있음 (빈 체크박스) */
+.v4f-empty-plan{
+  display:inline-flex;
+  align-items:center;justify-content:center;
+  width:32px;height:24px;
+  border:1.5px dashed #cbd5e1;
+  border-radius:6px;
+  color:#94a3b8;
+  font-size:14px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.v4f-empty-plan:hover{
+  border-color:#3b82f6;
+  border-style:solid;
+  background:#eff6ff;
+  color:#3b82f6;
+}
+
+/* 자체점검 (빨간 사각형) */
+.v4f-self-check{
+  display:inline-flex;
+  align-items:center;justify-content:center;
+  width:32px;height:24px;
+  background:#fee2e2;
+  border:1.5px solid #fca5a5;
+  border-radius:6px;
+  color:#dc2626;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+  transition:all .15s;
+}
+.v4f-self-check:hover{
+  background:#fecaca;
+  transform:translateY(-1px);
+}
+
+/* 지연/임박 알림 칩 */
+.v4f-warn-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 10px;
+  border-radius:14px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:-.01em;
+  cursor:pointer;
+  transition:transform .15s;
+}
+.v4f-warn-chip:hover{transform:translateY(-1px)}
+.v4f-warn-chip.late{
+  background:#fef2f2;
+  color:#991b1b;
+  border:1.5px solid #fca5a5;
+}
+.v4f-warn-chip.soon{
+  background:#fffbeb;
+  color:#92400e;
+  border:1.5px solid #fbbf24;
+}
+.v4f-warn-chip .ico{font-size:12px}
+
+/* 빈 셀 (계획 없음) */
+.v4f-cell-empty{
+  color:#cbd5e1;
+  font-size:11px;
+}
+
+/* 인쇄 시 포커스 뷰 숨김 (인쇄는 기존 12개월 표 사용) */
+@media print{
+  .v4f-section{display:none !important}
+}
+
+/* 모바일 */
+@media (max-width: 720px){
+  .v4f-section{padding:14px 14px 12px;border-radius:10px}
+  .v4f-section-title{font-size:15px}
+  .v4f-table{font-size:12px;min-width:600px}
+  .v4f-table td{padding:9px 4px}
+  .v4f-done-chip{padding:3px 7px 3px 3px}
+  .v4f-done-chip .ini-circle{width:18px;height:18px;font-size:8px}
+  .v4f-done-chip .date-txt{font-size:10px}
+}
+/* ============================================================
+   [v4-FOCUS END]
+   ============================================================ */
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -2365,25 +3161,33 @@ function saveChks(key, obj){
   localStorage.setItem(chkStoreKey(key), JSON.stringify(obj));
 }
 function toggleChk(ckey, cellEl){
-  // 현재 설비 key 추출 (ckey 형식: "eqKey|type|idx|period")
+  // [v4 패치] 모달을 열어 점검자/메모 입력받기
+  // 원본 즉시 토글 동작 → 모달 기반으로 변경
+  if(typeof window.v4OpenModal === 'function'){
+    // 체크박스 클릭 이벤트가 부모로 전파된 경우 자기 부모 div 사용
+    if(cellEl && cellEl.tagName === 'INPUT'){
+      cellEl = cellEl.parentElement;
+    }
+    window.v4OpenModal(ckey, cellEl);
+    return;
+  }
+  // === v4 모듈 미로드 시 fallback (원본 동작) ===
   const eqKey = ckey.split('|')[0];
   const data = loadChks(eqKey);
   const cb = cellEl.querySelector('input[type=checkbox]');
   const dateDiv = cellEl.querySelector('.date');
   if(data[ckey]){
-    // 해제
     delete data[ckey];
     cellEl.classList.remove('checked');
     cb.checked = false;
     dateDiv.textContent = '';
   } else {
-    // 체크 + 오늘 날짜 저장
     const today = new Date();
     const ymd = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
     data[ckey] = ymd;
     cellEl.classList.add('checked');
     cb.checked = true;
-    dateDiv.textContent = ymd.substring(5); // MM-DD만 표시
+    dateDiv.textContent = ymd.substring(5);
   }
   saveChks(eqKey, data);
 }
@@ -2571,75 +3375,7 @@ function buildSettings(){
     '</div>'+
   '</div>';
 
-  // 2. ntfy
-  h+='<div class="stg-panel orange">'+
-    '<div class="stg-title">🔔 ntfy 알림</div>'+
-    '<div class="stg-hint">발송 조건: <b>저장 시</b> 또는 <b>NG 발생 시</b>. <span style="color:var(--orange)">⚠ Title/Tag는 영문, 본문(body)만 한글</span> (인코딩 이슈 회피)</div>'+
-    '<div id="ntfyList" class="stg-list"></div>'+
-    '<div class="stg-row r4">'+
-      '<input id="newNtfyTopic" class="stg-input" placeholder="Topic (예: pm_alert_kim)">'+
-      '<input id="newNtfyLabel" class="stg-input" placeholder="이름(설명)">'+
-      '<select id="newNtfyCond" class="stg-input"><option value="save">저장 시</option><option value="ng">NG 발생 시</option><option value="both">둘 다</option></select>'+
-      '<button class="stg-btn-primary orange" onclick="addNtfyRule()">+ 추가</button>'+
-    '</div>'+
-    '<div class="stg-action-bar">'+
-      '<button class="stg-btn" onclick="testNtfyAll()">🔔 테스트 발송</button>'+
-      '<span id="ntfyStatus" class="stg-status"></span>'+
-    '</div>'+
-  '</div>';
-
-  // 3. 텔레그램
-  h+='<div class="stg-panel purple">'+
-    '<div class="stg-title">📨 텔레그램 알림</div>'+
-    '<div class="stg-field"><label>Bot Token (읽기전용 · 마스킹)</label>'+
-      '<input class="stg-input" value="'+_esc(_mask(_getTgToken()))+'" readonly></div>'+
-    '<div class="stg-hint">수신자별 Chat ID와 발송 조건을 등록합니다.</div>'+
-    '<div id="tgList" class="stg-list"></div>'+
-    '<div class="stg-row r4">'+
-      '<input id="newTgName" class="stg-input" placeholder="이름 (예: 김상기)">'+
-      '<input id="newTgChatId" class="stg-input" placeholder="Chat ID (예: 8317824579)">'+
-      '<select id="newTgCond" class="stg-input"><option value="save">저장 시</option><option value="ng">NG 발생 시</option><option value="both">둘 다</option></select>'+
-      '<button class="stg-btn-primary purple" onclick="addTgRule()">+ 추가</button>'+
-    '</div>'+
-    '<div class="stg-action-bar">'+
-      '<button class="stg-btn" onclick="testTelegramAll()">📨 테스트 발송</button>'+
-      '<span id="tgStatus" class="stg-status"></span>'+
-    '</div>'+
-  '</div>';
-
-  // 4. 디스코드
-  h+='<div class="stg-panel discord">'+
-    '<div class="stg-title">💬 디스코드 알림</div>'+
-    '<div class="stg-hint">채널별 Webhook URL과 발송 조건을 등록합니다.</div>'+
-    '<div id="dcList" class="stg-list"></div>'+
-    '<div class="stg-row r5">'+
-      '<input id="newDcLabel" class="stg-input" placeholder="채널 이름">'+
-      '<input id="newDcHook" class="stg-input" type="password" placeholder="https://discord.com/api/webhooks/...">'+
-      '<select id="newDcCond" class="stg-input"><option value="save">저장 시</option><option value="ng">NG 발생 시</option><option value="both">둘 다</option></select>'+
-      '<button class="stg-btn-primary discord" onclick="addDcRule()">+ 추가</button>'+
-    '</div>'+
-    '<div class="stg-action-bar">'+
-      '<button class="stg-btn" onclick="testDiscordAll()">💬 테스트 발송</button>'+
-      '<span id="dcStatus" class="stg-status"></span>'+
-    '</div>'+
-  '</div>';
-
-  // 5. 메일
-  h+='<div class="stg-panel red">'+
-    '<div class="stg-title">📧 메일 알림</div>'+
-    '<div class="stg-hint">Supabase Edge Function <code>send-mail</code> 연동. 수신자별 조건 등록.</div>'+
-    '<div id="mailList" class="stg-list"></div>'+
-    '<div class="stg-row r4">'+
-      '<input id="newMailName" class="stg-input" placeholder="이름">'+
-      '<input id="newMailAddr" class="stg-input" type="email" placeholder="이메일 주소">'+
-      '<select id="newMailCond" class="stg-input"><option value="save">저장 시</option><option value="ng">NG 발생 시</option><option value="both">둘 다</option></select>'+
-      '<button class="stg-btn-primary red" onclick="addMailRule()">+ 추가</button>'+
-    '</div>'+
-    '<div class="stg-action-bar">'+
-      '<button class="stg-btn" onclick="testMailAll()">📧 테스트 발송</button>'+
-      '<span id="mailStatus" class="stg-status"></span>'+
-    '</div>'+
-  '</div>';
+  // [v4] 알림 4개 섹션(ntfy/텔레그램/디스코드/메일) 삭제됨
 
   // 6. Supabase 설정
   h+='<div class="stg-panel teal">'+
@@ -5231,6 +5967,17 @@ document.addEventListener('DOMContentLoaded', function(){
   // 체크시트 년도 UI 초기화
   if(typeof window.initChkYearUI==='function') window.initChkYearUI();
 });
+
+// [v4-FOCUS] 외부 스크립트 블록에서 접근 가능하도록 변수/함수를 window에 노출
+// (let으로 선언된 변수는 스크립트 블록 외부에서 접근 불가하므로)
+window.__v4 = window.__v4 || {};
+Object.defineProperty(window.__v4, 'EQUIP', { get: function(){ return EQUIP; }, configurable: true });
+Object.defineProperty(window.__v4, 'currentVol', { get: function(){ return currentVol; }, configurable: true });
+Object.defineProperty(window.__v4, 'currentYear', { get: function(){ return currentYear; }, configurable: true });
+Object.defineProperty(window.__v4, 'checkData', { get: function(){ return checkData; }, configurable: true });
+window.__v4.getPlanFor = getPlanFor;
+window.__v4.getCheckKey = getCheckKey;
+console.log('[v4] 변수 노출 완료', window.__v4);
 </script>
 
 <!-- ============== 📋 보고서결재 모듈 JS ============== -->
@@ -7470,5 +8217,1097 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
 
 })();
 </script>
+
+<!-- ============================================================
+     [v4] 체크시트 개선 - 점검자/메모 입력 모달 + 점검자 마스터 관리
+     ============================================================ -->
+
+<!-- 체크 입력 모달 -->
+<div class="v4-modal-bg" id="v4ModalBg" onclick="if(event.target===this)v4CloseModal()">
+  <div class="v4-modal">
+    <div class="v4-modal-header">
+      <div class="icon">✓</div>
+      <div style="flex:1">
+        <h3 id="v4ModalTitle">점검 완료 등록</h3>
+        <div class="sub" id="v4ModalSub">설비명 · 점검 항목</div>
+      </div>
+      <button class="close-btn" onclick="v4CloseModal()" aria-label="닫기">✕</button>
+    </div>
+    <div class="v4-modal-body">
+      <div class="v4-field">
+        <label>점검일자 <span class="req">*</span></label>
+        <input type="date" id="v4Date" />
+      </div>
+      <div class="v4-field">
+        <label>점검자 <span class="req">*</span></label>
+        <div class="v4-inspector-chips" id="v4InspectorChips">
+          <!-- 동적 생성 -->
+        </div>
+        <div class="hint">※ 점검자 목록은 설정 → 점검자 관리에서 추가/수정 가능합니다</div>
+      </div>
+      <div class="v4-field">
+        <label>점검 의견 / 메모</label>
+        <textarea id="v4Memo" placeholder="이상 사항, 조치 내역, 특이사항 등을 입력하세요 (선택)"></textarea>
+      </div>
+    </div>
+    <div class="v4-modal-footer">
+      <button class="v4-btn v4-btn-danger" id="v4DeleteBtn" onclick="v4DeleteCheck()" style="display:none">🗑 점검 취소</button>
+      <button class="v4-btn v4-btn-ghost" onclick="v4CloseModal()">취소</button>
+      <button class="v4-btn v4-btn-primary" onclick="v4SaveCheck()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ===== 점검자 마스터 관리 =====
+  const V4_INSPECTORS_KEY = 'v4_inspectors';
+
+  function getInspectors(){
+    try{
+      const arr = JSON.parse(localStorage.getItem(V4_INSPECTORS_KEY) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+  function setInspectors(arr){
+    localStorage.setItem(V4_INSPECTORS_KEY, JSON.stringify(arr));
+  }
+  function addInspector(name){
+    name = (name||'').trim();
+    if(!name) return;
+    const list = getInspectors();
+    if(list.includes(name)){ alert('이미 등록된 점검자입니다.'); return; }
+    list.push(name);
+    setInspectors(list);
+    return list;
+  }
+  function removeInspector(name){
+    const list = getInspectors().filter(x => x !== name);
+    setInspectors(list);
+    return list;
+  }
+
+  // 이름에서 이니셜 추출 (한글: 성+이름 첫글자, 영문: 첫 2글자)
+  function getInitial(name){
+    if(!name) return '?';
+    name = name.trim();
+    // 한글 이름인 경우 (성씨 한 글자 + 이름 마지막 한 글자 또는 첫 2글자)
+    if(/[가-힣]/.test(name)){
+      // 김상기 → 김상, 강병주 → 강병
+      return name.slice(0, 2);
+    }
+    // 영문/숫자 - 첫 2글자
+    const parts = name.split(/\s+/);
+    if(parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  }
+
+  // 점검자 이름에 따른 색상 인덱스 (해시)
+  function getColorIdx(name){
+    let h = 0;
+    for(let i = 0; i < name.length; i++){
+      h = ((h << 5) - h) + name.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h) % 8;
+  }
+
+  // 점검자 이니셜 뱃지 HTML 생성
+  window.v4InspectorBadge = function(name, size){
+    if(!name) return '';
+    const ini = getInitial(name);
+    const cIdx = getColorIdx(name);
+    const sz = size || 22;
+    return `<span class="ini-badge ini-color-${cIdx}" title="${name}" style="width:${sz}px;height:${sz}px;font-size:${Math.floor(sz*0.45)}px">${ini}</span>`;
+  };
+
+  // ===== 체크 데이터 호환 처리 (문자열 ↔ 객체) =====
+  // 기존 데이터: "2026-05-14"  →  신규: {date:"2026-05-14", inspector:"김상기", memo:"..."}
+  window.v4NormalizeCheck = function(v){
+    if(!v) return null;
+    if(typeof v === 'string') return { date: v, inspector: '', memo: '' };
+    if(typeof v === 'object') return { date: v.date || '', inspector: v.inspector || '', memo: v.memo || '' };
+    return null;
+  };
+
+  // ===== 모달 상태 =====
+  let _ctx = null;  // { ckey, eqKey, cellEl, isEdit }
+
+  window.v4OpenModal = function(ckey, cellEl){
+    _ctx = { ckey: ckey, eqKey: ckey.split('|')[0], cellEl: cellEl };
+
+    // 셀에서 점검 항목 정보 추출 (모달 sub에 표시)
+    let itemLabel = '';
+    try{
+      const row = cellEl.closest('tr');
+      if(row){
+        const tds = row.querySelectorAll('td');
+        // 첫번째 td: 구분, 두번째 td: 점검항목
+        if(tds.length >= 2) itemLabel = tds[1].textContent.trim().slice(0, 40);
+      }
+    }catch(e){}
+    const eqInfo = (typeof DATA !== 'undefined' && DATA[_ctx.eqKey]) ? (DATA[_ctx.eqKey].title || _ctx.eqKey) : _ctx.eqKey;
+    document.getElementById('v4ModalSub').textContent = `${eqInfo}${itemLabel ? ' · ' + itemLabel : ''}`;
+
+    // 기존 데이터 로드
+    const data = JSON.parse(localStorage.getItem('INS_CHK_'+_ctx.eqKey+'_'+getCheckYear()) || '{}');
+    const cur = window.v4NormalizeCheck(data[ckey]);
+    _ctx.isEdit = !!cur;
+
+    // 폼 채우기
+    const todayStr = new Date().toISOString().substring(0, 10);
+    document.getElementById('v4Date').value = (cur && cur.date) || todayStr;
+    document.getElementById('v4Memo').value = (cur && cur.memo) || '';
+    document.getElementById('v4ModalTitle').textContent = _ctx.isEdit ? '점검 정보 수정' : '점검 완료 등록';
+    document.getElementById('v4DeleteBtn').style.display = _ctx.isEdit ? '' : 'none';
+
+    // 점검자 칩 렌더
+    renderInspectorChips(cur && cur.inspector);
+
+    document.getElementById('v4ModalBg').classList.add('open');
+  };
+
+  function getCheckYear(){
+    // 기존 getChkYear() 함수가 있으면 사용, 없으면 올해
+    try{
+      if(typeof getChkYear === 'function') return getChkYear();
+    }catch(e){}
+    return String(new Date().getFullYear());
+  }
+
+  function renderInspectorChips(selected){
+    const box = document.getElementById('v4InspectorChips');
+    const list = getInspectors();
+    if(list.length === 0){
+      box.innerHTML = `<div style="font-size:13px;color:#94a3b8;padding:8px 0">
+        등록된 점검자가 없습니다.<br>
+        <button class="v4-btn v4-btn-ghost" style="margin-top:8px;padding:6px 12px;font-size:13px"
+                onclick="v4QuickAddInspector()">➕ 점검자 추가</button>
+      </div>`;
+      return;
+    }
+    box.innerHTML = list.map(name => {
+      const ini = getInitial(name);
+      const cIdx = getColorIdx(name);
+      const isSel = (selected === name);
+      return `<button class="v4-chip${isSel?' selected':''}" type="button"
+                      data-name="${name.replace(/"/g,'&quot;')}"
+                      onclick="v4SelectInspector('${name.replace(/'/g,"\\'")}')">
+        <span class="ini-mini ini-color-${cIdx}">${ini}</span>
+        <span>${name}</span>
+      </button>`;
+    }).join('') + `<button class="v4-chip" type="button" onclick="v4QuickAddInspector()"
+                          style="background:#fff;border-style:dashed;color:#3b82f6">
+      ➕ 추가
+    </button>`;
+  }
+
+  window.v4SelectInspector = function(name){
+    document.querySelectorAll('#v4InspectorChips .v4-chip').forEach(c => {
+      c.classList.toggle('selected', c.dataset.name === name);
+    });
+  };
+
+  window.v4QuickAddInspector = function(){
+    const name = prompt('점검자 이름을 입력하세요 (예: 김상기)');
+    if(!name) return;
+    const list = addInspector(name);
+    if(list) renderInspectorChips(name);
+  };
+
+  window.v4CloseModal = function(){
+    document.getElementById('v4ModalBg').classList.remove('open');
+    _ctx = null;
+  };
+
+  window.v4SaveCheck = function(){
+    if(!_ctx) return;
+    const date = document.getElementById('v4Date').value;
+    const selChip = document.querySelector('#v4InspectorChips .v4-chip.selected');
+    const inspector = selChip ? selChip.dataset.name : '';
+    const memo = document.getElementById('v4Memo').value.trim();
+
+    if(!date){ alert('점검일자를 선택해주세요.'); return; }
+    if(!inspector){ alert('점검자를 선택해주세요.'); return; }
+
+    // 저장
+    const storeKey = 'INS_CHK_' + _ctx.eqKey + '_' + getCheckYear();
+    const data = JSON.parse(localStorage.getItem(storeKey) || '{}');
+    data[_ctx.ckey] = { date: date, inspector: inspector, memo: memo };
+    localStorage.setItem(storeKey, JSON.stringify(data));
+
+    // 셀 시각 업데이트
+    updateCellUI(_ctx.cellEl, data[_ctx.ckey]);
+    v4CloseModal();
+  };
+
+  window.v4DeleteCheck = function(){
+    if(!_ctx) return;
+    if(!confirm('이 점검 기록을 삭제하시겠습니까?')) return;
+    const storeKey = 'INS_CHK_' + _ctx.eqKey + '_' + getCheckYear();
+    const data = JSON.parse(localStorage.getItem(storeKey) || '{}');
+    delete data[_ctx.ckey];
+    localStorage.setItem(storeKey, JSON.stringify(data));
+    updateCellUI(_ctx.cellEl, null);
+    v4CloseModal();
+  };
+
+  // 셀 UI 업데이트 (이니셜 아이콘 + 날짜 + 메모 dot)
+  function updateCellUI(cellEl, info){
+    if(!cellEl) return;
+    const dateDiv = cellEl.querySelector('.date');
+    const cb = cellEl.querySelector('input[type=checkbox]');
+    // 기존 인스펙터/메모 요소 제거
+    cellEl.querySelectorAll('.chk-inspector, .memo-dot').forEach(el => el.remove());
+
+    if(info && info.date){
+      cellEl.classList.add('checked');
+      if(cb) cb.checked = true;
+      if(dateDiv) dateDiv.textContent = info.date.substring(5);
+
+      // 점검자 이니셜 아이콘 추가
+      if(info.inspector){
+        const ini = document.createElement('div');
+        ini.className = 'chk-inspector';
+        ini.innerHTML = window.v4InspectorBadge(info.inspector, 22);
+        cellEl.appendChild(ini);
+      }
+      // 메모 표시 dot
+      if(info.memo){
+        const dot = document.createElement('div');
+        dot.className = 'memo-dot';
+        dot.title = info.memo;
+        cellEl.appendChild(dot);
+      }
+    } else {
+      cellEl.classList.remove('checked');
+      if(cb) cb.checked = false;
+      if(dateDiv) dateDiv.textContent = '';
+    }
+  }
+
+  // ===== 기존 toggleChk 가로채기 =====
+  // 원본 toggleChk(ckey, cellEl) 를 모달 열기로 대체
+  if(typeof window.toggleChk === 'function'){
+    window._origToggleChk = window.toggleChk;
+  }
+  window.toggleChk = function(ckey, cellEl){
+    v4OpenModal(ckey, cellEl);
+  };
+
+  // ===== 기존 restoreChks 후킹 =====
+  // 페이지 진입 시 체크된 셀에 이니셜 뱃지 자동 표시
+  if(typeof window.restoreChks === 'function'){
+    const _origRestore = window.restoreChks;
+    window.restoreChks = function(eqKey){
+      _origRestore.call(this, eqKey);
+      // 추가: 이니셜/메모 dot 표시
+      try{
+        const data = JSON.parse(localStorage.getItem('INS_CHK_'+eqKey+'_'+getCheckYear()) || '{}');
+        document.querySelectorAll('.chk-cell').forEach(cell => {
+          const ckey = cell.getAttribute('data-key');
+          if(!ckey || !ckey.startsWith(eqKey+'|')) return;
+          const info = window.v4NormalizeCheck(data[ckey]);
+          // 기존 이니셜/메모 요소 제거 후 다시 추가
+          cell.querySelectorAll('.chk-inspector, .memo-dot').forEach(el => el.remove());
+          if(info && info.date){
+            if(info.inspector){
+              const ini = document.createElement('div');
+              ini.className = 'chk-inspector';
+              ini.innerHTML = window.v4InspectorBadge(info.inspector, 22);
+              cell.appendChild(ini);
+            }
+            if(info.memo){
+              const dot = document.createElement('div');
+              dot.className = 'memo-dot';
+              dot.title = info.memo;
+              cell.appendChild(dot);
+            }
+          }
+        });
+      }catch(e){console.warn('[v4] restore 후처리 실패', e);}
+    };
+  }
+
+  // ===== 점검자 마스터 관리 UI (설정 탭 안에 자동 삽입) =====
+  window.v4RenderInspectorManager = function(){
+    // 설정 탭의 buildSettings()가 끝난 후 추가
+    const root = document.getElementById('tab-settings');
+    if(!root) return;
+    // 이미 추가된 경우 갱신만
+    let box = document.getElementById('v4InspectorManageBox');
+    const list = getInspectors();
+    const listHtml = list.length === 0
+      ? '<div style="color:#94a3b8;font-size:13px;padding:8px 0">등록된 점검자가 없습니다. 아래에서 추가하세요.</div>'
+      : list.map(name => {
+          const ini = getInitial(name);
+          const cIdx = getColorIdx(name);
+          return `<div class="v4-inspector-card">
+            <span class="ini-mini ini-color-${cIdx}" style="width:22px;height:22px;font-size:10px">${ini}</span>
+            <span>${name}</span>
+            <button class="remove-btn" onclick="v4MgrRemove('${name.replace(/'/g,"\\'")}')" title="삭제">✕</button>
+          </div>`;
+        }).join('');
+
+    const html = `<div class="v4-inspector-manage" id="v4InspectorManageBox">
+      <h4>👥 점검자 관리 <span style="font-size:12px;font-weight:600;color:#64748b">(체크시트에서 사용)</span></h4>
+      <div class="v4-inspector-list">${listHtml}</div>
+      <div class="v4-inspector-form">
+        <input type="text" id="v4NewInspector" placeholder="점검자 이름 (예: 김상기, 강병주)" 
+               onkeypress="if(event.key==='Enter')v4MgrAdd()">
+        <button class="v4-btn v4-btn-primary" style="flex:0 0 auto;padding:8px 16px" onclick="v4MgrAdd()">➕ 추가</button>
+      </div>
+    </div>`;
+
+    if(box){
+      box.outerHTML = html;
+    } else {
+      // 설정 탭 맨 위에 삽입
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      root.insertBefore(tmp.firstChild, root.firstChild);
+    }
+  };
+
+  window.v4MgrAdd = function(){
+    const input = document.getElementById('v4NewInspector');
+    if(!input) return;
+    addInspector(input.value);
+    input.value = '';
+    window.v4RenderInspectorManager();
+  };
+  window.v4MgrRemove = function(name){
+    if(!confirm(`'${name}' 점검자를 삭제하시겠습니까?\n(기존 점검 기록은 유지됩니다)`)) return;
+    removeInspector(name);
+    window.v4RenderInspectorManager();
+  };
+
+  // ===== buildSettings 후킹 (설정 탭 렌더 시 자동 추가) =====
+  if(typeof window.buildSettings === 'function'){
+    const _origBuild = window.buildSettings;
+    window.buildSettings = function(){
+      _origBuild.apply(this, arguments);
+      setTimeout(window.v4RenderInspectorManager, 50);
+    };
+  }
+
+  // 페이지 진입 시 한 번 - 설정 탭이 이미 렌더되어 있으면 즉시 추가
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      // 설정 탭이 활성화되어 있으면 추가
+      const settingsTab = document.getElementById('tab-settings');
+      if(settingsTab && settingsTab.children.length > 0){
+        window.v4RenderInspectorManager();
+      }
+    }, 200);
+  });
+
+})();
+</script>
+<!-- [v4 END] -->
+
+<!-- ============================================================
+     [v4-PLAN] 보전계획표 개선 - KPI 카드, 점검자 표시, 현재월 강조
+     ============================================================ -->
+<script>
+(function(){
+  'use strict';
+
+  // 점검자 데이터에서 이니셜과 색상 추출
+  function getInitial(name){
+    if(!name) return '';
+    name = name.trim();
+    if(/[가-힣]/.test(name)) return name.slice(0, 2);
+    const parts = name.split(/\s+/);
+    if(parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  }
+  function getColorIdx(name){
+    let h = 0;
+    for(let i = 0; i < name.length; i++){
+      h = ((h << 5) - h) + name.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h) % 8;
+  }
+  const INI_COLORS = [
+    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+    'linear-gradient(135deg, #10b981, #047857)',
+    'linear-gradient(135deg, #f59e0b, #b45309)',
+    'linear-gradient(135deg, #ef4444, #b91c1c)',
+    'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+    'linear-gradient(135deg, #ec4899, #be185d)',
+    'linear-gradient(135deg, #14b8a6, #0f766e)',
+    'linear-gradient(135deg, #6366f1, #4338ca)'
+  ];
+
+  // 현재 월(1-12)
+  function getCurrentMonth(){
+    // 표시 중인 년도가 올해와 다르면 강조 안 함
+    try{
+      var _cy = (typeof currentYear !== 'undefined') ? currentYear : (window.__v4 ? window.__v4.currentYear : new Date().getFullYear()); if(_cy !== new Date().getFullYear()){
+        return 0;
+      }
+    }catch(e){}
+    return new Date().getMonth() + 1;
+  }
+
+  // 현재 주차 추정 (1~2주차면 w2, 3주차 이상이면 w4)
+  function getCurrentWeek(){
+    const day = new Date().getDate();
+    return day <= 15 ? 'w2' : 'w4';
+  }
+
+  // checkData 정규화 (문자열/객체 모두 처리)
+  function normCheck(v){
+    if(!v) return null;
+    if(typeof v === 'string') return { date:v, inspector:'', memo:'' };
+    // 원본 보전계획표는 'by' 필드, 체크시트는 'inspector' 필드 → 둘 다 지원
+    return { 
+      date:    v.date || '', 
+      inspector: v.inspector || v.by || '', 
+      memo:    v.memo || '' 
+    };
+  }
+
+  // KPI 통계 계산
+  function computeKPI(){
+    let totalPlan = 0, totalDone = 0;
+    let thisMonthPlan = 0, thisMonthDone = 0;
+    let late = 0;        // 이미 지난 달인데 미완료
+    let soon = 0;        // 이번 달인데 미완료
+    
+    const curMonth = getCurrentMonth();
+    
+    try{
+      const list = ((typeof EQUIP !== 'undefined' && Array.isArray(EQUIP)) || (window.__v4 && Array.isArray(window.__v4.EQUIP))) ? EQUIP : [];
+      list.forEach(eq=>{
+        const plan = (typeof getPlanFor==='function') ? getPlanFor(eq.id) : {};
+        for(let m=1; m<=12; m++){
+          const p = plan[String(m)];
+          if(!p) continue;
+          ['w2','w4'].forEach(w=>{
+            if(!p[w]) return;
+            totalPlan++;
+            const k = (typeof getCheckKey==='function') ? getCheckKey(eq.id, m, w) : (eq.id+'-'+m+'-'+w);
+            const done = !!(((typeof checkData !== 'undefined' && checkData[k]) || (window.__v4 && window.__v4.checkData && window.__v4.checkData[k])));
+            if(done) totalDone++;
+            if(m === curMonth){
+              thisMonthPlan++;
+              if(done) thisMonthDone++;
+              else soon++;
+            } else if(m < curMonth && curMonth > 0){
+              if(!done) late++;
+            }
+          });
+        }
+      });
+    }catch(e){console.warn('[v4-PLAN] KPI 계산 실패', e);}
+    
+    return {
+      thisMonthPlan, thisMonthDone, late, soon,
+      thisMonthPct: thisMonthPlan ? Math.round(thisMonthDone/thisMonthPlan*100) : 0
+    };
+  }
+
+  // KPI 카드 렌더링
+  function renderKPI(){
+    const tbl = document.querySelector('#pmPlanTab .eq-table-wrap');
+    if(!tbl) return;
+    
+    const k = computeKPI();
+    const curMonth = getCurrentMonth();
+    const monthLabel = curMonth ? `${curMonth}월 계획` : '이번 달 계획';
+    
+    // 기존 KPI 행이 있으면 제거 후 재생성
+    const existing = document.querySelector('.v4p-kpi-row');
+    if(existing) existing.remove();
+    
+    const html = `
+      <div class="v4p-kpi-row">
+        <div class="v4p-kpi" data-tone="plan">
+          <div class="label"><span class="ico">📅</span>${monthLabel}</div>
+          <div class="value">${k.thisMonthPlan}<span style="font-size:14px;font-weight:600;color:#64748b">건</span></div>
+          <div class="sub">${curMonth ? curMonth+'월 등록된 점검 계획' : '계획 등록 필요'}</div>
+        </div>
+        <div class="v4p-kpi" data-tone="done">
+          <div class="label"><span class="ico">✅</span>완료</div>
+          <div class="value">${k.thisMonthDone}<span style="font-size:14px;font-weight:600;color:#64748b">건 (${k.thisMonthPct}%)</span></div>
+          <div class="sub">${k.thisMonthPlan ? '이번 달 완료 점검' : '아직 계획 없음'}</div>
+        </div>
+        <div class="v4p-kpi" data-tone="late">
+          <div class="label"><span class="ico">⚠️</span>지연</div>
+          <div class="value">${k.late}<span style="font-size:14px;font-weight:600;color:#64748b">건</span></div>
+          <div class="sub">${k.late ? '지난 달 미완료' : '지연 없음 👍'}</div>
+        </div>
+        <div class="v4p-kpi" data-tone="soon">
+          <div class="label"><span class="ico">🕐</span>이번달 잔여</div>
+          <div class="value">${k.soon}<span style="font-size:14px;font-weight:600;color:#64748b">건</span></div>
+          <div class="sub">${k.soon ? '이번 달 안에 완료 필요' : '이번 달 완료'}</div>
+        </div>
+      </div>`;
+    
+    // progress-bar 다음, 테이블 앞에 삽입
+    const progBar = document.querySelector('#pmPlanTab .progress-bar');
+    if(progBar){
+      progBar.insertAdjacentHTML('afterend', html);
+    } else {
+      tbl.insertAdjacentHTML('beforebegin', html);
+    }
+  }
+
+  // 현재 월 컬럼 강조
+  function highlightCurrentMonth(){
+    const curMonth = getCurrentMonth();
+    if(!curMonth) return;
+    
+    const table = document.querySelector('#pmPlanTab .eq-table');
+    if(!table) return;
+    
+    // 1행: 월 헤더 (rowspan=2 설비번호, 설비명 다음부터 12개월 colspan=2)
+    const headRows = table.querySelectorAll('thead tr');
+    if(headRows.length >= 2){
+      // 첫번째 헤더 row: 설비번호, 설비명, 1월, 2월, ..., 12월, 등급, 년식, 진행
+      const firstRowTh = headRows[0].querySelectorAll('th');
+      // 인덱스 0~1: 설비번호/설비명(rowspan), 2번째부터 1월
+      // curMonth가 1이면 index = 2, 2면 3, ...
+      const monthThIdx = 2 + (curMonth - 1);
+      if(firstRowTh[monthThIdx]){
+        firstRowTh[monthThIdx].classList.add('v4p-current-month');
+      }
+      
+      // 두번째 헤더 row: 2주/4주 (12개월 × 2 = 24개)
+      const secondRowTh = headRows[1].querySelectorAll('th');
+      const wkIdx = (curMonth - 1) * 2;  // 해당 월의 2주
+      if(secondRowTh[wkIdx]) secondRowTh[wkIdx].classList.add('v4p-current-month');
+      if(secondRowTh[wkIdx + 1]) secondRowTh[wkIdx + 1].classList.add('v4p-current-month');
+    }
+    
+    // 본문 td: 설비번호+설비명 2개 다음부터, 24개 칸 중 (curMonth-1)*2, (curMonth-1)*2+1
+    const w2Idx = 2 + (curMonth - 1) * 2;
+    const w4Idx = w2Idx + 1;
+    table.querySelectorAll('tbody tr').forEach(tr=>{
+      const tds = tr.querySelectorAll('td');
+      if(tds[w2Idx]) tds[w2Idx].classList.add('v4p-current-month');
+      if(tds[w4Idx]) tds[w4Idx].classList.add('v4p-current-month');
+    });
+  }
+
+  // 점검자 이니셜 뱃지 + 지연/임박 칩 추가
+  function decorateCells(){
+    const curMonth = getCurrentMonth();
+    const table = document.querySelector('#pmPlanTab .eq-table');
+    if(!table) return;
+    
+    // 각 td.plan-cell 순회
+    table.querySelectorAll('tbody tr').forEach((tr, rowIdx)=>{
+      const tds = tr.querySelectorAll('td.plan-cell');
+      tds.forEach((td, idx)=>{
+        // idx 0~23: (월-1)*2 + (0=w2, 1=w4)
+        const monthIdx = Math.floor(idx / 2) + 1;
+        const week = (idx % 2 === 0) ? 'w2' : 'w4';
+        
+        // 셀이 비어있으면 (계획 없음) skip
+        if(!td.classList.contains('clickable')) return;
+        
+        // eq.id를 첫번째 td(eq-id)에서 추출
+        const eqIdTd = tr.querySelector('td.eq-id');
+        if(!eqIdTd) return;
+        const eqId = eqIdTd.textContent.trim();
+        
+        // 점검 데이터 조회
+        try{
+          const k = (typeof getCheckKey==='function') ? getCheckKey(eqId, monthIdx, week) : null;
+          if(!k) return;
+          const info = normCheck(typeof checkData !== 'undefined' ? checkData[k] : null);
+          
+          if(info && info.date){
+            // 완료된 셀: 점검자 이니셜 뱃지 추가
+            if(info.inspector){
+              // 기존 check-date span 제거
+              const oldDate = td.querySelector('.check-date');
+              if(oldDate) oldDate.remove();
+              // 새 인스펙터 뱃지 추가
+              const ini = getInitial(info.inspector);
+              const colorIdx = getColorIdx(info.inspector);
+              const wrap = document.createElement('div');
+              wrap.className = 'v4p-inspector';
+              wrap.title = `${info.inspector} · ${info.date}${info.memo ? '\n📝 '+info.memo : ''}`;
+              wrap.innerHTML = `
+                <span class="ini" style="background:${INI_COLORS[colorIdx]}">${ini}</span>
+                <span class="date-mini">${info.date.substring(5)}</span>
+              `;
+              td.appendChild(wrap);
+            }
+          } else {
+            // 미완료 셀: 지연/임박 칩 추가
+            if(curMonth > 0){
+              if(monthIdx < curMonth){
+                // 지난 달 = 지연
+                const chip = document.createElement('div');
+                chip.className = 'v4p-warn late';
+                chip.innerHTML = '⚠ 지연';
+                chip.style.marginTop = '3px';
+                td.appendChild(chip);
+              } else if(monthIdx === curMonth){
+                // 이번 달 = 임박
+                const chip = document.createElement('div');
+                chip.className = 'v4p-warn soon';
+                chip.innerHTML = '🕐 임박';
+                chip.style.marginTop = '3px';
+                td.appendChild(chip);
+              }
+            }
+          }
+        }catch(e){}
+      });
+    });
+  }
+
+  // 설비별 상태 바 (마지막 진행 컬럼을 개선)
+  function decorateProgressColumn(){
+    const table = document.querySelector('#pmPlanTab .eq-table');
+    if(!table) return;
+    
+    table.querySelectorAll('tbody tr').forEach(tr=>{
+      const tds = tr.querySelectorAll('td');
+      const lastTd = tds[tds.length - 1];
+      if(!lastTd || !lastTd.textContent.includes('/')) return;
+      
+      const txt = lastTd.textContent.trim();
+      const m = txt.match(/(\d+)\s*\/\s*(\d+)/);
+      if(!m) return;
+      
+      const done = parseInt(m[1], 10);
+      const total = parseInt(m[2], 10);
+      const pct = total ? Math.round(done/total*100) : 0;
+      
+      let barColor = '#9ca3af';
+      let textColor = '#6b7280';
+      let rowMark = '';
+      if(pct >= 100){ barColor = '#16a34a'; textColor = '#15803d'; }
+      else if(pct >= 50){ barColor = '#d97706'; textColor = '#b45309'; rowMark = 'v4p-warn'; }
+      else if(total > 0){ barColor = '#dc2626'; textColor = '#991b1b'; rowMark = 'v4p-risk'; }
+      
+      lastTd.innerHTML = `
+        <div class="v4p-progress">
+          <div class="txt" style="color:${textColor}">${done}/${total} (${pct}%)</div>
+          <div class="bar"><div style="width:${pct}%;background:${barColor}"></div></div>
+        </div>
+      `;
+      
+      // 행 강조 (위험/주의 설비)
+      if(rowMark) tr.classList.add(rowMark);
+    });
+  }
+
+  // 메인 후처리 함수
+  function applyPlanImprovements(){
+    try{
+      // 보전계획표가 렌더된 후에만 동작
+      if(!document.querySelector('#pmPlanTab .eq-table')) return;
+      
+      renderKPI();
+      highlightCurrentMonth();
+      decorateCells();
+      decorateProgressColumn();
+    }catch(e){
+      console.warn('[v4-PLAN] 개선 적용 실패', e);
+    }
+  }
+  
+  // ===== renderEqTable 후킹 =====
+  if(typeof window.renderEqTable === 'function'){
+    const _orig = window.renderEqTable;
+    window.renderEqTable = function(){
+      const r = _orig.apply(this, arguments);
+      // DOM 렌더가 끝난 직후 후처리
+      setTimeout(applyPlanImprovements, 30);
+      return r;
+    };
+  } else {
+    // renderEqTable이 아직 정의 안된 경우 (스크립트 순서 문제)
+    document.addEventListener('DOMContentLoaded', function(){
+      if(typeof window.renderEqTable === 'function'){
+        const _orig = window.renderEqTable;
+        window.renderEqTable = function(){
+          const r = _orig.apply(this, arguments);
+          setTimeout(applyPlanImprovements, 30);
+          return r;
+        };
+      }
+    });
+  }
+  
+  // 페이지 로드 후 첫 적용
+  window.addEventListener('load', function(){
+    setTimeout(applyPlanImprovements, 200);
+  });
+  
+  // 외부에서 강제 재적용 가능하도록 노출
+  window.v4PlanRefresh = applyPlanImprovements;
+
+})();
+</script>
+<!-- [v4-PLAN END] -->
+
+<!-- ============================================================
+     [v4-FOCUS] 4개월 압축 포커스 뷰
+     ============================================================ -->
+<script>
+// [v4-FOCUS] 글로벌 스코프에서 원본의 let 변수들을 window에 노출 (IIFE 외부에서도 접근 가능하게)
+// 단, 원본 let 변수는 글로벌 스크립트 블록에서는 동일 스코프 공유하므로 이 코드는 보험용
+try{
+  if(typeof EQUIP !== 'undefined') window.__v4_EQUIP = EQUIP;
+  if(typeof currentVol !== 'undefined') window.__v4_currentVol = currentVol;
+  if(typeof currentYear !== 'undefined') window.__v4_currentYear = currentYear;
+  if(typeof checkData !== 'undefined') window.__v4_checkData = checkData;
+}catch(e){}
+</script>
+<script>
+(function(){
+  'use strict';
+
+  // 이니셜/색상 함수 (v4-PLAN과 동일)
+  function getInitial(name){
+    if(!name) return '';
+    name = name.trim();
+    if(/[가-힣]/.test(name)) return name.slice(0, 2);
+    const parts = name.split(/\s+/);
+    if(parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  }
+  function getColorIdx(name){
+    let h = 0;
+    for(let i = 0; i < name.length; i++){
+      h = ((h << 5) - h) + name.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h) % 8;
+  }
+  const INI_COLORS = [
+    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+    'linear-gradient(135deg, #10b981, #047857)',
+    'linear-gradient(135deg, #f59e0b, #b45309)',
+    'linear-gradient(135deg, #ef4444, #b91c1c)',
+    'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+    'linear-gradient(135deg, #ec4899, #be185d)',
+    'linear-gradient(135deg, #14b8a6, #0f766e)',
+    'linear-gradient(135deg, #6366f1, #4338ca)'
+  ];
+
+  function normCheck(v){
+    if(!v) return null;
+    if(typeof v === 'string') return { date:v, inspector:'', memo:'' };
+    // 원본 보전계획표는 'by' 필드, 체크시트는 'inspector' 필드 → 둘 다 지원
+    return { 
+      date:    v.date || '', 
+      inspector: v.inspector || v.by || '', 
+      memo:    v.memo || '' 
+    };
+  }
+
+  function getCurrentMonth(){
+    try{
+      var _cy = (typeof currentYear !== 'undefined') ? currentYear : (window.__v4 ? window.__v4.currentYear : new Date().getFullYear()); if(_cy !== new Date().getFullYear()){
+        return 0;
+      }
+    }catch(e){}
+    return new Date().getMonth() + 1;
+  }
+
+  // 4개월 범위 산출 (전월, 현재, +1, +2) — 1월/12월 경계 처리
+  function getFocusMonths(){
+    const cur = getCurrentMonth() || 5;  // 기본 5월
+    const months = [];
+    for(let off = -1; off <= 2; off++){
+      let m = cur + off;
+      let yearOff = 0;
+      if(m < 1){ m += 12; yearOff = -1; }
+      if(m > 12){ m -= 12; yearOff = 1; }
+      months.push({
+        m: m,
+        yearOff: yearOff,
+        label: m + '월',
+        tone: off === -1 ? 'prev' : off === 0 ? 'cur' : off === 1 ? 'next' : 'future'
+      });
+    }
+    return { months, current: cur };
+  }
+
+  // 셀 렌더링 (한 설비 × 한 월) — 2주/4주를 한 셀에 통합 표시
+  function renderFocusCell(eqId, monthObj){
+    if(!eqId) return '<td></td>';
+    
+    const plan = (typeof getPlanFor === 'function') ? getPlanFor(eqId) : (window.__v4 && window.__v4.getPlanFor ? window.__v4.getPlanFor(eqId) : {});
+    const p = plan[String(monthObj.m)];
+    
+    const cellClass = monthObj.tone === 'cur' ? 'v4f-cell-cur' :
+                      monthObj.tone === 'prev' ? 'v4f-cell-prev' : '';
+    
+    // 2주/4주 데이터 모두 수집
+    const weeks = ['w2', 'w4'];
+    const items = [];
+    
+    weeks.forEach(week => {
+      const v = p ? p[week] : '';
+      if(!v) return;  // 계획 없는 주는 skip
+      
+      const isSelfCheck = (v === '■');
+      let info = null;
+      try{
+        const k = (typeof getCheckKey === 'function') ? getCheckKey(eqId, monthObj.m, week) : (window.__v4 && window.__v4.getCheckKey ? window.__v4.getCheckKey(eqId, monthObj.m, week) : null);
+        if(k && ((typeof checkData !== 'undefined' && checkData[k]) || (window.__v4 && window.__v4.checkData && window.__v4.checkData[k]))){
+          info = normCheck(checkData[k]);
+        }
+      }catch(e){}
+      
+      items.push({ week, v, isSelfCheck, info });
+    });
+    
+    // 계획 자체가 없는 월
+    if(items.length === 0){
+      return `<td class="${cellClass}"></td>`;
+    }
+    
+    // 각 주별 칩 렌더링 (수직 정렬)
+    const chips = items.map(item => {
+      const { week, isSelfCheck, info } = item;
+      
+      if(info && info.date){
+        // 완료
+        const inspector = info.inspector || '';
+        const ini = inspector ? getInitial(inspector) : '✓';
+        const cIdx = inspector ? getColorIdx(inspector) : 0;
+        const tooltip = `${inspector || '점검완료'} · ${info.date}${info.memo ? '\n📝 ' + info.memo : ''}`;
+        const dateMD = info.date.substring(5);
+        return `<span class="v4f-done-chip" 
+                      onclick="event.stopPropagation();toggleCheck('${eqId}',${monthObj.m},'${week}',event)" 
+                      title="${tooltip.replace(/"/g, '&quot;')}">
+          <span class="ini-circle" style="background:${INI_COLORS[cIdx]}">${ini}</span>
+          <span class="date-txt">${dateMD}</span>
+        </span>`;
+      }
+      
+      // 자체점검 미완료
+      if(isSelfCheck){
+        if(monthObj.tone === 'cur'){
+          return `<span class="v4f-warn-chip soon" 
+                        onclick="event.stopPropagation();toggleCheck('${eqId}',${monthObj.m},'${week}',event)" 
+                        title="자체점검 (이번달) · 클릭하여 완료 처리">
+            <span class="ico">🕐</span>이번주
+          </span>`;
+        }
+        if(monthObj.tone === 'prev'){
+          return `<span class="v4f-warn-chip late" 
+                        onclick="event.stopPropagation();toggleCheck('${eqId}',${monthObj.m},'${week}',event)" 
+                        title="자체점검 미완료 · 클릭하여 완료">
+            <span class="ico">⚠</span>지연
+          </span>`;
+        }
+        return `<span class="v4f-self-check" 
+                      onclick="event.stopPropagation();toggleCheck('${eqId}',${monthObj.m},'${week}',event)" 
+                      title="자체점검 · 클릭하여 완료">■</span>`;
+      }
+      
+      // 일반 점검 미완료
+      if(monthObj.tone === 'cur'){
+        return `<span class="v4f-warn-chip soon" 
+                      onclick="event.stopPropagation();toggleCheck('${eqId}',${monthObj.m},'${week}',event)" 
+                      title="이번 달 점검 예정 · 클릭하여 완료">
+          <span class="ico">🕐</span>이번주
+        </span>`;
+      }
+      if(monthObj.tone === 'prev'){
+        return `<span class="v4f-warn-chip late" 
+                      onclick="event.stopPropagation();toggleCheck('${eqId}',${monthObj.m},'${week}',event)" 
+                      title="지난 달 점검 미완료 · 클릭하여 완료">
+          <span class="ico">⚠</span>지연
+        </span>`;
+      }
+      // 미래
+      return `<span class="v4f-empty-plan" 
+                    onclick="event.stopPropagation();toggleCheck('${eqId}',${monthObj.m},'${week}',event)" 
+                    title="예정 · 클릭하여 완료">□</span>`;
+    });
+    
+    return `<td class="${cellClass}"><div class="v4f-cell-inner">${chips.join('')}</div></td>`;
+  }
+
+  // 설비별 진행 상태 (해당 4개월에 한정 X — 전체 진행률을 표시하여 일관성)
+  function renderStatusBar(eqId){
+    try{
+      const plan = (typeof getPlanFor === 'function') ? getPlanFor(eqId) : (window.__v4 && window.__v4.getPlanFor ? window.__v4.getPlanFor(eqId) : {});
+      let total = 0, done = 0;
+      for(let m = 1; m <= 12; m++){
+        const p = plan[String(m)];
+        if(!p) continue;
+        ['w2', 'w4'].forEach(w => {
+          if(!p[w]) return;
+          total++;
+          const k = (typeof getCheckKey === 'function') ? getCheckKey(eqId, m, w) : (window.__v4 && window.__v4.getCheckKey ? window.__v4.getCheckKey(eqId, m, w) : null);
+          if(k && ((typeof checkData !== 'undefined' && checkData[k]) || (window.__v4 && window.__v4.checkData && window.__v4.checkData[k]))) done++;
+        });
+      }
+      const pct = total ? Math.round(done/total*100) : 0;
+      const color = pct >= 100 ? '#16a34a' : pct >= 50 ? '#d97706' : (total > 0 ? '#dc2626' : '#9ca3af');
+      const textColor = pct >= 100 ? '#15803d' : pct >= 50 ? '#b45309' : (total > 0 ? '#991b1b' : '#6b7280');
+      return `<div class="v4f-status-bar">
+        <div class="bar"><div style="width:${pct}%;background:${color}"></div></div>
+        <span class="pct" style="color:${textColor}">${pct}%</span>
+      </div>`;
+    }catch(e){
+      return '<span style="color:#9ca3af">-</span>';
+    }
+  }
+
+  // 메인 렌더 - 4개월 압축 뷰 섹션 생성
+  function renderFocusView(){
+    console.log('[v4-FOCUS] renderFocusView called');
+    
+    const tblWrap = document.querySelector('#pmPlanTab .eq-table-wrap');
+    if(!tblWrap){
+      console.warn('[v4-FOCUS] .eq-table-wrap not found - 보전계획표가 아직 렌더되지 않음');
+      return;
+    }
+    
+    // 기존 포커스 뷰 제거 (재렌더 대비)
+    const existing = document.querySelector('.v4f-section');
+    if(existing) existing.remove();
+    
+    // 설비 목록 가져오기
+    let list = [];
+    try{
+      const cv = (typeof currentVol !== 'undefined') ? currentVol : (window.__v4 ? window.__v4.currentVol : 0);
+      const eq = (typeof EQUIP !== 'undefined') ? EQUIP : (window.__v4 ? window.__v4.EQUIP : null);
+      console.log('[v4-FOCUS] EQUIP=', eq && eq.length, 'currentVol=', cv);
+      list = (eq && Array.isArray(eq))
+        ? (cv === 0 ? eq : eq.filter(e => e.vol === cv))
+        : [];
+    }catch(e){
+      console.error('[v4-FOCUS] EQUIP 접근 실패', e);
+    }
+    
+    console.log('[v4-FOCUS] list.length=', list.length);
+    if(list.length === 0){
+      console.warn('[v4-FOCUS] 설비 목록이 비어있음 - 포커스 뷰 생성 skip');
+      return;
+    }
+    
+    const focus = getFocusMonths();
+    const months = focus.months;
+    
+    // 헤더 (단일 row - 월별 1칸씩)
+    let headRow = '<tr>';
+    headRow += '<th class="v4f-id">번호</th>';
+    headRow += '<th class="v4f-name">설비명</th>';
+    headRow += '<th class="v4f-status">상태</th>';
+    months.forEach(mo => {
+      headRow += `<th class="v4f-month-${mo.tone}">${mo.label}</th>`;
+    });
+    headRow += '</tr>';
+    
+    // 본문 (월별 1칸씩)
+    let body = '';
+    list.forEach(eq => {
+      body += '<tr>';
+      body += `<td class="v4f-id" onclick="openDetail('${eq.id}')">${eq.id}</td>`;
+      body += `<td class="v4f-name" onclick="openDetail('${eq.id}')">${eq.name}</td>`;
+      body += `<td>${renderStatusBar(eq.id)}</td>`;
+      months.forEach(mo => {
+        body += renderFocusCell(eq.id, mo);
+      });
+      body += '</tr>';
+    });
+    
+    const curYear = (typeof currentYear !== 'undefined') ? currentYear : new Date().getFullYear();
+    const sectionHTML = `
+      <div class="v4f-section">
+        <div class="v4f-section-head">
+          <div class="v4f-section-title">
+            <span class="ico">🎯</span>
+            <div>
+              ${curYear}년 ${focus.current}월 포커스 뷰
+              <div class="v4f-section-sub">전월 · 현재 · 이번달 + 2개월 한눈에 · 셀 클릭하여 점검 완료 처리</div>
+            </div>
+          </div>
+          <button class="v4f-toggle" onclick="document.querySelector('.v4f-section .v4f-table-wrap').style.display = document.querySelector('.v4f-section .v4f-table-wrap').style.display === 'none' ? '' : 'none'">
+            <span>접기/펼치기</span>
+          </button>
+        </div>
+        <div class="v4f-table-wrap">
+          <table class="v4f-table">
+            <thead>${headRow}</thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      </div>`;
+    
+    // KPI 카드 다음, 12개월 테이블 앞에 삽입
+    const kpiRow = document.querySelector('.v4p-kpi-row');
+    if(kpiRow){
+      kpiRow.insertAdjacentHTML('afterend', sectionHTML);
+    } else {
+      tblWrap.insertAdjacentHTML('beforebegin', sectionHTML);
+    }
+  }
+
+  // renderEqTable 후킹
+  if(typeof window.renderEqTable === 'function'){
+    const _orig = window.renderEqTable;
+    window.renderEqTable = function(){
+      const r = _orig.apply(this, arguments);
+      setTimeout(renderFocusView, 100);
+      return r;
+    };
+    console.log('[v4-FOCUS] renderEqTable hooked at script load');
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){
+      if(typeof window.renderEqTable === 'function'){
+        const _orig = window.renderEqTable;
+        window.renderEqTable = function(){
+          const r = _orig.apply(this, arguments);
+          setTimeout(renderFocusView, 100);
+          return r;
+        };
+        console.log('[v4-FOCUS] renderEqTable hooked at DOMContentLoaded');
+      }
+    });
+  }
+  
+  // 페이지 진입 시 + 재시도 로직 (보전계획표 탭이 나중에 보이는 경우 대비)
+  function tryRender(attempt){
+    attempt = attempt || 0;
+    if(attempt > 10) return;  // 최대 10회 시도
+    
+    renderFocusView();
+    
+    // 성공적으로 그려졌는지 확인
+    if(!document.querySelector('.v4f-section')){
+      // 아직 안 그려졌으면 재시도
+      setTimeout(function(){ tryRender(attempt + 1); }, 500);
+    }
+  }
+  
+  window.addEventListener('load', function(){
+    setTimeout(function(){ tryRender(0); }, 300);
+  });
+  
+  // 탭 전환 감지 - 보전계획표 탭으로 진입할 때
+  document.addEventListener('click', function(e){
+    const target = e.target.closest('[onclick*="switchTopTab(\'plan\')"], [onclick*="switchMainTab(\'plan\')"]');
+    if(target){
+      setTimeout(function(){ tryRender(0); }, 500);
+    }
+  });
+  
+  window.v4FocusRefresh = renderFocusView;
+
+})();
+</script>
+<!-- [v4-FOCUS END] -->
+
 </body>
 </html>
