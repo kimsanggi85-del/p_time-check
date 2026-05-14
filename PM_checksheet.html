@@ -2798,6 +2798,48 @@ table th{
   background:#475569 !important;
 }
 
+/* ─────────────────────────────────────────────
+   점검자 관리(.v4-inspector-*) 영역 다크화
+   ───────────────────────────────────────────── */
+.v4-inspector-manage{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.v4-inspector-manage h4{
+  color:#e2e8f0 !important;
+}
+.v4-inspector-manage h4 span{
+  color:#94a3b8 !important;
+}
+.v4-inspector-list{
+  background:transparent !important;
+}
+.v4-inspector-card{
+  background:#334155 !important;
+  border:1px solid #475569 !important;
+  color:#e2e8f0 !important;
+}
+.v4-inspector-card .remove-btn{
+  color:#94a3b8 !important;
+}
+.v4-inspector-card .remove-btn:hover{
+  background:rgba(239,68,68,0.2) !important;
+  color:#f87171 !important;
+}
+.v4-inspector-form input{
+  background:#0f172a !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+}
+.v4-inspector-form input::placeholder{
+  color:#64748b !important;
+}
+.v4-inspector-form input:focus{
+  border-color:#3b82f6 !important;
+  box-shadow:0 0 0 2px rgba(59,130,246,0.2) !important;
+}
+
 /* 폼 입력 요소 글로벌 강제 (어디에 있든 다크) */
 .controls input,
 .controls select,
@@ -4780,12 +4822,12 @@ function buildSettings(){
         '</select></div>'+
       '<button class="stg-btn-primary red" onclick="autoChkPreview()">👁 미리보기</button>'+
     '</div>'+
-    '<div id="autoChkTypes" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:#f8f9fb;border-radius:6px">'+
-      '<label style="font-size:14px;cursor:pointer"><input type="checkbox" id="autoChkT_m" checked style="margin-right:4px;vertical-align:middle"> 월간</label>'+
-      '<label style="font-size:14px;cursor:pointer"><input type="checkbox" id="autoChkT_q" checked style="margin-right:4px;vertical-align:middle"> 분기</label>'+
-      '<label style="font-size:14px;cursor:pointer"><input type="checkbox" id="autoChkT_h" checked style="margin-right:4px;vertical-align:middle"> 반기</label>'+
-      '<label style="font-size:14px;cursor:pointer"><input type="checkbox" id="autoChkT_y" checked style="margin-right:4px;vertical-align:middle"> 연간(12월만)</label>'+
-      '<label style="font-size:14px;cursor:pointer;margin-left:auto"><input type="checkbox" id="autoChkSkipDone" checked style="margin-right:4px;vertical-align:middle"> 이미 체크된 것은 건너뛰기</label>'+
+    '<div id="autoChkTypes" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid #334155;border-radius:6px;color:#cbd5e1">'+
+      '<label style="font-size:14px;cursor:pointer;color:#cbd5e1"><input type="checkbox" id="autoChkT_m" checked style="margin-right:4px;vertical-align:middle;accent-color:#3b82f6"> 월간</label>'+
+      '<label style="font-size:14px;cursor:pointer;color:#cbd5e1"><input type="checkbox" id="autoChkT_q" checked style="margin-right:4px;vertical-align:middle;accent-color:#3b82f6"> 분기</label>'+
+      '<label style="font-size:14px;cursor:pointer;color:#cbd5e1"><input type="checkbox" id="autoChkT_h" checked style="margin-right:4px;vertical-align:middle;accent-color:#3b82f6"> 반기</label>'+
+      '<label style="font-size:14px;cursor:pointer;color:#cbd5e1"><input type="checkbox" id="autoChkT_y" checked style="margin-right:4px;vertical-align:middle;accent-color:#3b82f6"> 연간(12월만)</label>'+
+      '<label style="font-size:14px;cursor:pointer;margin-left:auto;color:#cbd5e1"><input type="checkbox" id="autoChkSkipDone" checked style="margin-right:4px;vertical-align:middle;accent-color:#3b82f6"> 이미 체크된 것은 건너뛰기</label>'+
     '</div>'+
     '<div id="autoChkResult" style="margin-top:12px"></div>'+
     '<div class="stg-action-bar" style="margin-top:12px">'+
