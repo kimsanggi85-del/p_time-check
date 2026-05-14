@@ -9170,7 +9170,7 @@ try{
     const tblWrap = document.querySelector('#pmPlanTab .eq-table-wrap');
     if(!tblWrap){
       console.warn('[v4-FOCUS] .eq-table-wrap not found - 보전계획표가 아직 렌더되지 않음');
-      return;
+      return false;
     }
     
     // 기존 포커스 뷰 제거 (재렌더 대비)
@@ -9181,7 +9181,7 @@ try{
     let list = [];
     try{
       const cv = (typeof currentVol !== 'undefined') ? currentVol : (window.__v4 ? window.__v4.currentVol : 0);
-      const eq = (typeof EQUIP !== 'undefined') ? EQUIP : (window.__v4 ? window.__v4.EQUIP : null);
+      let eq = (typeof EQUIP !== 'undefined') ? EQUIP : (window.__v4 ? window.__v4.EQUIP : null);
       console.log('[v4-FOCUS] EQUIP=', eq && eq.length, 'currentVol=', cv);
       list = (eq && Array.isArray(eq))
         ? (cv === 0 ? eq : eq.filter(e => e.vol === cv))
@@ -9192,8 +9192,8 @@ try{
     
     console.log('[v4-FOCUS] list.length=', list.length);
     if(list.length === 0){
-      console.warn('[v4-FOCUS] 설비 목록이 비어있음 - 포커스 뷰 생성 skip');
-      return;
+      console.warn('[v4-FOCUS] 설비 목록이 비어있음 - 포커스 뷰 생성 skip (재시도 대기)');
+      return false;  // ← 재시도 트리거
     }
     
     const focus = getFocusMonths();
@@ -9252,6 +9252,8 @@ try{
     } else {
       tblWrap.insertAdjacentHTML('beforebegin', sectionHTML);
     }
+    console.log('[v4-FOCUS] ✅ 4개월 포커스 뷰 생성 성공');
+    return true;
   }
 
   // renderEqTable 후킹
@@ -9259,7 +9261,7 @@ try{
     const _orig = window.renderEqTable;
     window.renderEqTable = function(){
       const r = _orig.apply(this, arguments);
-      setTimeout(renderFocusView, 100);
+      setTimeout(function(){ tryRender(0); }, 100);  // 재시도 가능한 형태로 호출
       return r;
     };
     console.log('[v4-FOCUS] renderEqTable hooked at script load');
@@ -9269,7 +9271,7 @@ try{
         const _orig = window.renderEqTable;
         window.renderEqTable = function(){
           const r = _orig.apply(this, arguments);
-          setTimeout(renderFocusView, 100);
+          setTimeout(function(){ tryRender(0); }, 100);
           return r;
         };
         console.log('[v4-FOCUS] renderEqTable hooked at DOMContentLoaded');
@@ -9280,19 +9282,22 @@ try{
   // 페이지 진입 시 + 재시도 로직 (보전계획표 탭이 나중에 보이는 경우 대비)
   function tryRender(attempt){
     attempt = attempt || 0;
-    if(attempt > 10) return;  // 최대 10회 시도
+    if(attempt > 15){
+      console.warn('[v4-FOCUS] 최대 재시도 도달 - 포기');
+      return;
+    }
     
-    renderFocusView();
+    const result = renderFocusView();
     
-    // 성공적으로 그려졌는지 확인
-    if(!document.querySelector('.v4f-section')){
-      // 아직 안 그려졌으면 재시도
-      setTimeout(function(){ tryRender(attempt + 1); }, 500);
+    // false 반환했거나 .v4f-section이 안 그려진 경우 재시도
+    if(result === false || !document.querySelector('.v4f-section')){
+      console.log(`[v4-FOCUS] 재시도 예약 (attempt=${attempt+1})`);
+      setTimeout(function(){ tryRender(attempt + 1); }, 600);
     }
   }
   
   window.addEventListener('load', function(){
-    setTimeout(function(){ tryRender(0); }, 300);
+    setTimeout(function(){ tryRender(0); }, 500);
   });
   
   // 탭 전환 감지 - 보전계획표 탭으로 진입할 때
