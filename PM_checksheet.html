@@ -10812,27 +10812,27 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
   
   // 12개월 표(.eq-table-wrap)를 view_planTable로 이동 + 헤더 박스로 감싸기
   function wrapAndMoveTable(){
-    const tableWrap = document.querySelector('#pmPlanTab .eq-table-wrap');
+    // 페이지 안의 모든 .eq-table-wrap 찾기
+    const allWraps = document.querySelectorAll('#pmPlanTab .eq-table-wrap');
+    if(allWraps.length === 0) return false;
+    
     const targetView = document.getElementById('view_planTable');
     if(!targetView) return false;
-    if(!tableWrap) return false;
     
     const cy = getCurYearSafe();
     const tabLabelEl = document.getElementById('planTableTabLabel');
     if(tabLabelEl) tabLabelEl.textContent = cy + '년 설비정기점검계획';
     
-    // 이미 view_planTable 안에 있고 정상적으로 감싸졌으면 제목만 갱신
-    if(tableWrap.closest('#view_planTable') && tableWrap.closest('.v4plan-section')){
-      const titleNode = targetView.querySelector('.v4plan-section-title > div > div:first-child');
-      if(titleNode) titleNode.firstChild.textContent = cy + '년 설비정기점검계획';
-      return true;
+    // 가장 최신 표 결정: view_plan(원본 생성 위치)에 있는 것 우선, 없으면 마지막
+    let theTable = null;
+    for(const w of allWraps){
+      if(w.closest('#view_plan')){ theTable = w; break; }
     }
+    if(!theTable) theTable = allWraps[allWraps.length - 1];
     
-    // 기존 분리 박스가 view_planTable에 있으면 그 안으로만 이동
+    // 기존 분리 박스가 view_planTable에 있으면 재사용, 없으면 생성
     let section = targetView.querySelector('.v4plan-section');
-    
     if(!section){
-      // 새 박스 생성
       section = document.createElement('div');
       section.className = 'v4plan-section';
       section.innerHTML =
@@ -10850,16 +10850,26 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
         + '<div class="v4plan-body"></div>';
       targetView.appendChild(section);
     } else {
-      // 기존 박스의 제목 갱신
       const yearSpan = section.querySelector('.v4plan-title-year');
       if(yearSpan) yearSpan.textContent = cy;
     }
     
     const body = section.querySelector('.v4plan-body');
-    // 테이블을 박스 body로 이동
-    body.appendChild(tableWrap);
     
-    console.log('[v4-PLAN-WRAP] ✅ 12개월 표를 ' + cy + '년 설비정기점검계획 탭으로 이동 완료');
+    // ★ 중복 방지: v4plan-body 안의 기존 .eq-table-wrap 모두 제거 (theTable 제외)
+    body.querySelectorAll('.eq-table-wrap').forEach(el => {
+      if(el !== theTable) el.remove();
+    });
+    
+    // 새 표를 body로 이동 (appendChild는 자동으로 기존 위치에서 분리됨)
+    body.appendChild(theTable);
+    
+    // ★ 페이지 안 다른 곳(view_plan, 또는 v4plan-section 밖)에 남은 .eq-table-wrap 모두 제거
+    document.querySelectorAll('#pmPlanTab .eq-table-wrap').forEach(el => {
+      if(el !== theTable && !el.closest('.v4plan-section')) el.remove();
+    });
+    
+    console.log('[v4-PLAN-WRAP] ✅ ' + cy + '년 설비정기점검계획 탭 - 표 중복 정리 완료');
     return true;
   }
   
