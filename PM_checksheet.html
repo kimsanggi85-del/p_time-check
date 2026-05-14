@@ -2674,6 +2674,130 @@ table th{
   }
 }
 
+/* ─────────────────────────────────────────────
+   설정/조회(.stg-*) 영역 다크화 (눈부심 방지)
+   ───────────────────────────────────────────── */
+.stg-panel{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  border-left-width:4px !important;
+  color:#cbd5e1 !important;
+}
+.stg-title{
+  color:#e2e8f0 !important;
+}
+.stg-hint{
+  color:#94a3b8 !important;
+}
+.stg-hint code{
+  background:#0f172a !important;
+  color:#cbd5e1 !important;
+}
+.stg-field label{
+  color:#cbd5e1 !important;
+}
+.stg-input{
+  background:#0f172a !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+}
+.stg-input:focus{
+  border-color:#3b82f6 !important;
+  box-shadow:0 0 0 2px rgba(59,130,246,0.25) !important;
+}
+.stg-input[readonly]{
+  background:#0a1426 !important;
+  color:#94a3b8 !important;
+}
+.stg-list{
+  background:transparent !important;
+}
+.stg-item{
+  background:#0f172a !important;
+  border:1px solid #334155 !important;
+  color:#cbd5e1 !important;
+}
+.stg-item:hover{
+  background:#1e293b !important;
+}
+.stg-empty{
+  background:#0f172a !important;
+  border:1px dashed #475569 !important;
+  color:#94a3b8 !important;
+  padding:14px !important;
+  border-radius:8px !important;
+  text-align:center !important;
+}
+.stg-btn{
+  background:#334155 !important;
+  border:1px solid #475569 !important;
+  color:#e2e8f0 !important;
+}
+.stg-btn:hover{
+  background:#475569 !important;
+}
+.stg-btn.danger{
+  color:#f87171 !important;
+  border-color:rgba(239,68,68,0.4) !important;
+  background:rgba(239,68,68,0.1) !important;
+}
+.stg-btn.danger:hover{
+  background:rgba(239,68,68,0.2) !important;
+}
+
+/* .appr-app 영역의 입력 요소 더 어둡게 (눈부심 방지) */
+.appr-app input[type=text],
+.appr-app input[type=date],
+.appr-app input[type=time],
+.appr-app input[type=number],
+.appr-app input[type=email],
+.appr-app input[type=password],
+.appr-app input[type=search],
+.appr-app select,
+.appr-app textarea{
+  background:#0f172a !important;
+  border-color:#475569 !important;
+  color:#e2e8f0 !important;
+  color-scheme:dark;
+}
+.appr-app input:focus,
+.appr-app select:focus,
+.appr-app textarea:focus{
+  border-color:#3b82f6 !important;
+  box-shadow:0 0 0 2px rgba(59,130,246,0.2) !important;
+}
+
+/* .appr-app 카드 배경 미세 조정 (덜 부담스럽게) */
+.appr-app .card{
+  background:#1e293b !important;
+  border-color:#334155 !important;
+}
+.appr-app .card-title{
+  color:#e2e8f0 !important;
+}
+.appr-app label{
+  color:#cbd5e1 !important;
+}
+.appr-app .muted,
+.appr-app small,
+.appr-app .hint{
+  color:#94a3b8 !important;
+}
+.appr-app code{
+  background:#0f172a !important;
+  color:#cbd5e1 !important;
+  padding:2px 6px !important;
+  border-radius:4px !important;
+}
+.appr-app .btn-secondary{
+  background:#334155 !important;
+  border:1px solid #475569 !important;
+  color:#e2e8f0 !important;
+}
+.appr-app .btn-secondary:hover{
+  background:#475569 !important;
+}
+
 /* 폼 입력 요소 글로벌 강제 (어디에 있든 다크) */
 .controls input,
 .controls select,
@@ -3276,32 +3400,32 @@ mark,
   </div>
 
   <div id="view_settings" style="display:none">
-    <div class="settings-section" style="border:2px solid #2563eb;background:#eff6ff">
-      <h3>☁️ 클라우드 동기화 설정 (PC ↔ 핸드폰) <span id="syncSettingsStatus" style="font-size:13px;color:var(--muted);font-weight:500;margin-left:auto"></span></h3>
-      <div style="background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:14px;line-height:1.7;margin-bottom:14px">
-        <b style="color:var(--accent)">✅ 모든 PC에서 자동 연결됩니다.</b><br>
+    <div class="settings-section" style="border:1px solid #3b82f6;background:rgba(59,130,246,0.06)">
+      <h3>☁️ 클라우드 동기화 설정 (PC ↔ 핸드폰) <span id="syncSettingsStatus" style="font-size:13px;color:#94a3b8;font-weight:500;margin-left:auto"></span></h3>
+      <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.35);border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.7;margin-bottom:14px;color:#cbd5e1">
+        <b style="color:#60a5fa">✅ 모든 PC에서 자동 연결됩니다.</b><br>
         • Supabase 프로젝트 <code>ebthltdmxpzlkfwvdloz</code>의 <code>kv_store</code> 테이블 자동 사용<br>
         • PM 앱 데이터는 모두 <code>pm:</code> prefix로 격리되므로 다른 앱과 충돌하지 않습니다<br>
-        • PC와 핸드폰이 같은 URL로 접속하면 <b>자동으로 동기화</b>됩니다<br>
+        • PC와 핸드폰이 같은 URL로 접속하면 <b style="color:#e2e8f0">자동으로 동기화</b>됩니다<br>
         • URL/KEY는 시스템에 고정되어 있어 사용자가 변경할 수 없습니다 (관리자 고정)
       </div>
       <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px">
         <div>
-          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase URL <span style="color:var(--ok);font-weight:700">🔒 자동 연결 (고정값)</span></label>
-          <input type="text" id="cfgSbUrl" readonly disabled style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace;background:#f1f5f9;color:#64748b;cursor:not-allowed" placeholder="https://xxxxx.supabase.co">
+          <label style="display:block;font-size:13px;color:#94a3b8;font-weight:600;margin-bottom:4px">Supabase URL <span style="color:#4ade80;font-weight:700">🔒 자동 연결 (고정값)</span></label>
+          <input type="text" id="cfgSbUrl" readonly disabled style="width:100%;padding:9px 12px;border:1px solid #475569;border-radius:8px;font-size:14px;font-family:monospace;background:#0f172a;color:#94a3b8;cursor:not-allowed" placeholder="https://xxxxx.supabase.co">
         </div>
         <div>
-          <label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">Supabase KEY <span style="color:var(--ok);font-weight:700">🔒 자동 연결 (고정값)</span></label>
-          <input type="text" id="cfgSbKey" readonly disabled style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace;background:#f1f5f9;color:#64748b;cursor:not-allowed" placeholder="sb_publishable_... 또는 eyJ...">
+          <label style="display:block;font-size:13px;color:#94a3b8;font-weight:600;margin-bottom:4px">Supabase KEY <span style="color:#4ade80;font-weight:700">🔒 자동 연결 (고정값)</span></label>
+          <input type="text" id="cfgSbKey" readonly disabled style="width:100%;padding:9px 12px;border:1px solid #475569;border-radius:8px;font-size:13px;font-family:monospace;background:#0f172a;color:#94a3b8;cursor:not-allowed" placeholder="sb_publishable_... 또는 eyJ...">
         </div>
       </div>
-      <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px 12px;font-size:12px;color:#065f46;line-height:1.6;margin-bottom:12px">
-        🔒 <b>관리자 고정 모드</b> — 위 URL/KEY는 시스템에 고정되어 있어 변경할 수 없습니다.<br>
+      <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:10px 12px;font-size:12px;color:#fcd34d;line-height:1.6;margin-bottom:12px">
+        🔒 <b style="color:#fbbf24">관리자 고정 모드</b> — 위 URL/KEY는 시스템에 고정되어 있어 변경할 수 없습니다.<br>
         모든 PC에서 동일한 Supabase 프로젝트로 자동 연결되어 데이터가 공유됩니다.
       </div>
       <div class="settings-actions">
         <button class="btn btn-secondary" onclick="manualSync()">🔄 지금 동기화</button>
-        <button class="btn btn-secondary" onclick="forcePushAll()" style="background:#fef3c7;color:#b45309;border-color:#fbbf24">⬆️ 로컬 데이터 서버에 강제 푸시</button>
+        <button class="btn btn-secondary" onclick="forcePushAll()" style="background:rgba(245,158,11,0.15);color:#fcd34d;border-color:rgba(245,158,11,0.4)">⬆️ 로컬 데이터 서버에 강제 푸시</button>
       </div>
       <details style="margin-top:12px">
         <summary style="cursor:pointer;font-weight:600;color:var(--accent)">▶ kv_store 테이블이 없을 때만 실행할 SQL 보기</summary>
