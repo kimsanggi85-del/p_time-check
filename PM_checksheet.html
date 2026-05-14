@@ -10269,10 +10269,16 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     const plan = getPlanForEq(eqId);
     const checks = getChecksAll();
     
-    const monthPlan = plan[monthInfo.m] || {};
+    // plan 데이터 구조: { "P- 01": { "1": { "w2": "□", "w4": "" }, ... } }
+    // 월 키는 문자열일 수도, 숫자일 수도 → 둘 다 시도
+    const monthPlan = plan[monthInfo.m] || plan[String(monthInfo.m)] || {};
     const plannedWeeks = [];
     for(const w in monthPlan){
-      if(monthPlan[w] === true) plannedWeeks.push(parseInt(w));
+      const v = monthPlan[w];
+      // 값이 빈 문자열이 아닌 문자열(□, ■ 등) 또는 truthy면 계획 있음
+      if(v && (typeof v === 'string' ? v.trim() !== '' : v === true)){
+        plannedWeeks.push(w);  // "w2", "w4" 그대로 (parseInt 하지 않음)
+      }
     }
     
     if(plannedWeeks.length === 0) return {status:'na', label:'예정없음'};
@@ -10325,12 +10331,15 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
       for(const eq of list){
         const plan = getPlanForEq(eq.id);
         const checks = getChecksAll();
-        const monthPlan = plan[m] || {};
+        const monthPlan = plan[m] || plan[String(m)] || {};
         const plannedWeeks = [];
         for(const w in monthPlan){
-          if(monthPlan[w] === true) plannedWeeks.push(parseInt(w));
+          const v = monthPlan[w];
+          if(v && (typeof v === 'string' ? v.trim() !== '' : v === true)){
+            plannedWeeks.push(w);
+          }
         }
-        if(plannedWeeks.length === 0) continue;  // 계획 없으면 스킵
+        if(plannedWeeks.length === 0) continue;
         
         plannedEquips++;
         let doneCount = 0;
@@ -10342,13 +10351,13 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
         if(doneCount === plannedWeeks.length) doneEquips++;
         else if(doneCount > 0) partialEquips++;
         else if(m < curMonth) lateEquips++;
-        else if(m === curMonth) partialEquips++;  // 이번달 미완료는 진행중
+        else if(m === curMonth) partialEquips++;
       }
       
       // 월별 상태 결정
       let tone = 'none';
       if(plannedEquips === 0) tone = 'none';
-      else if(m > curMonth) tone = 'none';  // 미래 = 예정
+      else if(m > curMonth) tone = 'none';
       else if(doneEquips === plannedEquips) tone = 'done';
       else if(lateEquips > 0) tone = 'late';
       else tone = 'partial';
