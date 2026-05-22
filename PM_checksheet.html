@@ -9,6 +9,7 @@
 <title>설비정기점검 기준·체크시트·보고서결재 - (주)태진다이텍</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#f5f6fa;--card:#fff;--text:#1a1a2e;--muted:#6b7280;--accent:#2563eb;--blue:#2563eb;--green:#16a34a;--orange:#d97706;--red:#dc2626;--border:#e0e3eb;--radius:12px}
@@ -6715,6 +6716,7 @@ function renderMaintHistory(){
     h += `<div style="margin-top:10px;text-align:right"><button onclick="exportMaintHistory()" class="btn btn-secondary btn-sm">📥 엑셀 다운로드</button></div>`;
   }
   document.getElementById('maintHistContent').innerHTML = h;
+  try{ renderReliabilityKPI(filtered); }catch(e){ console.warn('[reliability]', e); }
 }
 
 function openMaintForm(editId){
@@ -10712,6 +10714,140 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
 })();
 </script>
 <!-- [v4-RENDER-GUARD END] -->
+
+<!-- ============================================================
+     [v4-RELIABILITY START] 설비 신뢰성 지표 + 월별 추이 차트
+     - 유지보전 이력(maintHistory) 데이터 기반 MTTR·고장·다운타임 집계
+     - 월별 고장/수리시간 추이 (Chart.js)
+     - renderMaintHistory() 종료 시 자동 호출
+     ============================================================ -->
+<script>
+(function(){
+  'use strict';
+  var chartRef = null;
+
+  // 반응형 스타일 1회 주입
+  if(!document.getElementById('relStyle')){
+    var st = document.createElement('style');
+    st.id = 'relStyle';
+    st.textContent = '@media(max-width:768px){.rel-kpi-grid{grid-template-columns:repeat(2,1fr)!important}}'
+      + '@media(max-width:480px){.rel-kpi-grid{grid-template-columns:1fr!important}}';
+    document.head.appendChild(st);
+  }
+
+  // 보전유형 중 "고장/사후보전"으로 간주할 키워드
+  function isBreakdown(t){
+    if(!t) return false;
+    return /고장|사후|돌발|긴급|수리/.test(t);
+  }
+
+  window.renderReliabilityKPI = function(filtered){
+    var host = document.getElementById('maintHistContent');
+    if(!host) return;
+    filtered = filtered || (window.maintHistory || []);
+
+    // 기존 보강 블록 제거 후 재생성
+    var old = document.getElementById('relWrap');
+    if(old) old.remove();
+
+    var bd = filtered.filter(function(r){ return isBreakdown(r.type); });
+    var bdCnt = bd.length;
+    var totalHours = filtered.reduce(function(a,b){ return a+(parseFloat(b.hours)||0); },0);
+    var bdHours = bd.reduce(function(a,b){ return a+(parseFloat(b.hours)||0); },0);
+    var totalCost = filtered.reduce(function(a,b){ return a+(parseInt(b.cost)||0); },0);
+    var mttr = bdCnt ? (bdHours/bdCnt) : 0;            // 평균 수리시간
+    var avgCost = filtered.length ? (totalCost/filtered.length) : 0;
+    // 고장율 = 고장(사후보전) 건수 / 전체 보전 건수 × 100
+    var failRate = filtered.length ? (bdCnt/filtered.length*100) : 0;
+    var frColor = failRate>=30 ? '#dc2626' : failRate>=15 ? '#f59e0b' : '#16a34a';
+
+    // 가동 설비 수 기준 MTBF 근사: (집계기간 가동시간 합) / 고장건수
+    // 가동시간 정보가 없으므로 "고장 간 평균 일수"로 대체 산출
+    var dates = bd.map(function(r){ return r.date; }).filter(Boolean).sort();
+    var mtbfDays = 0;
+    if(dates.length >= 2){
+      var first = new Date(dates[0]), last = new Date(dates[dates.length-1]);
+      var span = (last - first)/(1000*60*60*24);
+      mtbfDays = span / (dates.length - 1);
+    }
+
+    var card = function(color,label,val,unit,sub){
+      return '<div class="mh-summary-card">'
+        + '<div class="num" style="color:'+color+'">'+val+'<span style="font-size:14px;font-weight:600;color:#94a3b8">'+(unit||'')+'</span></div>'
+        + '<div class="label">'+label+'</div>'
+        + (sub?'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+sub+'</div>':'')
+        + '</div>';
+    };
+
+    var html =
+      '<div id="relWrap" style="margin-bottom:20px">'
+      + '<h4 style="font-size:15px;font-weight:800;color:#60a5fa;margin-bottom:10px;display:flex;align-items:center;gap:6px">📈 설비 신뢰성 지표 <span style="font-size:11px;font-weight:600;color:#94a3b8">(필터 조건 기준 자동 집계)</span></h4>'
+      + '<div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:8px" class="rel-kpi-grid">'
+      // 고장율 강조 카드 (맨 앞, 큰 표시)
+      +   '<div class="mh-summary-card" style="border:2px solid '+frColor+';background:linear-gradient(135deg,rgba(30,41,59,.6),rgba(15,23,42,.3))">'
+      +     '<div class="num" style="color:'+frColor+';font-size:34px">'+failRate.toFixed(1)+'<span style="font-size:16px;font-weight:700">%</span></div>'
+      +     '<div class="label" style="font-size:14px;font-weight:800;color:#e2e8f0">⚠️ 고장율</div>'
+      +     '<div style="font-size:11px;color:#94a3b8;margin-top:2px">고장 '+bdCnt+'건 / 전체 '+filtered.length+'건</div>'
+      +   '</div>'
+      +   card('#f59e0b', 'MTTR (평균수리시간)', mttr.toFixed(1), ' H', '고장 1건당 평균')
+      +   card('#dc2626', '고장(사후보전)', bdCnt, ' 건', '돌발/긴급 수리')
+      +   card('#3b82f6', 'MTBF (고장간격)', mtbfDays ? mtbfDays.toFixed(0) : '-', mtbfDays?' 일':'', '고장 발생 평균간격')
+      +   card('#16a34a', '평균 보전비용', (avgCost/10000).toFixed(1), ' 만원', '1건당 평균')
+      + '</div>'
+      + '<div style="font-size:11px;color:#94a3b8;margin-bottom:14px">※ 고장율=고장건수/전체보전건수×100(낮을수록 양호) · MTTR=총수리시간/고장건수(낮을수록 양호) · MTBF=고장 발생 평균간격(높을수록 양호)</div>'
+      + '<h4 style="font-size:15px;font-weight:800;color:#60a5fa;margin-bottom:10px;display:flex;align-items:center;gap:6px">📊 월별 보전 추이</h4>'
+      + '<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;position:relative;height:280px">'
+      +   '<canvas id="relChart"></canvas>'
+      + '</div>'
+      + '<div style="border-bottom:1px solid #334155;margin:20px 0 4px"></div>'
+      + '</div>';
+
+    host.insertAdjacentHTML('afterbegin', html);
+
+    // 월별 집계 (당해년도 기준)
+    var year = (typeof currentYear !== 'undefined' && currentYear) ? currentYear : new Date().getFullYear();
+    var byMonthCnt = new Array(12).fill(0);
+    var byMonthBd  = new Array(12).fill(0);
+    var byMonthHr  = new Array(12).fill(0);
+    filtered.forEach(function(r){
+      if(!r.date) return;
+      var d = new Date(r.date);
+      if(d.getFullYear() !== year) return;
+      var m = d.getMonth();
+      byMonthCnt[m]++;
+      byMonthHr[m] += (parseFloat(r.hours)||0);
+      if(isBreakdown(r.type)) byMonthBd[m]++;
+    });
+
+    var ctx = document.getElementById('relChart');
+    if(!ctx || typeof Chart === 'undefined') return;
+    if(chartRef){ try{ chartRef.destroy(); }catch(_){ } }
+    var labels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    chartRef = new Chart(ctx, {
+      type:'bar',
+      data:{ labels:labels, datasets:[
+        { label:'전체 보전(건)', data:byMonthCnt, backgroundColor:'#3b82f6', borderRadius:4, order:2 },
+        { label:'고장보전(건)', data:byMonthBd, backgroundColor:'#dc2626', borderRadius:4, order:1 },
+        { label:'수리시간(H)', data:byMonthHr, type:'line', borderColor:'#f59e0b', backgroundColor:'#f59e0b',
+          borderWidth:2, tension:.3, yAxisID:'y1', order:0, pointRadius:3 }
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'top', labels:{ color:'#cbd5e1', font:{size:12} } },
+          title:{ display:true, text:year+'년 월별 보전 현황', color:'#94a3b8', font:{size:13} } },
+        scales:{
+          x:{ ticks:{ color:'#94a3b8' }, grid:{ color:'#334155' } },
+          y:{ beginAtZero:true, ticks:{ color:'#94a3b8', stepSize:1 }, grid:{ color:'#334155' },
+              title:{ display:true, text:'건수', color:'#94a3b8' } },
+          y1:{ beginAtZero:true, position:'right', ticks:{ color:'#f59e0b' }, grid:{ drawOnChartArea:false },
+              title:{ display:true, text:'시간(H)', color:'#f59e0b' } }
+        }
+      }
+    });
+  };
+})();
+</script>
+<!-- [v4-RELIABILITY END] -->
 
 </body>
 </html>
