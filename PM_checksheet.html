@@ -1928,6 +1928,32 @@ code,pre,kbd,samp{
   color:#94a3b8 !important;
 }
 
+/* ─── 셀 마커 톤다운 (다크 배경에서 형광색 → 부드러운 파스텔) ───
+   □ 계획(plan) / ▣ 완료(done) / ■ 자체점검(self) 기호가
+   진한 원색이라 어두운 배경에서 눈이 부신 문제 개선 */
+#pmPlanTab .plan-cell .plan,
+#pmPlanTab .plan,
+#pmPlanTab .eq-table .plan{
+  color:#7eaef0 !important;   /* 형광 파랑 #2563eb → 차분한 하늘색 */
+}
+#pmPlanTab .plan-cell .done,
+#pmPlanTab .done,
+#pmPlanTab .eq-table .done{
+  color:#6fcf97 !important;   /* 형광 초록 #16a34a → 부드러운 민트 */
+}
+#pmPlanTab .plan-cell .self,
+#pmPlanTab .self,
+#pmPlanTab .eq-table .self{
+  color:#e89393 !important;   /* 형광 빨강 #dc2626 → 차분한 살구빛 빨강 */
+}
+
+/* 등급 글씨도 동일하게 채도 낮춤 */
+#pmPlanTab .grade-a{color:#6fcf97 !important}
+#pmPlanTab .grade-b{color:#7eaef0 !important}
+#pmPlanTab .grade-c{color:#e0b070 !important}
+#pmPlanTab .grade-d{color:#e0a06a !important}
+#pmPlanTab .grade-e{color:#e89393 !important}
+
 /* 폼/버튼/입력 (#pmPlanTab 내부) */
 #pmPlanTab input,
 #pmPlanTab select,
@@ -2023,8 +2049,8 @@ code,pre,kbd,samp{
   color:#bfdbfe !important;
 }
 #pmPlanTab .eq-table thead tr:first-child th.v4p-current-month{
-  background:#1d4ed8 !important;
-  color:#fff !important;
+  background:#2f5aa8 !important;
+  color:#e8eefc !important;
 }
 #pmPlanTab .eq-table thead tr:first-child th.v4p-current-month::after{
   color:#fff !important;
@@ -3418,9 +3444,9 @@ mark,
   <div id="view_plan">
     <div class="vol-tabs" id="volTabs"></div>
     <div class="legend">
-      <span><span class="sym" style="color:#2563eb">□</span> 계획</span>
-      <span><span class="sym" style="color:#16a34a">▣</span> 점검완료</span>
-      <span><span class="sym" style="color:#dc2626">■</span> 자체점검</span>
+      <span><span class="sym" style="color:#7eaef0">□</span> 계획</span>
+      <span><span class="sym" style="color:#6fcf97">▣</span> 점검완료</span>
+      <span><span class="sym" style="color:#e89393">■</span> 자체점검</span>
       <span style="color:var(--muted);font-size:13px">| □ 클릭 → 점검완료 + 이력 자동등록</span>
     </div>
     <div id="eqContent"></div>
