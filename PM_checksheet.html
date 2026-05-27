@@ -455,7 +455,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 #pmPlanTab .eq-table col.c-wk{width:34px}
 #pmPlanTab .eq-table col.c-grade{width:50px}
 #pmPlanTab .eq-table col.c-year{width:55px}
-#pmPlanTab .eq-table col.c-prog{width:60px}
+#pmPlanTab .eq-table col.c-prog{width:90px}
 #pmPlanTab .plan-cell {font-size:15px;line-height:1.1;padding:6px 1px}
 #pmPlanTab .plan-cell .check-date{display:block;font-size:9px;color:var(--muted);margin-top:1px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pmPlanTab .plan-cell .plan{color:#2563eb}
@@ -546,7 +546,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   #pmPlanTab .eq-table col.c-wk{width:22px}
   #pmPlanTab .eq-table col.c-grade{width:32px}
   #pmPlanTab .eq-table col.c-year{width:36px}
-  #pmPlanTab .eq-table col.c-prog{width:40px}
+  #pmPlanTab .eq-table col.c-prog{width:72px}
   #pmPlanTab .plan-cell {font-size:12px;padding:4px 0}
   #pmPlanTab .plan-cell .check-date{font-size:8px}
 }
@@ -575,7 +575,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   #pmPlanTab .eq-table col.c-wk{width:20px}
   #pmPlanTab .eq-table col.c-grade{width:32px}
   #pmPlanTab .eq-table col.c-year{width:36px}
-  #pmPlanTab .eq-table col.c-prog{width:38px}
+  #pmPlanTab .eq-table col.c-prog{width:70px}
   #pmPlanTab .plan-cell {font-size:12px;padding:4px 0}
   #pmPlanTab .plan-cell .check-date{font-size:8px}
   #pmPlanTab .mp-cell .mp-val {font-size:20px}
@@ -606,7 +606,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   #pmPlanTab .eq-table col.c-wk{width:16px}
   #pmPlanTab .eq-table col.c-grade{width:26px}
   #pmPlanTab .eq-table col.c-year{width:30px}
-  #pmPlanTab .eq-table col.c-prog{width:32px}
+  #pmPlanTab .eq-table col.c-prog{width:64px}
   #pmPlanTab .plan-cell {font-size:11px;padding:3px 0}
   #pmPlanTab .plan-cell .check-date{font-size:7px}
   #pmPlanTab .mp-cell .mp-val {font-size:18px}
@@ -1247,24 +1247,24 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 
 /* 설비별 상태 바 (진행 컬럼에 표시) */
 #pmPlanTab .eq-table td .v4p-progress{
-  display:flex;flex-direction:column;gap:3px;
-  min-width:55px;
+  display:flex;flex-direction:column;gap:5px;
+  min-width:78px;
 }
 #pmPlanTab .eq-table td .v4p-progress .bar{
-  height:5px;
+  height:10px;
   background:#f1f5f9;
-  border-radius:3px;
+  border-radius:5px;
   overflow:hidden;
 }
 #pmPlanTab .eq-table td .v4p-progress .bar > div{
   height:100%;
-  border-radius:3px;
+  border-radius:5px;
   transition:width .4s ease;
 }
 #pmPlanTab .eq-table td .v4p-progress .txt{
-  font-size:10px;font-weight:800;
+  font-size:14px;font-weight:800;
   text-align:center;
-  line-height:1;
+  line-height:1.1;
 }
 
 /* 색상 인디케이터 (위험 설비 좌측 표시) - 다크 테마 */
@@ -1928,31 +1928,29 @@ code,pre,kbd,samp{
   color:#94a3b8 !important;
 }
 
-/* ─── 셀 마커 톤다운 (다크 배경에서 형광색 → 부드러운 파스텔) ───
-   □ 계획(plan) / ▣ 완료(done) / ■ 자체점검(self) 기호가
-   진한 원색이라 어두운 배경에서 눈이 부신 문제 개선 */
+/* ─── 셀 마커 기호 강조 (다크 배경에서 □/■/▣ 가 묻혀 보이는 문제) ───
+   색은 원래 형광색 그대로 두고, 굵게·크게·글로우로 또렷하게 */
 #pmPlanTab .plan-cell .plan,
-#pmPlanTab .plan,
 #pmPlanTab .eq-table .plan{
-  color:#7eaef0 !important;   /* 형광 파랑 #2563eb → 차분한 하늘색 */
-}
-#pmPlanTab .plan-cell .done,
-#pmPlanTab .done,
-#pmPlanTab .eq-table .done{
-  color:#6fcf97 !important;   /* 형광 초록 #16a34a → 부드러운 민트 */
+  color:#2563eb !important;
+  font-weight:900 !important;
+  font-size:1.3em !important;
+  text-shadow:0 0 2px rgba(37,99,235,0.9), 0 0 1px rgba(37,99,235,0.9) !important;
 }
 #pmPlanTab .plan-cell .self,
-#pmPlanTab .self,
 #pmPlanTab .eq-table .self{
-  color:#e89393 !important;   /* 형광 빨강 #dc2626 → 차분한 살구빛 빨강 */
+  color:#dc2626 !important;
+  font-weight:900 !important;
+  font-size:1.3em !important;
+  text-shadow:0 0 2px rgba(220,38,38,0.9), 0 0 1px rgba(220,38,38,0.9) !important;
 }
-
-/* 등급 글씨도 동일하게 채도 낮춤 */
-#pmPlanTab .grade-a{color:#6fcf97 !important}
-#pmPlanTab .grade-b{color:#7eaef0 !important}
-#pmPlanTab .grade-c{color:#e0b070 !important}
-#pmPlanTab .grade-d{color:#e0a06a !important}
-#pmPlanTab .grade-e{color:#e89393 !important}
+#pmPlanTab .plan-cell .done,
+#pmPlanTab .eq-table .done{
+  color:#16a34a !important;
+  font-weight:900 !important;
+  font-size:1.3em !important;
+  text-shadow:0 0 2px rgba(22,163,74,0.9), 0 0 1px rgba(22,163,74,0.9) !important;
+}
 
 /* 폼/버튼/입력 (#pmPlanTab 내부) */
 #pmPlanTab input,
@@ -2049,8 +2047,8 @@ code,pre,kbd,samp{
   color:#bfdbfe !important;
 }
 #pmPlanTab .eq-table thead tr:first-child th.v4p-current-month{
-  background:#2f5aa8 !important;
-  color:#e8eefc !important;
+  background:#1d4ed8 !important;
+  color:#fff !important;
 }
 #pmPlanTab .eq-table thead tr:first-child th.v4p-current-month::after{
   color:#fff !important;
@@ -3444,9 +3442,9 @@ mark,
   <div id="view_plan">
     <div class="vol-tabs" id="volTabs"></div>
     <div class="legend">
-      <span><span class="sym" style="color:#7eaef0">□</span> 계획</span>
-      <span><span class="sym" style="color:#6fcf97">▣</span> 점검완료</span>
-      <span><span class="sym" style="color:#e89393">■</span> 자체점검</span>
+      <span><span class="sym" style="color:#2563eb">□</span> 계획</span>
+      <span><span class="sym" style="color:#16a34a">▣</span> 점검완료</span>
+      <span><span class="sym" style="color:#dc2626">■</span> 자체점검</span>
       <span style="color:var(--muted);font-size:13px">| □ 클릭 → 점검완료 + 이력 자동등록</span>
     </div>
     <div id="eqContent"></div>
