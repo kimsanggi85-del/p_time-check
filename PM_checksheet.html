@@ -81,14 +81,14 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 .check-grid.monthly{grid-template-columns:repeat(6,1fr)}
 .check-grid.quarterly{grid-template-columns:repeat(4,1fr)}
 .check-grid.halfly{grid-template-columns:repeat(2,1fr)}
-.check-grid.yearly{grid-template-columns:1fr}
-.chk-cell{display:flex;flex-direction:column;align-items:center;padding:6px 3px;background:#f8f9fb;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .15s;font-size:13px;user-select:none;min-height:44px;justify-content:center}
+.check-grid.yearly{grid-template-columns:repeat(6,1fr)}
+.chk-cell{display:flex;flex-direction:column;align-items:center;padding:4px 2px;background:#f8f9fb;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .15s;font-size:13px;user-select:none;min-height:34px;justify-content:center}
 .chk-cell:hover{background:#eff6ff;border-color:var(--accent)}
 .chk-cell.checked{background:#dcfce7;border-color:var(--green)}
 .chk-cell .lbl{font-weight:600;color:var(--muted);margin-bottom:2px}
 .chk-cell.checked .lbl{color:var(--green)}
-.chk-cell input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--green)}
-.chk-cell .date{font-size:12px;color:var(--muted);margin-top:3px;min-height:14px;font-weight:600}
+.chk-cell input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--green)}
+.chk-cell .date{font-size:11px;color:var(--muted);margin-top:2px;min-height:12px;font-weight:600}
 .chk-cell.checked .date{color:var(--green);font-weight:600}
 
 /* 년도 선택 */
@@ -4383,7 +4383,7 @@ function showEquipment(key){
     } else if(type==='halfly'){
       headerCells = '<th>상반기</th><th>하반기</th>';
     } else {
-      headerCells = '<th>연간</th>';
+      for(let m=1;m<=12;m++) headerCells += `<th style="font-size:13px;padding:6px 2px;font-weight:700">${m}월</th>`;
     }
     let s = `<div class="check-section" data-type="${type}"><h3>${icon} ${title} (${items.length}건)</h3>
       <table class="check-table">
@@ -4625,13 +4625,14 @@ window.syncChkYearFromDetail = syncChkYearFromDetail;
 
 // ========== 점검 체크박스 시스템 ==========
 function getColCount(type){
-  return type==='monthly'?12 : type==='quarterly'?4 : type==='halfly'?2 : 1;
+  return type==='monthly'?12 : type==='quarterly'?4 : type==='halfly'?2 : 12;
 }
 function getPeriods(type){
   if(type==='monthly') return Array.from({length:12},(_,i)=>({k:'m'+(i+1), label:(i+1)+'월'}));
   if(type==='quarterly') return [{k:'q1',label:'1분기'},{k:'q2',label:'2분기'},{k:'q3',label:'3분기'},{k:'q4',label:'4분기'}];
   if(type==='halfly') return [{k:'h1',label:'상반기'},{k:'h2',label:'하반기'}];
-  return [{k:'y',label:'연간'}];
+  // 연간 항목도 '월 1회/2500시간' 기준에 맞춰 월별 12칸으로 체크
+  return Array.from({length:12},(_,i)=>({k:'m'+(i+1), label:(i+1)+'월'}));
 }
 function chkStoreKey(key){
   return 'INS_CHK_'+key+'_'+getChkYear();
@@ -5301,12 +5302,10 @@ function _collectCkeys(eqKey,eqData,year,month,enabledTypes){
     }
   }
   if(enabledTypes.y && eqData.yearly){
-    // 연간은 12월에만
-    if(month===12){
-      eqData.yearly.forEach(function(it,idx){
-        out.push({ckey:eqKey+'|yearly|'+idx+'|y', type:'yearly'});
-      });
-    }
+    // 연간 항목도 월별(매월) 체크로 변경
+    eqData.yearly.forEach(function(it,idx){
+      out.push({ckey:eqKey+'|yearly|'+idx+'|m'+month, type:'yearly'});
+    });
   }
   return out;
 }
