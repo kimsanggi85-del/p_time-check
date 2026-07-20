@@ -733,6 +733,21 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   .appr-app table.ng-tbl th {background:#1e293b;color:#fff;font-weight:700;text-align:center}
   .appr-app table.ng-tbl td.ng-it {color:#b91c1c;font-weight:600}
 
+  /* ── 결재 보고서(흰 용지) 표 글자색 고정 ─────────────────────────
+     전역 규칙 table{color:#e2e8f0} 이 흰 용지 위 표 글자를 밝은 회색으로
+     상속시켜 안 보이던 문제 해결. 이미 결재한/앞으로 결재할 모든 보고서에 적용됨. */
+  .appr-app .paper-wrap table.ng-tbl,
+  .appr-app .paper-wrap table.mtx {color:#1e293b}
+  .appr-app .paper-wrap table.ng-tbl td,
+  .appr-app .paper-wrap table.mtx td {color:#1e293b}
+  .appr-app .paper-wrap table.ng-tbl th,
+  .appr-app .paper-wrap table.mtx th {color:#fff}
+  .appr-app .paper-wrap table.ng-tbl td.ok {color:#15803d;font-weight:700}   /* ▣ 완료 */
+  .appr-app .paper-wrap table.mtx td.mc {color:#1e293b}
+  .appr-app .paper-wrap table.mtx td.ok {color:#15803d}
+  .appr-app .paper-wrap table.mtx td.ng {color:#b91c1c}
+  .appr-app .paper-wrap table.mtx td.na {color:#94a3b8}
+
   .appr-app .paper-comment {border:1.5px solid #1e293b;padding:10px 12px;min-height:60px;font-size:12px;background:#fff;line-height:1.7;white-space:pre-wrap}
   .appr-app .paper-comment.editable {background:#fffbeb;border-color:#f59e0b}
 
