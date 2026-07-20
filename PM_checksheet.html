@@ -2570,6 +2570,76 @@ table th{
 }
 
 /* ─────────────────────────────────────────────
+   체크시트 상세화면(#detailPanel) 가독성 수정
+   ① 점검 년도 바·결재란·섹션 제목: 밝은 파스텔 → 다크 가독성
+   ② 점검/교체 주기 열: 글자가 한 글자씩 세로로 밀리는 현상 방지
+   ───────────────────────────────────────────── */
+
+/* ① 점검 년도 선택 바 (.year-selector) 다크화 */
+.detail-panel .year-selector{
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  border-radius:8px !important;
+  color:#e2e8f0 !important;
+}
+.detail-panel .year-selector label,
+.detail-panel .year-selector label b{color:#e2e8f0 !important}
+.detail-panel .year-selector span{color:#94a3b8 !important}
+.detail-panel .year-selector select{
+  background:#0f172a !important;
+  border:1px solid #475569 !important;
+  color:#e2e8f0 !important;
+}
+.detail-panel .year-selector select option{background:#1e293b;color:#e2e8f0}
+
+/* ① 결재란(담당/검토/승인) 라벨 가독성 */
+.detail-panel .approval{border-color:#475569 !important}
+.detail-panel .approval-cell .label{
+  color:#e2e8f0 !important;
+  border-bottom-color:#475569 !important;
+}
+
+/* ① 섹션 제목(📅 …항목 (N건)) 파스텔 → 다크 그라데이션 + 밝은 글자 */
+.detail-panel .check-section h3{
+  background:linear-gradient(90deg,rgba(59,130,246,0.22),transparent) !important;
+  color:#93c5fd !important;
+  border-left:4px solid #3b82f6 !important;
+}
+
+/* ① 설비 수리/보전 이력 제목(📝) 앰버 파스텔 → 다크 그라데이션 + 밝은 글자 */
+.detail-panel .history-section h3{
+  background:linear-gradient(90deg,rgba(217,119,6,0.24),transparent) !important;
+  color:#fcd34d !important;
+  border-left:4px solid #d97706 !important;
+}
+
+/* ① 등급별 년식 기준 안내 박스 밝은 바탕 → 다크 가독성 */
+.detail-panel .grade-note{
+  margin-top:20px !important;
+  padding:12px 14px !important;
+  background:#1e293b !important;
+  border:1px solid #334155 !important;
+  border-radius:8px !important;
+  font-size:13px !important;
+  color:#cbd5e1 !important;
+  text-align:center !important;
+}
+
+/* ② 점검/교체 주기 열·헤더: 한글 낱자 분리 방지 + 최소폭 확보 */
+.check-table th{word-break:keep-all !important}
+.check-table td.period{
+  word-break:keep-all !important;
+  white-space:normal !important;
+  min-width:66px !important;
+  line-height:1.45 !important;
+  padding:8px 6px !important;
+}
+.check-table thead tr:first-child th:last-child{
+  min-width:66px !important;
+  word-break:keep-all !important;
+}
+
+/* ─────────────────────────────────────────────
    보고서결재(.appr-app) 입력 가독성 강화
    ───────────────────────────────────────────── */
 .appr-app input::placeholder,
@@ -4351,7 +4421,7 @@ function showEquipment(key){
     h += `</ul></div>`;
   }
   
-  h += `<div style="margin-top:20px;padding:12px;background:#f8f9fb;border-radius:8px;font-size:13px;color:var(--muted);text-align:center">
+  h += `<div class="grade-note">
     ※ 등급별 년식 기준: A급 1~10년 · B급 11~20년 · C급 21~30년 · D급 31~40년 · E급 41년 이상
   </div>`;
   
