@@ -4385,8 +4385,13 @@ function showEquipment(key){
     } else {
       for(let m=1;m<=12;m++) headerCells += `<th style="font-size:13px;padding:6px 2px;font-weight:700">${m}월</th>`;
     }
+    const _nc = getColCount(type);
+    let _cols = '<col style="width:14%"><col style="width:26%">';
+    for(let _i=0;_i<_nc;_i++) _cols += `<col style="width:${(44/_nc).toFixed(3)}%">`;
+    _cols += '<col style="width:16%">';
     let s = `<div class="check-section" data-type="${type}"><h3>${icon} ${title} (${items.length}건)</h3>
-      <table class="check-table">
+      <table class="check-table" style="table-layout:fixed">
+      <colgroup>${_cols}</colgroup>
       <thead><tr><th>점검항목</th><th>점검 기준</th><th colspan="${getColCount(type)}">점검 결과 (체크 시 날짜 자동기록)</th><th>점검/교체 주기</th></tr>
       <tr><th></th><th></th>${headerCells}<th></th></tr></thead><tbody>`;
     items.forEach((it, idx)=>{
