@@ -3886,6 +3886,11 @@ async function initialDownload(){
     for(const [k, v] of serverMap.entries()){
       const cur = localStorage.getItem(k);
       if(cur !== v){
+        if(_isEmptyWipeRisk(k, v)){
+          console.warn('[Sync-Guard] 빈 서버값이 로컬 데이터를 덮어쓰려 함 → 로컬 유지 & 재업로드:', k);
+          queueUpload(k, cur);
+          continue;
+        }
         _lsSet(k, v);  // 후킹 우회(재업로드 방지)
         applied++;
       }
@@ -3925,6 +3930,21 @@ async function initialDownload(){
   }
 }
 
+
+// [PATCH v2.8] 빈 데이터 덮어쓰기 방지 가드
+// 서버의 빈 값({})이 로컬의 완료 체크 데이터를 지우는 사고 방지 (eq_checks_/INS_CHK_ 한정)
+function _isEmptyWipeRisk(localKey, incoming){
+  try{
+    if(!localKey) return false;
+    if(!(localKey.indexOf('eq_checks_')===0 || localKey.indexOf('INS_CHK_')===0)) return false;
+    var inc = (incoming==null?'':String(incoming)).trim();
+    if(inc!=='' && inc!=='{}' && inc!=='[]' && inc!=='null') return false;
+    var cur = localStorage.getItem(localKey);
+    if(!cur) return false;
+    var c = cur.trim();
+    return (c!=='' && c!=='{}' && c!=='[]' && c!=='null');
+  }catch(e){ return false; }
+}
 // JSONB value를 localStorage용 문자열로 변환
 // - 객체/배열: JSON.stringify
 // - 문자열: 그대로 (localStorage는 문자열만 저장, JSON.stringify("abc")는 '"abc"'가 되어 어긋남)
@@ -4082,6 +4102,11 @@ async function _bootstrapSync(){
         const val = cloudValueToLocalString(row.value);
         const cur = localStorage.getItem(localKey);
         if(cur !== val){
+          if(_isEmptyWipeRisk(localKey, val)){
+            console.warn('[Sync-Guard] (폴링) 빈 서버값 차단 → 로컬 유지 & 재업로드:', localKey);
+            queueUpload(localKey, cur);
+            continue;
+          }
           _lsSet(localKey, val);
           changed = true;
         }
@@ -11029,6 +11054,164 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
 })();
 </script>
 <!-- [v4-RELIABILITY END] -->
+
+<!-- [PATCH v2.8] 체크시트/보전이력 → 연간계획 자동 연동 -->
+<script>
+(function(){
+'use strict';
+
+// 설비키 정규화: "P-1" / "P- 1" / "P-01" → "P- 01"
+function normEqId(key){
+  if(!key) return null;
+  var m = String(key).trim().match(/^P\s*-\s*0*(\d+)$/i);
+  if(!m) return null;
+  var n = parseInt(m[1],10);
+  return 'P- ' + (n<10 ? '0'+n : String(n));
+}
+
+// 체크시트 DATA의 eq_id 매핑 우선 사용
+function mapSheetKeyToPlanId(sheetKey){
+  try{
+    if(typeof INSPECTION_DATA!=='undefined' && INSPECTION_DATA && INSPECTION_DATA.inspection_data){
+      var d = INSPECTION_DATA.inspection_data[sheetKey];
+      if(d && d.eq_id) return d.eq_id;
+    }
+  }catch(e){}
+  return normEqId(sheetKey);
+}
+
+function getYear(){
+  var y = parseInt(localStorage.getItem('cur_year_v3')||'',10);
+  if(!y || isNaN(y)) y = new Date().getFullYear();
+  return y;
+}
+
+function pickWeek(planMonth, dateStr){
+  var day = 15;
+  try{ day = parseInt(String(dateStr).slice(8,10),10)||15; }catch(e){}
+  var hasW2 = !!(planMonth && planMonth.w2);
+  var hasW4 = !!(planMonth && planMonth.w4);
+  if(hasW2 && hasW4) return day<=15 ? 'w2' : 'w4';
+  if(hasW2) return 'w2';
+  if(hasW4) return 'w4';
+  return null;
+}
+
+// 핵심: INS_CHK_* + maint_history 를 읽어 eq_checks_{year} 에 완료 반영
+function syncPlanFromChecksheet(opts){
+  opts = opts || {};
+  var year = getYear();
+  var plansRaw = localStorage.getItem('eq_plans_'+year);
+  if(!plansRaw) { console.log('[연동] eq_plans_'+year+' 없음 - 스킵'); return {added:0}; }
+  var plans; try{ plans = JSON.parse(plansRaw)||{}; }catch(e){ return {added:0}; }
+  var checksKey = 'eq_checks_'+year;
+  var checks; try{ checks = JSON.parse(localStorage.getItem(checksKey)||'{}')||{}; }catch(e){ checks={}; }
+
+  var added = 0;
+  function markDone(eqId, month, week, date, by, srcTag){
+    if(!eqId || !month || !week) return;
+    var k = eqId + '_' + month + '_' + week;
+    if(checks[k]) return; // 이미 완료된 셀은 보존
+    checks[k] = { date: date||'', by: by||'자동연동', auto: true, src: srcTag };
+    added++;
+  }
+
+  // 1) 체크시트 점검 기록 (INS_CHK_{sheetKey}_{year})
+  var suffix = '_' + year;
+  for(var i=0;i<localStorage.length;i++){
+    var lsKey = localStorage.key(i);
+    if(!lsKey || lsKey.indexOf('INS_CHK_')!==0) continue;
+    if(lsKey.slice(-suffix.length)!==suffix) continue;
+    var sheetKey = lsKey.substring('INS_CHK_'.length, lsKey.length - suffix.length);
+    var eqId = mapSheetKeyToPlanId(sheetKey);
+    if(!eqId || !plans[eqId]) continue;
+    var store; try{ store = JSON.parse(localStorage.getItem(lsKey)||'{}')||{}; }catch(e){ continue; }
+    Object.keys(store).forEach(function(ck){
+      var v = store[ck];
+      var date = (typeof v==='string') ? v : (v && v.date) ? v.date : '';
+      if(!date || String(date).slice(0,4)!==String(year)) return;
+      var month = parseInt(String(date).slice(5,7),10);
+      if(!month) return;
+      var pm = plans[eqId][String(month)];
+      if(!pm) return;
+      var wk = pickWeek(pm, date);
+      if(!wk) return;
+      var by = (v && typeof v==='object' && v.inspector) ? v.inspector : '체크시트';
+      markDone(eqId, month, wk, date, by, 'INS_CHK');
+    });
+  }
+
+  // 2) 보전이력 (maint_history) - 정기보전/예방보전/자체점검
+  try{
+    var hist = JSON.parse(localStorage.getItem('maint_history')||'[]')||[];
+    var okTypes = {'정기보전':1,'예방보전':1,'자체점검':1};
+    hist.forEach(function(r){
+      if(!r || !r.date || !okTypes[r.type]) return;
+      if(String(r.date).slice(0,4)!==String(year)) return;
+      var eqId = normEqId(r.eqId) || r.eqId;
+      if(!eqId || !plans[eqId]) return;
+      if(r.planYear===year && r.planMonth && r.planWeek){
+        markDone(eqId, r.planMonth, r.planWeek, r.date, r.worker||'이력', 'HIST');
+        return;
+      }
+      var month = parseInt(String(r.date).slice(5,7),10);
+      if(!month) return;
+      var pm = plans[eqId][String(month)];
+      if(!pm) return;
+      var wk = pickWeek(pm, r.date);
+      if(!wk) return;
+      markDone(eqId, month, wk, r.date, r.worker||'이력', 'HIST');
+    });
+  }catch(e){ console.warn('[연동] maint_history 처리 오류', e); }
+
+  if(added>0){
+    localStorage.setItem(checksKey, JSON.stringify(checks)); // setItem 훅 → 클라우드 자동 업로드
+    console.log('[연동] 체크시트/이력 → 연간계획 완료 반영: +'+added+'건 ('+year+'년)');
+    try{ if(typeof window.reloadYearData==='function') window.reloadYearData(); }catch(e){}
+    try{ if(typeof window.renderVolTabs==='function') window.renderVolTabs(); }catch(e){}
+    if(!opts.silent){
+      try{
+        var el=document.createElement('div');
+        el.textContent='🔗 점검기록 '+added+'건이 연간계획에 자동 반영되었습니다';
+        el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3)';
+        document.body.appendChild(el);
+        setTimeout(function(){ el.remove(); }, 4000);
+      }catch(e){}
+    }
+  } else {
+    console.log('[연동] 신규 반영 대상 없음 ('+year+'년) - eq_checks 기존 '+Object.keys(checks).length+'건 유지');
+  }
+  return {added:added};
+}
+window.syncPlanFromChecksheet = syncPlanFromChecksheet;
+
+// 진단 로그 (콘솔 입력 불필요)
+function diag(){
+  try{
+    var y = getYear();
+    var ec = localStorage.getItem('eq_checks_'+y);
+    var ins = [];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k && k.indexOf('INS_CHK_')===0) ins.push(k);
+    }
+    console.log('[진단] '+y+'년 eq_checks =', ec ? Object.keys(JSON.parse(ec)).length+'건' : '없음', '| INS_CHK 키:', ins.length+'개', ins);
+  }catch(e){}
+}
+
+// 실행 타이밍: 초기 클라우드 다운로드 이후(5초) + 60초마다 (다른 기기 기록 반영)
+function boot(){
+  setTimeout(function(){ diag(); syncPlanFromChecksheet(); }, 5000);
+  setInterval(function(){
+    if(document.hidden) return;
+    syncPlanFromChecksheet({silent:true});
+  }, 60000);
+}
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', boot, {once:true}); }
+else{ boot(); }
+})();
+</script>
+<!-- [PATCH v2.8 END] -->
 
 </body>
 </html>
