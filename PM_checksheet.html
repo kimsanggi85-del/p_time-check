@@ -11213,5 +11213,398 @@ else{ boot(); }
 </script>
 <!-- [PATCH v2.8 END] -->
 
+<!-- [PATCH v2.9] 쉬운 이력관리: 일괄 점검 등록 + 점검이력 통합 조회 -->
+<style>
+/* v2.9 공통 모달 */
+.qh-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99990;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 10px}
+.qh-overlay.open{display:flex}
+.qh-modal{background:#fff;color:#1e293b;border-radius:14px;width:100%;max-width:720px;box-shadow:0 20px 60px rgba(0,0,0,.35);margin:auto 0}
+.qh-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #e2e8f0}
+.qh-head h3{font-size:17px;font-weight:800;margin:0}
+.qh-close{border:none;background:#f1f5f9;border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer}
+.qh-body{padding:16px 18px}
+.qh-sec{margin-bottom:14px}
+.qh-sec label.qh-lb{display:block;font-size:13px;font-weight:700;color:#475569;margin-bottom:6px}
+.qh-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.qh-row select,.qh-row input[type=date]{padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;background:#fff;color:#1e293b}
+.qh-chips{display:flex;flex-wrap:wrap;gap:8px}
+.qh-chip{padding:8px 14px;border-radius:999px;border:1.5px solid #cbd5e1;background:#fff;font-size:14px;font-weight:600;cursor:pointer;user-select:none;transition:all .12s}
+.qh-chip:active{transform:scale(.96)}
+.qh-chip.sel{background:#2563eb;border-color:#2563eb;color:#fff}
+.qh-chip.eq{font-size:13px;padding:7px 11px}
+.qh-chip.eq.done{border-style:dashed;opacity:.65}
+.qh-chip.eq.sel{background:#16a34a;border-color:#16a34a}
+.qh-mini{font-size:12px;color:#64748b}
+.qh-actions{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid #e2e8f0;flex-wrap:wrap}
+.qh-btn{padding:11px 18px;border-radius:9px;border:none;font-size:15px;font-weight:800;cursor:pointer}
+.qh-btn.pri{background:#2563eb;color:#fff}
+.qh-btn.grn{background:#16a34a;color:#fff}
+.qh-btn.sec{background:#f1f5f9;color:#334155}
+.qh-btn:active{transform:scale(.97)}
+.qh-summary{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:10px}
+.qh-tablewrap{overflow-x:auto;max-height:52vh;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px}
+table.qh-tb{width:100%;border-collapse:collapse;font-size:13px}
+table.qh-tb th{position:sticky;top:0;background:#1e293b;color:#fff;padding:8px 6px;font-size:12px;white-space:nowrap}
+table.qh-tb td{padding:7px 6px;border-bottom:1px solid #eef2f7;text-align:center;white-space:nowrap}
+table.qh-tb td.l{text-align:left}
+table.qh-tb tr:hover td{background:#f8fafc}
+.qh-tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:700}
+.qh-tag.chk{background:#dcfce7;color:#166534}
+.qh-tag.hist{background:#fef3c7;color:#92400e}
+.qh-fab-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.qh-launch{padding:10px 16px;border-radius:9px;border:none;font-size:14px;font-weight:800;cursor:pointer;color:#fff}
+.qh-launch.q{background:#16a34a}
+.qh-launch.h{background:#7c3aed}
+@media(max-width:640px){
+  .qh-modal{max-width:100%}
+  .qh-chip{padding:10px 15px;font-size:15px}
+  .qh-btn{flex:1;padding:13px 10px}
+}
+</style>
+<script>
+(function(){
+'use strict';
+
+/* ================= 공용 유틸 ================= */
+function yearNow(){
+  try{ var y=getChkYear(); if(y) return parseInt(y,10); }catch(e){}
+  var s=localStorage.getItem('cur_year_chk'); if(s) return parseInt(s,10);
+  return new Date().getFullYear();
+}
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function inspectorNames(){
+  var set={}, out=[];
+  try{ (window.v4GetInspectors?window.v4GetInspectors():[]).forEach(function(n){ if(n&&!set[n]){set[n]=1;out.push(n);} }); }catch(e){}
+  try{ Object.keys(DATA).forEach(function(k){ var w=DATA[k]&&DATA[k].worker; if(w&&!set[w]){set[w]=1;out.push(w);} }); }catch(e){}
+  return out;
+}
+function eqEntries(){
+  var out=[];
+  try{
+    Object.keys(DATA).forEach(function(k){
+      out.push({key:k, title:(DATA[k]&&DATA[k].title)||k, worker:(DATA[k]&&DATA[k].worker)||''});
+    });
+  }catch(e){}
+  out.sort(function(a,b){
+    var na=parseInt((a.key.match(/\d+/)||[999])[0],10), nb=parseInt((b.key.match(/\d+/)||[999])[0],10);
+    return na-nb;
+  });
+  return out;
+}
+function loadStore(eqKey, year){
+  try{ return JSON.parse(localStorage.getItem('INS_CHK_'+eqKey+'_'+year)||'{}')||{}; }catch(e){ return {}; }
+}
+// 해당 월 점검 여부 (모든 대상 항목이 완료면 done)
+function monthStatus(eqKey, year, month){
+  var eqData=DATA[eqKey]; if(!eqData) return {total:0,done:0};
+  var ckeys=_collectCkeys(eqKey,eqData,year,month,{m:1,q:1,h:1,y:1});
+  var store=loadStore(eqKey,year), done=0;
+  ckeys.forEach(function(c){ if(store[c.ckey]) done++; });
+  return {total:ckeys.length, done:done};
+}
+
+/* ================= ① 일괄 점검 등록 ================= */
+var qc={month:0, sel:{}};
+
+function qcOpen(){
+  var y=yearNow();
+  qc.month=new Date().getMonth()+1;
+  qc.sel={};
+  var dEl=document.getElementById('qcDate'); if(dEl) dEl.value=todayStr();
+  var mSel=document.getElementById('qcMonth');
+  if(mSel){ mSel.innerHTML=Array.from({length:12},function(_,i){var m=i+1;return '<option value="'+m+'"'+(m===qc.month?' selected':'')+'>'+m+'월</option>';}).join(''); }
+  var yl=document.getElementById('qcYearLb'); if(yl) yl.textContent=y+'년';
+  renderQcInspectors();
+  renderQcEqChips();
+  updateQcCount();
+  document.getElementById('qcOverlay').classList.add('open');
+}
+function qcClose(){ document.getElementById('qcOverlay').classList.remove('open'); }
+
+function renderQcInspectors(){
+  var box=document.getElementById('qcInsChips');
+  var names=inspectorNames();
+  box.innerHTML = names.length
+    ? names.map(function(n){ return '<div class="qh-chip" data-name="'+esc(n)+'" onclick="qcPickInspector(this)">'+esc(n)+'</div>'; }).join('')
+    : '<span class="qh-mini">등록된 점검자가 없습니다. 체크시트 셀을 눌러 점검자를 먼저 등록하세요.</span>';
+}
+window.qcPickInspector=function(el){
+  document.querySelectorAll('#qcInsChips .qh-chip').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  // 담당자 선택 시: 그 담당자의 설비 자동 선택 (자동선택 체크 시)
+  var auto=document.getElementById('qcAutoPick');
+  if(auto && auto.checked){
+    var name=el.dataset.name;
+    qc.sel={};
+    eqEntries().forEach(function(e){ if(e.worker===name) qc.sel[e.key]=1; });
+    renderQcEqChips();
+  }
+  updateQcCount();
+};
+
+function renderQcEqChips(){
+  var y=yearNow(), m=qc.month;
+  var box=document.getElementById('qcEqChips');
+  box.innerHTML=eqEntries().map(function(e){
+    var st=monthStatus(e.key,y,m);
+    var full=(st.total>0 && st.done>=st.total);
+    var cls='qh-chip eq'+(qc.sel[e.key]?' sel':'')+(full?' done':'');
+    var badge=full?' ✓':(st.done>0?' ('+st.done+'/'+st.total+')':'');
+    return '<div class="'+cls+'" data-eq="'+esc(e.key)+'" title="'+esc(e.title)+'" onclick="qcToggleEq(this)">'+esc(e.key)+badge+'</div>';
+  }).join('');
+}
+window.qcToggleEq=function(el){
+  var k=el.dataset.eq;
+  if(qc.sel[k]) delete qc.sel[k]; else qc.sel[k]=1;
+  el.classList.toggle('sel');
+  updateQcCount();
+};
+window.qcMonthChange=function(v){ qc.month=parseInt(v,10)||qc.month; renderQcEqChips(); updateQcCount(); };
+window.qcSelectAll=function(){ eqEntries().forEach(function(e){qc.sel[e.key]=1;}); renderQcEqChips(); updateQcCount(); };
+window.qcSelectNone=function(){ qc.sel={}; renderQcEqChips(); updateQcCount(); };
+window.qcSelectUndone=function(){
+  var y=yearNow(), m=qc.month; qc.sel={};
+  eqEntries().forEach(function(e){ var st=monthStatus(e.key,y,m); if(st.total>0 && st.done<st.total) qc.sel[e.key]=1; });
+  renderQcEqChips(); updateQcCount();
+};
+
+function updateQcCount(){
+  var y=yearNow(), m=qc.month, eqCnt=0, itemCnt=0;
+  Object.keys(qc.sel).forEach(function(k){
+    var eqData=DATA[k]; if(!eqData) return;
+    var ckeys=_collectCkeys(k,eqData,y,m,{m:1,q:1,h:1,y:1});
+    var store=loadStore(k,y), nw=0;
+    ckeys.forEach(function(c){ if(!store[c.ckey]) nw++; });
+    if(nw>0){ eqCnt++; itemCnt+=nw; }
+  });
+  var el=document.getElementById('qcCount');
+  if(el) el.innerHTML = itemCnt>0
+    ? '선택 설비 <b>'+Object.keys(qc.sel).length+'대</b> → 신규 기록 <b style="color:#dc2626">'+itemCnt+'건</b> ('+eqCnt+'대, 이미 완료된 항목은 자동 건너뜀)'
+    : '선택 설비 '+Object.keys(qc.sel).length+'대 · 신규로 기록할 항목이 없습니다';
+}
+
+window.qcApply=function(){
+  var y=yearNow(), m=qc.month;
+  var date=document.getElementById('qcDate').value;
+  var insEl=document.querySelector('#qcInsChips .qh-chip.sel');
+  var inspector=insEl?insEl.dataset.name:'';
+  var keys=Object.keys(qc.sel);
+  if(!keys.length){ alert('설비를 1대 이상 선택하세요.'); return; }
+  if(!date){ alert('점검일자를 선택하세요.'); return; }
+  if(!inspector){ alert('점검자를 선택하세요.'); return; }
+  if(String(date).slice(0,4)!==String(y)){
+    if(!confirm('점검일('+date+')이 현재 점검년도('+y+'년)와 다릅니다.\n그래도 진행할까요?')) return;
+  }
+
+  var applied=0, skipped=0, eqApplied=0;
+  keys.forEach(function(eqKey){
+    var eqData=DATA[eqKey]; if(!eqData) return;
+    var storeKey='INS_CHK_'+eqKey+'_'+y;
+    var store=loadStore(eqKey,y);
+    var ckeys=_collectCkeys(eqKey,eqData,y,m,{m:1,q:1,h:1,y:1});
+    var nw=0;
+    ckeys.forEach(function(c){
+      if(store[c.ckey]){ skipped++; return; }
+      store[c.ckey]={date:date, inspector:inspector, memo:''};
+      nw++; applied++;
+    });
+    if(nw>0){ localStorage.setItem(storeKey, JSON.stringify(store)); eqApplied++; }
+  });
+
+  // 화면 갱신 + 연간계획 자동 반영
+  try{ var sel=document.getElementById('eqSelect'); if(sel&&sel.value&&typeof restoreChks==='function') restoreChks(sel.value); }catch(e){}
+  try{ if(typeof window.syncPlanFromChecksheet==='function') window.syncPlanFromChecksheet({silent:true}); }catch(e){}
+
+  alert('✅ 일괄 점검 등록 완료\n\n· '+m+'월 / '+date+' / '+inspector+'\n· 설비 '+eqApplied+'대, 항목 '+applied+'건 기록\n· 기존 완료 '+skipped+'건 건너뜀\n\n※ 보전계획표(연간계획)에도 자동 반영됩니다.');
+  renderQcEqChips(); updateQcCount();
+};
+
+/* ================= ② 점검이력 통합 조회 ================= */
+function collectRows(year){
+  var rows=[];
+  // 1) 체크시트 기록: (설비,날짜,점검자) 단위로 집계
+  var suffix='_'+year, agg={};
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(!k||k.indexOf('INS_CHK_')!==0||k.slice(-suffix.length)!==suffix) continue;
+    var eqKey=k.substring('INS_CHK_'.length, k.length-suffix.length);
+    var store; try{store=JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){continue;}
+    Object.keys(store).forEach(function(ck){
+      var v=store[ck];
+      var date=(typeof v==='string')?v:(v&&v.date)||'';
+      if(!date) return;
+      var ins=(v&&typeof v==='object'&&v.inspector)?v.inspector:'';
+      var memo=(v&&typeof v==='object'&&v.memo)?v.memo:'';
+      var gk=eqKey+'@'+date+'@'+ins;
+      if(!agg[gk]) agg[gk]={type:'점검', eqKey:eqKey, title:(DATA[eqKey]&&DATA[eqKey].title)||eqKey, date:date, who:ins, cnt:0, memos:[]};
+      agg[gk].cnt++;
+      if(memo) agg[gk].memos.push(memo);
+    });
+  }
+  Object.keys(agg).forEach(function(gk){ rows.push(agg[gk]); });
+  // 2) 보전이력
+  try{
+    var hist=JSON.parse(localStorage.getItem('maint_history')||'[]')||[];
+    hist.forEach(function(r){
+      if(!r||!r.date||String(r.date).slice(0,4)!==String(year)) return;
+      rows.push({type:r.type||'보전', eqKey:r.eqId||'', title:r.eqId||'', date:r.date, who:r.worker||'', cnt:'', memos:[r.content||r.memo||''].filter(Boolean), isHist:true});
+    });
+  }catch(e){}
+  rows.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
+  return rows;
+}
+
+var histCache=[];
+function histOpen(){
+  var y=yearNow();
+  document.getElementById('qhYearLb2').textContent=y+'년';
+  // 필터 옵션 구성
+  histCache=collectRows(y);
+  var months=document.getElementById('qhFilterMonth');
+  months.innerHTML='<option value="">전체 월</option>'+Array.from({length:12},function(_,i){return '<option value="'+(i+1)+'">'+(i+1)+'월</option>';}).join('');
+  var eqSet={}, whoSet={};
+  histCache.forEach(function(r){ if(r.eqKey) eqSet[r.eqKey]=r.title; if(r.who) whoSet[r.who]=1; });
+  var eqSel=document.getElementById('qhFilterEq');
+  eqSel.innerHTML='<option value="">전체 설비</option>'+Object.keys(eqSet).sort(function(a,b){
+    var na=parseInt((a.match(/\d+/)||[999])[0],10), nb=parseInt((b.match(/\d+/)||[999])[0],10); return na-nb;
+  }).map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+'</option>';}).join('');
+  var whoSel=document.getElementById('qhFilterWho');
+  whoSel.innerHTML='<option value="">전체 점검자</option>'+Object.keys(whoSet).map(function(w){return '<option value="'+esc(w)+'">'+esc(w)+'</option>';}).join('');
+  renderHist();
+  document.getElementById('qhOverlay').classList.add('open');
+}
+function histClose(){ document.getElementById('qhOverlay').classList.remove('open'); }
+
+window.renderHist=function(){
+  var m=document.getElementById('qhFilterMonth').value;
+  var eq=document.getElementById('qhFilterEq').value;
+  var who=document.getElementById('qhFilterWho').value;
+  var list=histCache.filter(function(r){
+    if(m && parseInt(String(r.date).slice(5,7),10)!==parseInt(m,10)) return false;
+    if(eq && r.eqKey!==eq) return false;
+    if(who && r.who!==who) return false;
+    return true;
+  });
+  var eqCnt={}; list.forEach(function(r){ if(r.eqKey) eqCnt[r.eqKey]=1; });
+  document.getElementById('qhSummary').innerHTML=
+    '총 <b>'+list.length+'건</b> · 설비 <b>'+Object.keys(eqCnt).length+'대</b>'+
+    ' <span class="qh-mini">(점검=체크시트 기록을 설비·날짜·점검자 단위로 묶어 표시)</span>';
+  var html='<table class="qh-tb"><thead><tr><th>날짜</th><th>구분</th><th>설비</th><th>점검자</th><th>항목수</th><th>메모/내용</th></tr></thead><tbody>';
+  if(!list.length){ html+='<tr><td colspan="6" style="padding:20px;color:#94a3b8">기록이 없습니다</td></tr>'; }
+  list.forEach(function(r){
+    var tag=r.isHist?'<span class="qh-tag hist">'+esc(r.type)+'</span>':'<span class="qh-tag chk">점검</span>';
+    html+='<tr><td>'+esc(r.date)+'</td><td>'+tag+'</td>'+
+      '<td class="l" title="'+esc(r.title)+'">'+esc(r.eqKey||'-')+'</td>'+
+      '<td>'+esc(r.who||'-')+'</td><td>'+(r.cnt===''?'-':r.cnt)+'</td>'+
+      '<td class="l" style="max-width:220px;overflow:hidden;text-overflow:ellipsis" title="'+esc(r.memos.join(' / '))+'">'+esc(r.memos.join(' / ')||'-')+'</td></tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('qhTable').innerHTML=html;
+  window._qhLastList=list;
+};
+
+window.qhExportCsv=function(){
+  var list=window._qhLastList||[];
+  if(!list.length){ alert('내보낼 기록이 없습니다.'); return; }
+  var y=yearNow();
+  var lines=['날짜,구분,설비,설비명,점검자,항목수,메모'];
+  list.forEach(function(r){
+    var cells=[r.date, r.isHist?(r.type||'보전'):'점검', r.eqKey||'', r.title||'', r.who||'', r.cnt===''?'':r.cnt, r.memos.join(' / ')];
+    lines.push(cells.map(function(c){ c=String(c==null?'':c); return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(','));
+  });
+  var blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='점검이력_'+y+'.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+};
+
+/* ================= UI 주입 ================= */
+function injectUI(){
+  if(document.getElementById('qcOverlay')) return;
+
+  // 1) 체크시트 탭 상단에 실행 버튼
+  var controls=document.querySelector('#tab-check .controls');
+  if(controls){
+    var wrap=document.createElement('div');
+    wrap.className='qh-fab-wrap no-print';
+    wrap.innerHTML=
+      '<button class="qh-launch q" onclick="window.qcOpen()">⚡ 일괄 점검 등록</button>'+
+      '<button class="qh-launch h" onclick="window.qhHistOpen()">📜 점검이력 조회</button>';
+    controls.parentNode.insertBefore(wrap, controls.nextSibling);
+  }
+
+  // 2) 일괄 등록 모달
+  var qcDiv=document.createElement('div');
+  qcDiv.id='qcOverlay'; qcDiv.className='qh-overlay';
+  qcDiv.innerHTML=
+  '<div class="qh-modal">'+
+    '<div class="qh-head"><h3>⚡ 일괄 점검 등록 <span id="qcYearLb" class="qh-mini"></span></h3><button class="qh-close" onclick="window.qcClose()">✕</button></div>'+
+    '<div class="qh-body">'+
+      '<div class="qh-sec"><label class="qh-lb">① 점검 월 / 점검일자</label>'+
+        '<div class="qh-row">'+
+          '<select id="qcMonth" onchange="qcMonthChange(this.value)"></select>'+
+          '<input type="date" id="qcDate">'+
+        '</div></div>'+
+      '<div class="qh-sec"><label class="qh-lb">② 점검자 선택</label>'+
+        '<div class="qh-chips" id="qcInsChips"></div>'+
+        '<label class="qh-mini" style="display:inline-flex;align-items:center;gap:5px;margin-top:7px;cursor:pointer">'+
+          '<input type="checkbox" id="qcAutoPick" checked> 점검자 선택 시 담당 설비 자동선택</label></div>'+
+      '<div class="qh-sec"><label class="qh-lb">③ 설비 선택 <span class="qh-mini">(✓=이번달 완료됨)</span></label>'+
+        '<div class="qh-row" style="margin-bottom:8px">'+
+          '<button class="qh-btn sec" style="padding:7px 12px;font-size:13px" onclick="qcSelectUndone()">미점검만 선택</button>'+
+          '<button class="qh-btn sec" style="padding:7px 12px;font-size:13px" onclick="qcSelectAll()">전체 선택</button>'+
+          '<button class="qh-btn sec" style="padding:7px 12px;font-size:13px" onclick="qcSelectNone()">선택 해제</button>'+
+        '</div>'+
+        '<div class="qh-chips" id="qcEqChips"></div></div>'+
+      '<div class="qh-summary" id="qcCount"></div>'+
+      '<div class="qh-mini">※ 선택한 설비의 해당 월 점검 항목(월간·분기·반기·연간 대상)을 한 번에 완료 처리합니다.<br>※ 이미 기록된 항목은 건드리지 않으며, 저장 즉시 클라우드 및 보전계획표(연간계획)에 자동 반영됩니다.</div>'+
+    '</div>'+
+    '<div class="qh-actions">'+
+      '<button class="qh-btn sec" onclick="window.qcClose()">닫기</button>'+
+      '<button class="qh-btn grn" onclick="window.qcApply()">✅ 일괄 등록 실행</button>'+
+    '</div>'+
+  '</div>';
+  document.body.appendChild(qcDiv);
+
+  // 3) 이력 조회 모달
+  var qhDiv=document.createElement('div');
+  qhDiv.id='qhOverlay'; qhDiv.className='qh-overlay';
+  qhDiv.innerHTML=
+  '<div class="qh-modal" style="max-width:860px">'+
+    '<div class="qh-head"><h3>📜 점검이력 통합 조회 <span id="qhYearLb2" class="qh-mini"></span></h3><button class="qh-close" onclick="window.qhHistClose()">✕</button></div>'+
+    '<div class="qh-body">'+
+      '<div class="qh-row" style="margin-bottom:10px">'+
+        '<select id="qhFilterMonth" onchange="renderHist()"></select>'+
+        '<select id="qhFilterEq" onchange="renderHist()"></select>'+
+        '<select id="qhFilterWho" onchange="renderHist()"></select>'+
+        '<button class="qh-btn sec" style="padding:8px 12px;font-size:13px" onclick="qhExportCsv()">📥 CSV 내보내기</button>'+
+      '</div>'+
+      '<div class="qh-summary" id="qhSummary"></div>'+
+      '<div class="qh-tablewrap" id="qhTable"></div>'+
+    '</div>'+
+    '<div class="qh-actions"><button class="qh-btn sec" onclick="window.qhHistClose()">닫기</button></div>'+
+  '</div>';
+  document.body.appendChild(qhDiv);
+
+  // 오버레이 바깥 클릭 시 닫기
+  qcDiv.addEventListener('click', function(e){ if(e.target===qcDiv) qcClose(); });
+  qhDiv.addEventListener('click', function(e){ if(e.target===qhDiv) histClose(); });
+}
+
+window.qcOpen=qcOpen; window.qcClose=qcClose;
+window.qhHistOpen=histOpen; window.qhHistClose=histClose;
+
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', injectUI, {once:true}); }
+else{ injectUI(); }
+})();
+</script>
+<!-- [PATCH v2.9 END] -->
+
 </body>
 </html>
