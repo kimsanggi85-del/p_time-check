@@ -3104,10 +3104,31 @@ mark,
 
   <!-- 상단 탭 네비게이션 -->
   <div class="top-tabs no-print">
+    <button class="top-tab" data-tab="eqhist" onclick="switchTopTab('eqhist')">🔧 수리이력</button>
     <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')">📋 보전계획표</button>
     <button class="top-tab" data-tab="check" onclick="switchTopTab('check')">📋 설비정기점검 기준 및 체크시트</button>
     <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')">⚙️ 설정/조회</button>
     <button class="top-tab" data-tab="approval" onclick="switchTopTab('approval')">📋 보고서결재</button>
+  </div>
+
+  <!-- 수리이력 탭 [PATCH v3.1] -->
+  <div id="tab-eqhist" class="tab-pane no-print">
+    <div class="settings-section" style="border:1px solid #d97706;background:rgba(217,119,6,0.06);border-radius:12px;padding:18px;margin-top:4px">
+      <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 10px">🔧 설비 수리/보전 이력 관리 <span id="eqhStatus" style="font-size:13px;color:#94a3b8;font-weight:500;margin-left:auto"></span></h3>
+      <div style="font-size:13px;color:#94a3b8;line-height:1.6;margin-bottom:12px">
+        설비를 선택하고 이력을 추가하면 클라우드(kv_store)에 저장되어 모든 PC/폰에서 공유되며, 체크시트 상세화면의 「📝 설비 수리/보전 이력」에도 함께 표시됩니다.<br>
+        <span style="color:#64748b">※ 회색 항목은 프로그램에 내장된 기본 이력(수정 불가), 주황 항목은 추가 이력(수정/삭제 가능)입니다.</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <select id="eqhSelect" onchange="eqhRenderList()" style="padding:9px 12px;border:1px solid #475569;border-radius:8px;background:#0f172a;color:#e2e8f0;font-size:14px;min-width:220px"></select>
+        <button class="btn btn-sm btn-secondary" onclick="eqhLoad(false)">⬇ 새로고침</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <input type="text" id="eqhNewText" placeholder="예) 2026.08.19일 클러치 라이닝 교체" style="flex:1;min-width:240px;padding:10px 12px;border:1px solid #475569;border-radius:8px;background:#0f172a;color:#e2e8f0;font-size:14px" onkeydown="if(event.key==='Enter')eqhAdd()">
+        <button class="btn btn-primary" onclick="eqhAdd()">➕ 이력 추가</button>
+      </div>
+      <div id="eqhList"></div>
+    </div>
   </div>
 
   <!-- 점검 탭 -->
@@ -4441,14 +4462,16 @@ function showEquipment(key){
   h += renderSection('반기별 점검항목', '📆', d.halfly, 'halfly');
   h += renderSection('연간 점검항목', '🗓', d.yearly, 'yearly');
   
-  // 이력
-  if(d.history && d.history.length){
-    h += `<div class="history-section"><h3>📝 설비 수리/보전 이력 (${d.history.length}건)</h3>
-      <ul class="history-list">`;
-    d.history.forEach(his=>{
-      h += `<li>${his}</li>`;
-    });
-    h += `</ul></div>`;
+  // 이력 (기본 내장 이력 + 수리이력 탭에서 추가한 클라우드 이력 병합) [PATCH v3.1]
+  {
+    const extra = (window.__eqhData && Array.isArray(window.__eqhData[key])) ? window.__eqhData[key].map(e=>typeof e==='string'?e:(e&&e.t)||'') : [];
+    const merged = (d.history||[]).concat(extra.filter(Boolean));
+    if(merged.length){
+      h += `<div class="history-section"><h3>📝 설비 수리/보전 이력 (${merged.length}건)</h3>
+        <ul class="history-list">`;
+      merged.forEach(his=>{ h += `<li>${his}</li>`; });
+      h += `</ul></div>`;
+    }
   }
   
   h += `<div class="grade-note">
@@ -4816,6 +4839,7 @@ function switchTopTab(name){
   document.querySelectorAll('.top-tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===name);});
   document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.toggle('active',p.id==='tab-'+name);});
   if(name==='settings') buildSettings();
+  if(name==='eqhist' && typeof window.eqhInit==='function') window.eqhInit();
   if(name==='plan' && typeof window.initPmPlan==='function') window.initPmPlan();
   if(name==='check' && typeof window.renderChkYearSelect==='function') window.renderChkYearSelect();
   if(name==='approval' && typeof window.apprInit==='function' && !window.__apprInited){
@@ -5106,6 +5130,91 @@ function renderWorkerList(){
       '<button class="stg-btn danger" onclick="deleteWorker('+i+')">✕</button></div>';
   }).join('');
 }
+// --- [PATCH v3.1] 설비 수리/보전 이력 관리 (🔧 수리이력 탭, kv_store: pm:ins_history_v1) ---
+var EQH_KEY='pm:ins_history_v1';
+window.__eqhData = window.__eqhData || {};
+function _eqhStatus(msg,ok){var st=document.getElementById('eqhStatus');if(!st)return;st.textContent=msg;st.style.color=(ok===false)?'var(--red)':(ok?'var(--green)':'var(--muted)');}
+function eqhInit(){
+  var sel=document.getElementById('eqhSelect');
+  if(sel && !sel.options.length){
+    var h='';
+    Object.keys(DATA).forEach(function(k){h+='<option value="'+_esc(k)+'">'+_esc(DATA[k].title||k)+'</option>';});
+    sel.innerHTML=h;
+  }
+  eqhLoad(true);
+}
+function eqhLoad(silent){
+  if(!silent)_eqhStatus('불러오는 중...');
+  fetch(_getSbUrl()+'/rest/v1/kv_store?select=value&key=eq.'+encodeURIComponent(EQH_KEY)+'&limit=1',{headers:_sbHeaders()})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(rows){
+      window.__eqhData=(rows[0]&&rows[0].value&&typeof rows[0].value==='object')?rows[0].value:{};
+      eqhRenderList();
+      var n=0;Object.keys(window.__eqhData).forEach(function(k){n+=(window.__eqhData[k]||[]).length;});
+      _eqhStatus('☁️ 추가 이력 '+n+'건 동기화됨',true);
+    })
+    .catch(function(e){eqhRenderList();_eqhStatus('❌ '+e.message,false);});
+}
+function eqhSave(cb){
+  _eqhStatus('저장 중...');
+  fetch(_getSbUrl()+'/rest/v1/kv_store?on_conflict=key',{
+    method:'POST',
+    headers:Object.assign({'Prefer':'resolution=merge-duplicates'},_sbHeaders()),
+    body:JSON.stringify([{key:EQH_KEY,value:window.__eqhData}])
+  }).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    _eqhStatus('✅ 저장 완료',true);
+    if(cb)cb();
+  }).catch(function(e){_eqhStatus('❌ 저장 실패: '+e.message,false);});
+}
+function eqhRenderList(){
+  var box=document.getElementById('eqhList');var sel=document.getElementById('eqhSelect');
+  if(!box||!sel)return;
+  var k=sel.value;if(!k){box.innerHTML='';return;}
+  var base=(DATA[k]&&DATA[k].history)||[];
+  var extra=window.__eqhData[k]||[];
+  var h='<ul class="history-list">';
+  base.forEach(function(t){
+    h+='<li style="color:#94a3b8">'+_esc(t)+' <span style="font-size:11px;color:#64748b">(기본)</span></li>';
+  });
+  extra.forEach(function(t,i){
+    h+='<li style="display:flex;align-items:center;gap:8px"><span style="flex:1;color:#fbbf24">'+_esc(t)+'</span>'
+      +'<button class="btn btn-sm btn-secondary" onclick="eqhEdit('+i+')">✏</button>'
+      +'<button class="btn btn-sm btn-secondary" onclick="eqhDel('+i+')" style="color:var(--red)">🗑</button></li>';
+  });
+  h+='</ul>';
+  if(!base.length&&!extra.length)h='<div style="padding:20px;text-align:center;color:var(--muted)">등록된 이력이 없습니다.</div>';
+  box.innerHTML=h;
+}
+function eqhAdd(){
+  var sel=document.getElementById('eqhSelect');var inp=document.getElementById('eqhNewText');
+  var k=sel.value;var v=(inp.value||'').trim();
+  if(!k){alert('설비를 선택하세요');return;}
+  if(!v){inp.focus();return;}
+  if(!window.__eqhData[k])window.__eqhData[k]=[];
+  window.__eqhData[k].push(v);
+  inp.value='';
+  eqhSave(eqhRenderList);
+}
+function eqhEdit(i){
+  var k=document.getElementById('eqhSelect').value;
+  var arr=window.__eqhData[k]||[];if(!arr[i]&&arr[i]!=='')return;
+  var v=prompt('이력 수정:',arr[i]);if(v===null)return;
+  var nv=v.trim();if(!nv)return;
+  arr[i]=nv;eqhSave(eqhRenderList);
+}
+function eqhDel(i){
+  var k=document.getElementById('eqhSelect').value;
+  var arr=window.__eqhData[k]||[];if(arr[i]===undefined)return;
+  if(!confirm('삭제하시겠습니까?\n'+arr[i]))return;
+  arr.splice(i,1);if(!arr.length)delete window.__eqhData[k];
+  eqhSave(eqhRenderList);
+}
+window.eqhInit=eqhInit;window.eqhLoad=eqhLoad;window.eqhRenderList=eqhRenderList;
+window.eqhAdd=eqhAdd;window.eqhEdit=eqhEdit;window.eqhDel=eqhDel;
+// 시작 시 백그라운드 로드 → 체크시트 상세화면 이력 병합에 즉시 반영
+try{eqhLoad(true);}catch(e){}
+
 function addWorker(){
   var inp=document.getElementById('newWorkerName');var v=(inp.value||'').trim();
   if(!v){inp.focus();return;}
@@ -11310,6 +11419,7 @@ else{ boot(); }
 </script>
 <!-- [PATCH v2.8 END] -->
 <!-- [PATCH v3.0] 미점검 자동알림: Supabase Edge Function pm-uncheck-notify + pg_cron(매시 20분) 연동. 설정 UI는 ⚙설정 > 미점검 자동알림(서버) 패널 -->
+<!-- [PATCH v3.1] 🔧 수리이력 탭: 최상단 탭바(보전계획표 앞)에 배치. 설비별 수리/보전 이력 추가·수정·삭제 (kv_store pm:ins_history_v1). 체크시트 상세화면 이력에 병합 표시 -->
 
 <!-- [PATCH v2.9] 쉬운 이력관리: 일괄 점검 등록 + 점검이력 통합 조회 -->
 <style>
