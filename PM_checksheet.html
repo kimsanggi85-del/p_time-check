@@ -4890,6 +4890,36 @@ function buildSettings(){
 
   // [v4] 알림 4개 섹션(ntfy/텔레그램/디스코드/메일) 삭제됨
 
+  // [v4.1] 미점검 자동알림 (서버 Edge Function: pm-uncheck-notify)
+  h+='<div class="stg-panel" style="border-color:#f59e0b">'+
+    '<div class="stg-title">🔔 미점검 자동알림 (서버)</div>'+
+    '<div class="stg-hint">서버가 매시간 <b>보전계획표 미완료</b> + <b>체크시트 미점검</b> 설비를 확인해 ntfy로 자동 발송합니다. '+
+      '브라우저를 꺼도 동작합니다. (당월 계획 대상 설비 기준)</div>'+
+    '<div class="stg-row r3" style="margin-top:8px">'+
+      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">사용</label>'+
+        '<select id="pmnCfgEnabled" class="stg-input"><option value="1">✅ 사용</option><option value="0">⛔ 중지</option></select></div>'+
+      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">ntfy 토픽</label>'+
+        '<input id="pmnCfgTopic" class="stg-input" placeholder="taejincall"></div>'+
+      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">안내 시작일 (매월)</label>'+
+        '<input id="pmnCfgNotice" type="number" min="1" max="28" class="stg-input" placeholder="10"></div>'+
+    '</div>'+
+    '<div class="stg-row r3" style="margin-top:8px">'+
+      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">기준일 (경과 시 독촉)</label>'+
+        '<input id="pmnCfgDue" type="number" min="1" max="31" class="stg-input" placeholder="20"></div>'+
+      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">재알림 간격(시간)</label>'+
+        '<input id="pmnCfgRepeat" type="number" min="0" max="168" class="stg-input" placeholder="24"></div>'+
+      '<div></div>'+
+    '</div>'+
+    '<div class="stg-action-bar" style="margin-top:12px">'+
+      '<button class="stg-btn-primary" onclick="pmnSaveCfg()">💾 서버에 저장</button>'+
+      '<button class="stg-btn" onclick="pmnLoadCfg()">⬇ 불러오기</button>'+
+      '<button class="stg-btn" onclick="pmnTestSend()">📨 테스트 발송</button>'+
+      '<button class="stg-btn" onclick="pmnDryRun()">👁 현재 미점검 확인</button>'+
+      '<span id="pmnStatus" class="stg-status"></span>'+
+    '</div>'+
+    '<div id="pmnDryResult" style="margin-top:10px"></div>'+
+  '</div>';
+
   // 6. Supabase 설정
   h+='<div class="stg-panel teal">'+
     '<div class="stg-title">🔧 Supabase 설정</div>'+
@@ -4996,6 +5026,71 @@ function buildSettings(){
   root.innerHTML=h;
   _fillAutoChkSelects();
   renderWorkerList();renderNtfyList();renderTgList();renderDcList();renderMailList();updateConnInfo();
+  pmnLoadCfg(true);
+}
+
+// --- [v4.1] 미점검 자동알림 (서버 pm-uncheck-notify) ---
+var PMN_CFG_KEY='pm:pm_ntfy_cfg';
+var PMN_FN_URL='https://ebthltdmxpzlkfwvdloz.supabase.co/functions/v1/pm-uncheck-notify';
+function _pmnStatus(msg,ok){var st=document.getElementById('pmnStatus');if(!st)return;st.textContent=msg;st.style.color=ok?'var(--green)':'var(--red)';}
+function pmnFillForm(c){
+  c=c||{};
+  var g=function(id){return document.getElementById(id);};
+  if(g('pmnCfgEnabled')) g('pmnCfgEnabled').value=(c.enabled===false)?'0':'1';
+  if(g('pmnCfgTopic'))   g('pmnCfgTopic').value=c.topic||'taejincall';
+  if(g('pmnCfgNotice'))  g('pmnCfgNotice').value=(c.notice_day!=null)?c.notice_day:10;
+  if(g('pmnCfgDue'))     g('pmnCfgDue').value=(c.due_day!=null)?c.due_day:20;
+  if(g('pmnCfgRepeat'))  g('pmnCfgRepeat').value=(c.repeat_hours!=null)?c.repeat_hours:24;
+}
+function pmnLoadCfg(silent){
+  fetch(_getSbUrl()+'/rest/v1/kv_store?select=value&key=eq.'+encodeURIComponent(PMN_CFG_KEY)+'&limit=1',{headers:_sbHeaders()})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      pmnFillForm(rows&&rows[0]?rows[0].value:{});
+      if(!silent)_pmnStatus('✅ 설정 로드 완료',true);
+    })
+    .catch(function(e){pmnFillForm({});if(!silent)_pmnStatus('❌ '+e.message,false);});
+}
+function pmnSaveCfg(){
+  var cfg={
+    enabled: document.getElementById('pmnCfgEnabled').value==='1',
+    topic: (document.getElementById('pmnCfgTopic').value||'taejincall').trim(),
+    notice_day: parseInt(document.getElementById('pmnCfgNotice').value,10)||10,
+    due_day: parseInt(document.getElementById('pmnCfgDue').value,10)||20,
+    repeat_hours: Math.max(0, parseInt(document.getElementById('pmnCfgRepeat').value,10)||0)
+  };
+  var hdrs=Object.assign({},_sbHeaders(),{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'});
+  fetch(_getSbUrl()+'/rest/v1/kv_store?on_conflict=key',{
+    method:'POST',headers:hdrs,
+    body:JSON.stringify([{key:PMN_CFG_KEY,value:cfg}])
+  }).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    _pmnStatus('✅ 서버 저장 완료 (다음 정각 20분부터 적용)',true);
+  }).catch(function(e){_pmnStatus('❌ '+e.message,false);});
+}
+function pmnTestSend(){
+  _pmnStatus('발송 중...',true);
+  fetch(PMN_FN_URL+'?test=1',{headers:{'Authorization':'Bearer '+_getSbKey()}})
+    .then(function(r){return r.json();})
+    .then(function(j){_pmnStatus(j.ok?'✅ 테스트 발송 완료 (ntfy 앱 확인)':'❌ 발송 실패',j.ok);})
+    .catch(function(e){_pmnStatus('❌ '+e.message,false);});
+}
+function pmnDryRun(){
+  var box=document.getElementById('pmnDryResult');
+  _pmnStatus('확인 중...',true);
+  fetch(PMN_FN_URL+'?dry=1',{headers:{'Authorization':'Bearer '+_getSbKey()}})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(!j.ok)throw new Error(j.error||'조회 실패');
+      var html='<div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid #334155;border-radius:6px;font-size:13px;line-height:1.7;color:#cbd5e1">'+
+        '<b>'+j.month+'</b> · 계획 대상 '+(j.plannedIds||[]).length+'대<br>'+
+        '📋 보전계획표 미완료: '+((j.planPending||[]).length?('<span style="color:#fbbf24">'+j.planPending.join(', ')+'</span>'):'<span style="color:#34d399">없음</span>')+'<br>'+
+        '📝 체크시트 미점검: '+((j.chkPending||[]).length?('<span style="color:#fbbf24">'+j.chkPending.join(', ')+'</span>'):'<span style="color:#34d399">없음</span>')+
+        '</div>';
+      if(box)box.innerHTML=html;
+      _pmnStatus('✅ 확인 완료',true);
+    })
+    .catch(function(e){_pmnStatus('❌ '+e.message,false);if(box)box.innerHTML='';});
 }
 
 // --- 작성자/작업자 ---
@@ -11214,6 +11309,7 @@ else{ boot(); }
 })();
 </script>
 <!-- [PATCH v2.8 END] -->
+<!-- [PATCH v3.0] 미점검 자동알림: Supabase Edge Function pm-uncheck-notify + pg_cron(매시 20분) 연동. 설정 UI는 ⚙설정 > 미점검 자동알림(서버) 패널 -->
 
 <!-- [PATCH v2.9] 쉬운 이력관리: 일괄 점검 등록 + 점검이력 통합 조회 -->
 <style>
