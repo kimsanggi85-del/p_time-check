@@ -3640,6 +3640,7 @@ CREATE INDEX IF NOT EXISTS idx_kv_store_updated ON kv_store(updated_at DESC);</p
       <div class="settings-actions">
         <button class="btn btn-primary" onclick="createNewYear()">+ 새 년도 추가</button>
         <button class="btn btn-secondary" onclick="copyYearData()">📋 다른 년도에서 복사</button>
+        <button class="btn btn-secondary" onclick="autoGenPlan()">⚡ 점검주기 자동생성</button>
         <button class="btn btn-danger btn-sm" onclick="deleteCurrentYear()">🗑 현재 년도 삭제</button>
       </div>
       <div style="font-size:14px;color:var(--muted);line-height:1.6">
@@ -6257,6 +6258,52 @@ function createNewYear(){
     switchMainTab('settings');
   }
 }
+
+// [PATCH v3.5] 점검주기 자동생성: 표준주기 설비는 규칙대로, 프레스는 전년도 패턴 복사
+const AUTO_PLAN_RULES = (function(){
+  const r = {};
+  ['C-1','C-2','C-3'].forEach(id=>r[id]={months:[3,6,9,12],week:'w2'});        // 콤프레셔: 분기
+  ['CR-1','CR-2','CR-3','CR-4','CR-5','CR-6','CR-7'].forEach(id=>r[id]={months:[3,6,9,12],week:'w4'}); // 크레인: 분기
+  ['M-1','L-1','W-1'].forEach(id=>r[id]={months:[6,12],week:'w2'});            // 가공설비: 반기
+  return r;
+})();
+function autoGenPlan(){
+  const eqList = getEquip(currentYear);
+  if(!eqList.length){alert('먼저 설비를 등록하세요.');return}
+  const prevY = currentYear - 1;
+  const prevPlan = getPlan(prevY);
+  const hasPrev = Object.keys(prevPlan).length > 0;
+  if(!confirm(`${currentYear}년 점검주기를 자동 생성합니다.\n\n• 콤프레셔(C-*): 3/6/9/12월 2주차\n• 크레인(CR-*): 3/6/9/12월 4주차\n• 가공설비(M/L/W): 6/12월 2주차\n• 프레스 등 기타: ${hasPrev? prevY+'년 패턴 복사' : '전년도 계획 없음 → 건너뜀'}\n\n기존에 지정된 계획은 지우지 않고 빈 곳만 채웁니다.\n계속할까요?`)) return;
+  const plan = getPlan(currentYear);
+  let nRule=0, nCopy=0;
+  eqList.forEach(e=>{
+    const id = e.id;
+    if(!plan[id]) plan[id] = {};
+    const rule = AUTO_PLAN_RULES[id];
+    if(rule){
+      rule.months.forEach(m=>{
+        if(!plan[id][m]) plan[id][m] = {w2:'',w4:''};
+        if(plan[id][m].w2!=='□' && plan[id][m].w4!=='□'){ plan[id][m][rule.week]='□'; nRule++; }
+      });
+    } else if(hasPrev && prevPlan[id]){
+      Object.keys(prevPlan[id]).forEach(m=>{
+        const pv = prevPlan[id][m] || {};
+        if(pv.w2!=='□' && pv.w4!=='□') return;
+        if(!plan[id][m]) plan[id][m] = {w2:'',w4:''};
+        if(plan[id][m].w2!=='□' && plan[id][m].w4!=='□'){
+          if(pv.w2==='□') plan[id][m].w2='□';
+          if(pv.w4==='□') plan[id][m].w4='□';
+          nCopy++;
+        }
+      });
+    }
+  });
+  setPlan(currentYear, plan);
+  reloadYearData();
+  if(currentMainTab==='plan') renderVolTabs();
+  alert(`✅ 자동생성 완료\n• 표준주기 적용: ${nRule}칸\n• 전년도 패턴 복사: ${nCopy}칸`);
+}
+window.autoGenPlan = autoGenPlan;
 
 function copyYearData(){
   const years = getYears().filter(y=>y!==currentYear);
@@ -11556,6 +11603,7 @@ else{ boot(); }
 </script>
 <!-- [PATCH v2.8 END] -->
 <!-- [PATCH v3.0] 미점검 자동알림: Supabase Edge Function pm-uncheck-notify + pg_cron(매시 20분) 연동. 설정 UI는 ⚙설정 > 미점검 자동알림(서버) 패널 -->
+<!-- [PATCH v3.5] 점검주기 자동생성 버튼: 표준주기 설비(C/CR/M/L/W)는 규칙 적용, 프레스는 전년도 패턴 복사. 기존 계획 보존, 빈 칸만 채움 -->
 <!-- [PATCH v3.4] 체크시트 설비 정보수정(년식/경과/등급/담당)·사진추가/삭제 기능. kv_store pm:ins_eq_edit_v1 클라우드 저장, 기본데이터 위에 병합 표시 -->
 <!-- [PATCH v3.3] 유틸리티 설비 13대 추가: 콤프레셔 C-1~3, 크레인 CR-1~7, 고속가공기 M-1, CNC선반 L-1, 와이어방전기 W-1 (체크시트 점검항목 + eq_master_2026 등록) -->
 <!-- [PATCH v3.2] 용량 최적화: 설비사진 중복 제거(47→24개) + 640px/WebP q70 재압축. 1,100KB → 아래 참조 -->
