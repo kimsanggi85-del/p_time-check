@@ -135,6 +135,14 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 /* 모바일 가시성 강화 */
 /* ===== 모바일 반응형 - 체크시트 탭 ===== */
 /* 태블릿 이하 */
+/* [PATCH v3.6] 모바일: 점검표 12개월 칸 찌그러짐 방지 - 가로 스크롤 */
+@media (max-width:768px){
+  .check-section{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .check-section .check-table{min-width:860px;table-layout:fixed}
+  .check-section[data-type="quarterly"] .check-table{min-width:620px}
+  .check-section[data-type="halfly"] .check-table{min-width:540px}
+  .check-section h3{position:sticky;left:0}
+}
 @media (max-width:768px){
   .page{padding:10px}
   .page-header{padding:12px 0;margin-bottom:12px}
@@ -11603,6 +11611,7 @@ else{ boot(); }
 </script>
 <!-- [PATCH v2.8 END] -->
 <!-- [PATCH v3.0] 미점검 자동알림: Supabase Edge Function pm-uncheck-notify + pg_cron(매시 20분) 연동. 설정 UI는 ⚙설정 > 미점검 자동알림(서버) 패널 -->
+<!-- [PATCH v3.6] 모바일 점검표 가로스크롤: 12개월 칸 최소폭 확보(월별 860px/분기 620px/반기 540px) -->
 <!-- [PATCH v3.5] 점검주기 자동생성 버튼: 표준주기 설비(C/CR/M/L/W)는 규칙 적용, 프레스는 전년도 패턴 복사. 기존 계획 보존, 빈 칸만 채움 -->
 <!-- [PATCH v3.4] 체크시트 설비 정보수정(년식/경과/등급/담당)·사진추가/삭제 기능. kv_store pm:ins_eq_edit_v1 클라우드 저장, 기본데이터 위에 병합 표시 -->
 <!-- [PATCH v3.3] 유틸리티 설비 13대 추가: 콤프레셔 C-1~3, 크레인 CR-1~7, 고속가공기 M-1, CNC선반 L-1, 와이어방전기 W-1 (체크시트 점검항목 + eq_master_2026 등록) -->
