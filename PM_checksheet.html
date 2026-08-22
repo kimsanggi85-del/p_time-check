@@ -12133,6 +12133,14 @@ else{ injectUI(); }
 .sf-tbl tbody tr:hover td{background:#243449}
 .sf-tbl tr.g-head td{background:#0f172a;font-weight:800;text-align:left;color:#60a5fa;letter-spacing:.3px}
 .sf-tbl tr.off td{opacity:.55}
+/* 관리(수정·삭제) 열 오른쪽 고정 — 가로 스크롤 시에도 항상 노출 */
+.sf-tbl th.sf-act,.sf-tbl td.sf-act{position:sticky;right:0;z-index:3;box-shadow:-8px 0 12px -6px rgba(0,0,0,.55)}
+.sf-tbl th.sf-act{background:#334155}
+.sf-tbl td.sf-act{background:#1e293b}
+.sf-tbl tbody tr:hover td.sf-act{background:#243449}
+.sf-tbl tr.g-head td.sf-act{background:#0f172a;box-shadow:none}
+.sf-tbl tbody tr{cursor:pointer}
+.sf-act .btn{padding:5px 9px;font-size:14px;line-height:1}
 .sf-bdg{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:800;white-space:nowrap}
 .sf-b-exp{background:#7f1d1d;color:#fecaca}
 .sf-b-urg{background:#7c2d12;color:#fed7aa}
@@ -12216,10 +12224,7 @@ var SF_SEED = [
  {id:'S31',cat:'프레스',name:'프레스',mno:'P-46',spec:'심팩 300톤',maker:'SIMPAC',place:'B동 생산팀 B',inDate:'2020-01-18',certDate:'',passNo:'',lastDate:'2026-04-15',nextDate:'2028-04-14',cycle:24,st:'active',note:''},
  {id:'S32',cat:'프레스',name:'프레스',mno:'P-47',spec:'심팩 300톤',maker:'SIMPAC',place:'B동 생산팀 B',inDate:'2021-01-09',certDate:'',passNo:'',lastDate:'2025-12-07',nextDate:'2027-12-06',cycle:24,st:'active',note:''},
  {id:'S33',cat:'프레스',name:'프레스',mno:'P-48',spec:'심팩 300톤',maker:'SIMPAC',place:'B동 생산팀 B',inDate:'2021-10-12',certDate:'',passNo:'',lastDate:'2026-04-15',nextDate:'2028-04-14',cycle:24,st:'active',note:''},
- {id:'S34',cat:'프레스',name:'프레스',mno:'P-49',spec:'심팩 300톤',maker:'SIMPAC',place:'B동 생산팀 B',inDate:'2023-06-17',certDate:'',passNo:'',lastDate:'2026-04-15',nextDate:'2028-04-14',cycle:24,st:'active',note:''},
- // 매각 (중앙통로 보관, C동 프레스 24년10.12일 매각)
- {id:'S90',cat:'프레스',name:'프레스',mno:'P-16',spec:'삼도 125톤',maker:'삼도',place:'B동 생산팀 B파트',inDate:'2004-04',certDate:'',passNo:'',lastDate:'',nextDate:'',cycle:24,st:'sold',note:'2024.10.12일 매각 (중앙통로 보관)'},
- {id:'S91',cat:'프레스',name:'프레스',mno:'P-33',spec:'샘 250톤',maker:'SIMPAC',place:'C동 생산팀 C파트',inDate:'2012-06-23',certDate:'',passNo:'',lastDate:'',nextDate:'',cycle:24,st:'sold',note:'2024.10.12일 매각'}
+ {id:'S34',cat:'프레스',name:'프레스',mno:'P-49',spec:'심팩 300톤',maker:'SIMPAC',place:'B동 생산팀 B',inDate:'2023-06-17',certDate:'',passNo:'',lastDate:'2026-04-15',nextDate:'2028-04-14',cycle:24,st:'active',note:''}
 ];
 
 var SF_CATS = ['압력용기','크레인','프레스'];
@@ -12269,25 +12274,36 @@ function alertList(){
 /* [v3.8.1] 클라우드 기존 데이터 정리 — 승강기·리프트·세척기 제외 대상 제거 */
 function sfMigrate(){
   if(!sfData||!Array.isArray(sfData.items)) return false;
-  // ① 제외 대상 판정은 '설비명' 기준 (구분명에 '세척기'가 포함되어 압력용기가 지워지지 않도록)
-  var DROP=/승강기|리프트|세척기/;
-  var before=sfData.items.length;
-  sfData.items=sfData.items.filter(function(it){ return !DROP.test(it.name||''); });
-  var changed=(sfData.items.length!==before);
-  // ② 구분명 정규화
-  sfData.items.forEach(function(it){
-    var c=it.cat||'';
-    if(c==='압력용기·세척기'||c==='승강기·리프트'||c.indexOf('압력용기')===0){
-      if(it.cat!=='압력용기'){ it.cat='압력용기'; changed=true; }
-    }
-    if(SF_CATS.indexOf(it.cat)<0){ it.cat='프레스'; changed=true; }
-  });
-  // 삭제된 항목의 알림기록 정리
-  if(sfData.notified){
-    var ids={}; sfData.items.forEach(function(it){ids[it.id]=1;});
-    Object.keys(sfData.notified).forEach(function(k){ if(!ids[k]){delete sfData.notified[k];changed=true;} });
+  var cfg = sfData.cfg || (sfData.cfg={});
+  var mv = parseInt(cfg.migv||0,10) || 0;
+  var before = sfData.items.length;
+  var changed = false;
+
+  // v1 : 승강기·리프트·세척기 제외 (설비명 기준 — 구분명의 '세척기'에 걸리지 않도록)
+  if(mv < 1){
+    sfData.items = sfData.items.filter(function(it){ return !/승강기|리프트|세척기/.test(it.name||''); });
+    sfData.items.forEach(function(it){
+      var c=it.cat||'';
+      if(c==='압력용기·세척기'||c==='승강기·리프트'||c.indexOf('압력용기')===0) it.cat='압력용기';
+      if(SF_CATS.indexOf(it.cat)<0) it.cat='프레스';
+    });
+    changed = true;
   }
-  if(changed) console.log('[안전검사] 정리 완료: '+before+'건 → '+sfData.items.length+'건');
+
+  // v2 : 기본 LIST의 매각 설비(P-16, P-33) 제거
+  if(mv < 2){
+    sfData.items = sfData.items.filter(function(it){ return it.id!=='S90' && it.id!=='S91'; });
+    changed = true;
+  }
+
+  if(changed){
+    cfg.migv = 2;
+    if(sfData.notified){
+      var ids={}; sfData.items.forEach(function(it){ids[it.id]=1;});
+      Object.keys(sfData.notified).forEach(function(k){ if(!ids[k]) delete sfData.notified[k]; });
+    }
+  }
+  if(changed) console.log('[안전검사] 데이터 정리: '+before+'건 → '+sfData.items.length+'건 (migv '+mv+'→2)');
   return changed;
 }
 function sfLoad(cb){
@@ -12384,7 +12400,7 @@ function sfRender(){
   // 테이블
   h+='<div class="sf-tblwrap"><table class="sf-tbl"><thead><tr>'
    +'<th>No</th><th>구분</th><th>설비명</th><th>관리번호</th><th>규격(용량)</th><th>제작회사</th><th>설치장소</th>'
-   +'<th>입고일자</th><th>인증일자</th><th>합격번호</th><th>안전검사일자</th><th>차기검사일자</th><th>주기</th><th>상태</th><th>비고</th><th class="sf-noprint">관리</th>'
+   +'<th>입고일자</th><th>인증일자</th><th>합격번호</th><th>안전검사일자</th><th>차기검사일자</th><th>주기</th><th>상태</th><th>비고</th><th class="sf-noprint sf-act">관리</th>'
    +'</tr></thead><tbody>';
 
   var rows=sfData.items.filter(function(it){
@@ -12429,7 +12445,7 @@ function sfRender(){
       var nt=it.note||'';
       var ntShort=nt.length>34?nt.slice(0,34)+'…':nt;
       var offCls=(s.k==='sold'||s.k==='exempt')?' class="off"':'';
-      h+='<tr'+offCls+'>'
+      h+='<tr'+offCls+' onclick="sfRowClick(event,\''+it.id+'\')" title="행을 클릭하면 수정창이 열립니다">'
        +'<td>'+no+'</td>'
        +'<td class="dim">'+E(it.cat)+'</td>'
        +'<td>'+E(it.name)+'</td>'
@@ -12445,10 +12461,10 @@ function sfRender(){
        +'<td class="dim">'+(it.cycle||24)+'개월</td>'
        +'<td><span class="sf-bdg '+s.c+'">'+E(s.t)+'</span></td>'
        +'<td class="l dim" style="font-size:12.5px;max-width:230px;overflow:hidden;text-overflow:ellipsis" title="'+E(nt)+'">'+E(ntShort)+'</td>'
-       +'<td class="sf-noprint" style="white-space:nowrap">'
+       +'<td class="sf-noprint sf-act" style="white-space:nowrap">'
          +'<button class="btn btn-secondary btn-sm" onclick="sfDone(\''+it.id+'\')" title="검사완료 처리">✅</button> '
-         +'<button class="btn btn-secondary btn-sm" onclick="sfOpenEdit(\''+it.id+'\')">✏</button> '
-         +'<button class="btn btn-secondary btn-sm" style="color:var(--red)" onclick="sfDel(\''+it.id+'\')">🗑</button>'
+         +'<button class="btn btn-secondary btn-sm" onclick="sfOpenEdit(\''+it.id+'\')" title="수정">✏</button> '
+         +'<button class="btn btn-secondary btn-sm" style="color:#f87171" onclick="sfDel(\''+it.id+'\')" title="삭제">🗑</button>'
        +'</td></tr>';
     });
   }
@@ -12457,6 +12473,7 @@ function sfRender(){
   h+='<div class="sf-hint">'
    +'• <b>차기검사일자</b> 기준으로 D-Day를 자동 계산합니다 — 만료(빨강) / 임박 '+SF_URG+'일 이내(주황) / 주의 '+SF_WARN+'일 이내(노랑) / 정상(초록)<br>'
    +'• <b>✅ 검사완료</b> 버튼을 누르면 안전검사일자가 오늘로, 차기검사일자는 <b>주기(기본 24개월) − 1일</b>로 자동 갱신됩니다.<br>'
+   +'• <b>수정</b>: 표의 <b>아무 곳이나 클릭</b>하거나 오른쪽 <b>✏</b> 버튼 · <b>삭제</b>: 오른쪽 <b>🗑</b> 버튼 (관리 열은 항상 오른쪽에 고정 표시)<br>'
    +'• 산업안전보건법 제93조 안전검사 대상: 프레스, 크레인(2톤 이상), 리프트, 압력용기, 국소배기장치 등 — 최초 설치 3년 후, 이후 <b>2년마다</b> (공정안전보고서 제출 사업장은 4년).<br>'
    +'• 알림은 <b>ntfy</b>로 발송됩니다'+(tp?' — 현재 토픽 <code>'+E(tp)+'</code>'+((sfData.cfg&&sfData.cfg.ntfyOn===false)?' <b style=\'color:#fbbf24\'>(자동발송 OFF)</b>':' <b style=\'color:#4ade80\'>(자동발송 ON)</b>'):' — <b style=\'color:#fbbf24\'>미설정 (🔔 ntfy 알림설정 클릭)</b>')+'<br>'
    +'• 모든 데이터는 Supabase <code>kv_store</code>(<code>'+SF_KEY+'</code>)에 저장되어 전 PC·모바일에서 공유됩니다.<br>'
@@ -12488,6 +12505,15 @@ function sfDone(id){
   if(sfData.notified) delete sfData.notified[id];
   sfSave(false,function(){sfRender();sfBanner();sfBadge();});
   sfRender();
+}
+function sfRowClick(ev,id){
+  // 관리 버튼(수정/삭제/완료) 클릭은 제외
+  var t=ev&&ev.target;
+  while(t && t!==document.body){
+    if(t.tagName==='BUTTON'||t.tagName==='A'||t.tagName==='INPUT'||t.tagName==='SELECT') return;
+    t=t.parentNode;
+  }
+  sfOpenEdit(id);
 }
 function sfDel(id){
   var it=sfFind(id); if(!it) return;
@@ -12761,6 +12787,7 @@ window.switchTopTab = function(name){
 window.sfInit=sfInit; window.sfRender=sfRender; window.sfSetCat=sfSetCat; window.sfSetSt=sfSetSt;
 window.sfSetQ=sfSetQ; window.sfOpenEdit=sfOpenEdit; window.sfApply=sfApply; window.sfDel=sfDel;
 window.sfDone=sfDone; window.sfReset=sfReset; window.sfExportCsv=sfExportCsv;
+window.sfRowClick=sfRowClick;
 window.sfAskNoti=sfAskNoti; window.sfPushNow=sfPushNow;
 window.sfNtfyCfg=sfNtfyCfg; window.sfNtfyTest=sfNtfyTest; window.sfNtfyApply=sfNtfyApply;
 window.sfLookup=function(mno,cat){
