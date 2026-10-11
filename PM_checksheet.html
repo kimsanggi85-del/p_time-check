@@ -4989,7 +4989,7 @@ function buildSettings(){
   // [v4.1] 미점검 자동알림 (서버 Edge Function: pm-uncheck-notify)
   h+='<div class="stg-panel" style="border-color:#f59e0b">'+
     '<div class="stg-title">🔔 미점검 자동알림 (서버)</div>'+
-    '<div class="stg-hint">서버가 매시간 <b>보전계획표 미완료</b> + <b>체크시트 미점검</b> 설비를 확인해 ntfy로 자동 발송합니다. '+
+    '<div class="stg-hint">서버가 <b>한국시간 기준 하루 1회</b>(발송 시각 이후 첫 확인 시) <b>보전계획표 미완료</b> + <b>체크시트 미점검</b> 설비를 ntfy로 자동 발송합니다. 발송 시간대 밖(야간·새벽)에는 보내지 않습니다. '+
       '브라우저를 꺼도 동작합니다. (당월 계획 대상 설비 기준)</div>'+
     '<div class="stg-row r3" style="margin-top:8px">'+
       '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">사용</label>'+
@@ -5002,9 +5002,10 @@ function buildSettings(){
     '<div class="stg-row r3" style="margin-top:8px">'+
       '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">기준일 (경과 시 독촉)</label>'+
         '<input id="pmnCfgDue" type="number" min="1" max="31" class="stg-input" placeholder="20"></div>'+
-      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">재알림 간격(시간)</label>'+
-        '<input id="pmnCfgRepeat" type="number" min="0" max="168" class="stg-input" placeholder="24"></div>'+
-      '<div></div>'+
+      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">발송 시각 (한국시간, 시)</label>'+
+        '<input id="pmnCfgHour" type="number" min="0" max="23" class="stg-input" placeholder="8"></div>'+
+      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">발송 마감 (이 시각 이후 미발송)</label>'+
+        '<input id="pmnCfgEnd" type="number" min="1" max="24" class="stg-input" placeholder="18"></div>'+
     '</div>'+
     '<div class="stg-action-bar" style="margin-top:12px">'+
       '<button class="stg-btn-primary" onclick="pmnSaveCfg()">💾 서버에 저장</button>'+
@@ -5136,7 +5137,8 @@ function pmnFillForm(c){
   if(g('pmnCfgTopic'))   g('pmnCfgTopic').value=c.topic||'taejincall';
   if(g('pmnCfgNotice'))  g('pmnCfgNotice').value=(c.notice_day!=null)?c.notice_day:10;
   if(g('pmnCfgDue'))     g('pmnCfgDue').value=(c.due_day!=null)?c.due_day:20;
-  if(g('pmnCfgRepeat'))  g('pmnCfgRepeat').value=(c.repeat_hours!=null)?c.repeat_hours:24;
+  if(g('pmnCfgHour'))    g('pmnCfgHour').value=(c.send_hour!=null)?c.send_hour:8;
+  if(g('pmnCfgEnd'))     g('pmnCfgEnd').value=(c.end_hour!=null)?c.end_hour:18;
 }
 function pmnLoadCfg(silent){
   fetch(_getSbUrl()+'/rest/v1/kv_store?select=value&key=eq.'+encodeURIComponent(PMN_CFG_KEY)+'&limit=1',{headers:_sbHeaders()})
@@ -5153,15 +5155,17 @@ function pmnSaveCfg(){
     topic: (document.getElementById('pmnCfgTopic').value||'taejincall').trim(),
     notice_day: parseInt(document.getElementById('pmnCfgNotice').value,10)||10,
     due_day: parseInt(document.getElementById('pmnCfgDue').value,10)||20,
-    repeat_hours: Math.max(0, parseInt(document.getElementById('pmnCfgRepeat').value,10)||0)
+    send_hour: Math.min(23, Math.max(0, parseInt(document.getElementById('pmnCfgHour').value,10)||0)),
+    end_hour: Math.min(24, Math.max(1, parseInt(document.getElementById('pmnCfgEnd').value,10)||18))
   };
+  if(cfg.end_hour<=cfg.send_hour){_pmnStatus('❌ 발송 마감은 발송 시각보다 늦어야 합니다',false);return;}
   var hdrs=Object.assign({},_sbHeaders(),{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'});
   fetch(_getSbUrl()+'/rest/v1/kv_store?on_conflict=key',{
     method:'POST',headers:hdrs,
     body:JSON.stringify([{key:PMN_CFG_KEY,value:cfg}])
   }).then(function(r){
     if(!r.ok)throw new Error('HTTP '+r.status);
-    _pmnStatus('✅ 서버 저장 완료 (다음 정각 20분부터 적용)',true);
+    _pmnStatus('✅ 서버 저장 완료 (매일 '+cfg.send_hour+'시대 1회 · 한국시간)',true);
   }).catch(function(e){_pmnStatus('❌ '+e.message,false);});
 }
 function pmnTestSend(){
@@ -12300,7 +12304,7 @@ function sfMigrate(){
     cfg.migv = 2;
     if(sfData.notified){
       var ids={}; sfData.items.forEach(function(it){ids[it.id]=1;});
-      Object.keys(sfData.notified).forEach(function(k){ if(!ids[k]) delete sfData.notified[k]; });
+      Object.keys(sfData.notified).forEach(function(k){ if(k!=='_day' && !ids[k]) delete sfData.notified[k]; });
     }
   }
   if(changed) console.log('[안전검사] 데이터 정리: '+before+'건 → '+sfData.items.length+'건 (migv '+mv+'→2)');
@@ -12745,12 +12749,15 @@ function sfSend(al){
 function sfAutoPush(){
   if(sfData&&sfData.cfg&&sfData.cfg.ntfyOn===false) return;
   var al=alertList(); if(!al.length) return;
-  var day=fmtD(today0());
+  // [v3.8] 한국시간(KST) 날짜 기준 하루 1회 — 그날 첫 발송 후에는 항목이 늘어도 다음 날 묶어서 발송
+  var _k=new Date(Date.now()+9*3600*1000), _p=function(n){return n<10?'0'+n:''+n;};
+  var day=_k.getUTCFullYear()+'-'+_p(_k.getUTCMonth()+1)+'-'+_p(_k.getUTCDate());
+  var hr=_k.getUTCHours();
+  if(hr<8||hr>=18) return;               // 근무시간(08~18시 KST) 외 발송 안 함
   if(!sfData.notified) sfData.notified={};
-  var fresh=al.filter(function(it){return sfData.notified[it.id]!==day;});
-  if(!fresh.length) return;
-  sfSend(fresh);
-  fresh.forEach(function(it){sfData.notified[it.id]=day;});
+  if(sfData.notified._day===day) return; // 오늘 이미 발송
+  sfSend(al);
+  sfData.notified={_day:day};
   sfSave(true);
 }
 
