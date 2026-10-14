@@ -10719,23 +10719,23 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     const html = `
       <div class="v4p-kpi-row">
         <div class="v4p-kpi" data-tone="plan">
-          <div class="label"><span class="ico">📅</span>${monthLabel}</div>
-          <div class="value">${k.thisMonthPlan}<span style="font-size:14px;font-weight:600;color:#64748b">건</span></div>
+          <div class="label"><span class="ico"></span>${monthLabel}</div>
+          <div class="value">${k.thisMonthPlan}<span class="unit">건</span></div>
           <div class="sub">${curMonth ? curMonth+'월 등록된 점검 계획' : '계획 등록 필요'}</div>
         </div>
         <div class="v4p-kpi" data-tone="done">
-          <div class="label"><span class="ico">✅</span>완료</div>
-          <div class="value">${k.thisMonthDone}<span style="font-size:14px;font-weight:600;color:#64748b">건 (${k.thisMonthPct}%)</span></div>
+          <div class="label"><span class="ico"></span>완료</div>
+          <div class="value">${k.thisMonthDone}<span class="unit">건 (${k.thisMonthPct}%)</span></div>
           <div class="sub">${k.thisMonthPlan ? '이번 달 완료 점검' : '아직 계획 없음'}</div>
         </div>
         <div class="v4p-kpi" data-tone="late">
-          <div class="label"><span class="ico">⚠️</span>지연</div>
-          <div class="value">${k.late}<span style="font-size:14px;font-weight:600;color:#64748b">건</span></div>
-          <div class="sub">${k.late ? '지난 달 미완료' : '지연 없음 👍'}</div>
+          <div class="label"><span class="ico"></span>지연</div>
+          <div class="value">${k.late}<span class="unit">건</span></div>
+          <div class="sub">${k.late ? '지난 달 미완료' : '지연 없음'}</div>
         </div>
         <div class="v4p-kpi" data-tone="soon">
-          <div class="label"><span class="ico">🕐</span>이번달 잔여</div>
-          <div class="value">${k.soon}<span style="font-size:14px;font-weight:600;color:#64748b">건</span></div>
+          <div class="label"><span class="ico"></span>이번달 잔여</div>
+          <div class="value">${k.soon}<span class="unit">건</span></div>
           <div class="sub">${k.soon ? '이번 달 안에 완료 필요' : '이번 달 완료'}</div>
         </div>
       </div>`;
@@ -11201,24 +11201,26 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     else if(s.status === 'overdue') iconChar = '!';
     else if(s.status === 'pending' || s.status === 'partial') iconChar = '◐';
     
-    return '<div class="v4d-card-row v4d-status-' + s.status + '" data-eq="' + eqId + '" data-month="' + monthInfo.m + '">'
+    return '<div class="v4d-card-row v4d-status-' + s.status + '" data-eq="' + eqId + '" data-month="' + monthInfo.m + '" title="' + monthInfo.label + ' (' + monthInfo.m + '월): ' + s.label + '">'
       + '<span class="v4d-icon">' + iconChar + '</span>'
-      + '<span class="v4d-label">' + monthInfo.label + '</span>'
-      + '<span class="v4d-badge">' + s.label + '</span>'
+      + '<span class="v4d-label">' + monthInfo.m + '월</span>'
+      + '<span class="v4d-badge">' + (s.status === 'na' ? '–' : s.label) + '</span>'
       + '</div>';
   }
   
   function renderCard(eq, months){
     const grade = (eq.grade || '').replace(/\s/g, '');
-    return '<div class="v4d-card" data-eq="' + eq.id + '">'
+    const late = getMonthStatus(eq.id, months.prev, 'past').status === 'overdue';
+    return '<div class="v4d-card' + (late ? ' has-late' : '') + '" data-eq="' + eq.id + '">'
       + '<div class="v4d-card-head">'
       +   '<div class="v4d-card-title">' + eq.id + ' · ' + eq.name + '</div>'
       +   (grade ? '<span class="v4d-card-grade">' + grade + '</span>' : '')
       + '</div>'
+      + '<div class="v4d-card-rows">'
       + renderRow(eq.id, months.prev, 'past')
       + renderRow(eq.id, months.cur, 'current')
       + renderRow(eq.id, months.next, 'future')
-      + '</div>';
+      + '</div></div>';
   }
   
   function renderDashboard(){
@@ -11245,16 +11247,17 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     const monthlyRowHtml = renderMonthlyRow(monthlyStats);
     
     const cards = list.map(eq => renderCard(eq, months)).join('');
+    let collapsed = false;
+    try{ collapsed = localStorage.getItem('v4d_collapsed') === '1'; }catch(_){}
     
     const html =
       '<div class="v4d-section">'
       + '<div class="v4d-section-head">'
       +   '<div>'
       +     '<div class="v4d-section-title">'
-      +       '<span class="ico">📊</span>'
       +       '<div>'
       +         months.cur.y + '년 ' + months.cur.m + '월 점검 대시보드'
-      +         '<div class="v4d-section-sub">올해 월별 실적 + 전월 · 이번달 · 다음달 · 카드 클릭하여 상세 보기</div>'
+      +         '<div class="v4d-section-sub">월별 실적과 설비별 전월 · 이번달 · 다음달 현황 (카드를 누르면 상세 보기)</div>'
       +       '</div>'
       +     '</div>'
       +   '</div>'
@@ -11266,7 +11269,7 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
       +     '<span class="v4d-summary-item t-warn"><span class="label">진행중</span> <span class="num">' + stats.pending + '</span></span>'
       +     '<span class="v4d-summary-sep">·</span>'
       +     '<span class="v4d-summary-item t-bad"><span class="label">전월지연</span> <span class="num">' + stats.overdue + '</span></span>'
-      +     '<button class="v4d-collapse-btn" onclick="(function(){ var g=document.querySelector(\'.v4d-section .v4d-grid\'); if(g) g.style.display = (g.style.display===\'none\'?\'\':\'none\'); })()" style="margin-left:8px">접기/펼치기</button>'
+      +     '<button class="v4d-collapse-btn" onclick="(function(b){ var g=document.querySelector(\'.v4d-section .v4d-grid\'); if(!g) return; var c = g.style.display!==\'none\'; g.style.display = c?\'none\':\'\'; b.textContent = c?\'설비 카드 펼치기\':\'설비 카드 접기\'; try{localStorage.setItem(\'v4d_collapsed\', c?\'1\':\'0\');}catch(_){} })(this)">' + (collapsed ? '설비 카드 펼치기' : '설비 카드 접기') + '</button>'
       +   '</div>'
       + '</div>'
       + monthlyRowHtml
@@ -11275,9 +11278,8 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
       +   '<span class="v4d-legend-item pending">진행중</span>'
       +   '<span class="v4d-legend-item overdue">지연</span>'
       +   '<span class="v4d-legend-item scheduled">예정</span>'
-      +   '<span class="v4d-legend-item na">예정없음</span>'
       + '</div>'
-      + '<div class="v4d-grid">' + cards + '</div>'
+      + '<div class="v4d-grid"' + (collapsed ? ' style="display:none"' : '') + '>' + cards + '</div>'
       + '</div>';
     
     // 삽입 위치: KPI 카드 다음, 없으면 보전계획표 앞
@@ -12983,6 +12985,106 @@ else setTimeout(sfBoot,300);
 #pmPlanTab .pc-prog .txt em{font-style:normal;font-size:10px;font-weight:600;color:#b91c1c;background:#fee2e2;border-radius:999px;padding:1px 6px;margin-left:6px}
 #pmPlanTab .pc-prog .bar{height:4px;background:#f3f4f6;border-radius:999px;margin-top:5px;overflow:hidden}
 #pmPlanTab .pc-prog .bar i{display:block;height:100%;border-radius:999px}
+
+/* ===== 상단 진행률 / KPI / 대시보드 (라이트) ===== */
+#pmPlanTab .progress-bar{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:12px !important;box-shadow:0 1px 2px rgba(16,24,40,.06) !important;padding:14px 20px !important}
+#pmPlanTab .progress-bar .prog-label{color:#111827 !important;font-size:14px !important}
+#pmPlanTab .prog-track{background:#f3f4f6 !important;height:8px !important;border-radius:999px !important}
+#pmPlanTab .prog-fill{border-radius:999px !important}
+
+#pmPlanTab .v4p-kpi-row{display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:12px !important;margin:0 0 16px !important;background:transparent !important;border:0 !important;padding:0 !important}
+#pmPlanTab .v4p-kpi{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:12px !important;box-shadow:0 1px 2px rgba(16,24,40,.06) !important;padding:16px 18px !important;transform:none !important}
+#pmPlanTab .v4p-kpi::before{display:none !important}
+#pmPlanTab .v4p-kpi .label{color:#6b7280 !important;font-size:13px !important;font-weight:600 !important;display:flex !important;align-items:center !important;gap:8px !important}
+#pmPlanTab .v4p-kpi .label .ico{width:8px !important;height:8px !important;min-width:0 !important;padding:0 !important;border-radius:50% !important;font-size:0 !important}
+#pmPlanTab .v4p-kpi[data-tone="plan"] .label .ico{background:#2563eb !important}
+#pmPlanTab .v4p-kpi[data-tone="done"] .label .ico{background:#16a34a !important}
+#pmPlanTab .v4p-kpi[data-tone="late"] .label .ico{background:#dc2626 !important}
+#pmPlanTab .v4p-kpi[data-tone="soon"] .label .ico{background:#d97706 !important}
+#pmPlanTab .v4p-kpi .value{color:#111827 !important;font-size:28px !important;font-weight:700 !important;margin-top:6px !important;letter-spacing:-.5px}
+#pmPlanTab .v4p-kpi[data-tone="late"] .value{color:#dc2626 !important}
+#pmPlanTab .v4p-kpi .value .unit{font-size:13px;font-weight:500;color:#9ca3af;margin-left:3px;letter-spacing:0}
+#pmPlanTab .v4p-kpi .sub{color:#9ca3af !important;font-size:12px !important;margin-top:2px !important}
+
+#pmPlanTab .v4d-section{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:12px !important;box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08) !important;padding:16px 20px 20px !important;color:#111827 !important}
+#pmPlanTab .v4d-section-title{color:#111827 !important;font-size:16px !important}
+#pmPlanTab .v4d-section-sub{color:#6b7280 !important}
+#pmPlanTab .v4d-summary{gap:6px !important}
+#pmPlanTab .v4d-summary-sep{display:none !important}
+#pmPlanTab .v4d-summary-item{background:#f3f4f6 !important;border-radius:999px !important;padding:4px 10px !important;align-items:center !important}
+#pmPlanTab .v4d-summary-item .label{color:#6b7280 !important}
+#pmPlanTab .v4d-summary-item .num{color:#111827 !important;font-size:13px !important}
+#pmPlanTab .v4d-summary-item.t-good{background:#dcfce7 !important}
+#pmPlanTab .v4d-summary-item.t-good .num,#pmPlanTab .v4d-summary-item.t-good .label{color:#15803d !important}
+#pmPlanTab .v4d-summary-item.t-warn{background:#fef3c7 !important}
+#pmPlanTab .v4d-summary-item.t-warn .num,#pmPlanTab .v4d-summary-item.t-warn .label{color:#b45309 !important}
+#pmPlanTab .v4d-summary-item.t-bad{background:#fee2e2 !important}
+#pmPlanTab .v4d-summary-item.t-bad .num,#pmPlanTab .v4d-summary-item.t-bad .label{color:#b91c1c !important}
+#pmPlanTab .v4d-collapse-btn{background:#fff !important;border:1px solid #d1d5db !important;color:#374151 !important;border-radius:8px !important;padding:5px 12px !important;font-weight:600 !important;margin-left:4px}
+#pmPlanTab .v4d-collapse-btn:hover{background:#f9fafb !important}
+
+/* 월별 실적 타일 */
+#pmPlanTab .v4d-monthly-row{display:grid !important;grid-template-columns:repeat(12,1fr) !important;gap:6px !important;background:transparent !important;border:0 !important;padding:0 !important;margin:4px 0 14px !important}
+#pmPlanTab .v4d-monthly-cell{background:#f9fafb !important;border:1px solid #f0f1f3 !important;border-radius:8px !important;padding:8px 4px !important;box-shadow:none !important;transform:none !important}
+#pmPlanTab .v4d-monthly-cell .m{color:#6b7280 !important;font-size:11px !important}
+#pmPlanTab .v4d-monthly-cell .v{color:#111827 !important;font-size:15px !important;font-weight:700 !important}
+#pmPlanTab .v4d-monthly-cell .badge{border-radius:999px !important;font-size:10px !important;font-weight:600 !important}
+#pmPlanTab .v4d-monthly-cell.t-done .badge{background:#dcfce7 !important;color:#15803d !important}
+#pmPlanTab .v4d-monthly-cell.t-late .badge{background:#fee2e2 !important;color:#b91c1c !important}
+#pmPlanTab .v4d-monthly-cell.t-partial .badge{background:#fef3c7 !important;color:#b45309 !important}
+#pmPlanTab .v4d-monthly-cell.t-none .badge{background:#f3f4f6 !important;color:#6b7280 !important}
+#pmPlanTab .v4d-monthly-cell.is-future{opacity:.6}
+#pmPlanTab .v4d-monthly-cell.is-now{background:#eff6ff !important;border-color:#2563eb !important;box-shadow:0 0 0 1px #2563eb !important}
+#pmPlanTab .v4d-monthly-cell.is-now .m{color:#2563eb !important}
+#pmPlanTab .v4d-monthly-cell.is-now .v{color:#1d4ed8 !important}
+
+/* 범례 */
+#pmPlanTab .v4d-legend{color:#4b5563 !important;border-bottom:1px solid #f3f4f6 !important}
+#pmPlanTab .v4d-legend-item.done::before{background:#16a34a !important}
+#pmPlanTab .v4d-legend-item.pending::before{background:#d97706 !important}
+#pmPlanTab .v4d-legend-item.overdue::before{background:#dc2626 !important}
+#pmPlanTab .v4d-legend-item.scheduled::before{background:#2563eb !important}
+
+/* 설비 카드 */
+#pmPlanTab .v4d-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr)) !important;gap:10px !important}
+#pmPlanTab .v4d-card{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:10px !important;box-shadow:none !important;transition:box-shadow .15s,border-color .15s !important}
+#pmPlanTab .v4d-card:hover{border-color:#d1d5db !important;box-shadow:0 4px 12px rgba(16,24,40,.08) !important}
+#pmPlanTab .v4d-card.has-late{border-left:3px solid #dc2626 !important}
+#pmPlanTab .v4d-card-head{background:transparent !important;border:0 !important;padding:10px 12px 6px !important}
+#pmPlanTab .v4d-card-title{color:#111827 !important;font-size:13px !important;font-weight:700 !important;text-align:left !important}
+#pmPlanTab .v4d-card-grade{background:#f3f4f6 !important;color:#4b5563 !important;border-radius:999px !important;font-weight:600 !important}
+#pmPlanTab .v4d-card-rows{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 8px 10px}
+#pmPlanTab .v4d-card-row{flex-direction:column !important;gap:3px !important;padding:6px 2px !important;border:0 !important;border-radius:6px !important;background:transparent !important;text-align:center}
+#pmPlanTab .v4d-card-row:hover{background:#f9fafb !important}
+#pmPlanTab .v4d-card-row .v4d-icon{display:none !important}
+#pmPlanTab .v4d-card-row .v4d-label{color:#9ca3af !important;font-size:11px !important;font-weight:500 !important;flex:none !important}
+#pmPlanTab .v4d-card-row .v4d-badge{font-size:11px !important;font-weight:600 !important;padding:2px 8px !important;border-radius:999px !important}
+#pmPlanTab .v4d-status-done .v4d-badge{background:#dcfce7 !important;color:#15803d !important}
+#pmPlanTab .v4d-status-overdue .v4d-badge{background:#fee2e2 !important;color:#b91c1c !important}
+#pmPlanTab .v4d-status-pending .v4d-badge,
+#pmPlanTab .v4d-status-partial .v4d-badge{background:#fef3c7 !important;color:#b45309 !important}
+#pmPlanTab .v4d-status-scheduled .v4d-badge{background:#dbeafe !important;color:#1d4ed8 !important}
+#pmPlanTab .v4d-status-na .v4d-badge{background:transparent !important;color:#d1d5db !important}
+
+#pmPlanTab .v4d-card .v4d-card-rows{background:transparent !important;border:0 !important;color:inherit !important}
+
+/* 특이사항 / 등급기준 (라이트) */
+#pmPlanTab .notes-box,#pmPlanTab .grade-legend{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:12px !important;box-shadow:0 1px 2px rgba(16,24,40,.06) !important}
+#pmPlanTab .notes-box h4{color:#111827 !important}
+#pmPlanTab .notes-box p,#pmPlanTab .grade-legend{color:#4b5563 !important}
+#pmPlanTab .grade-legend b{color:#111827 !important}
+#pmPlanTab .notes-box textarea{background:#fff !important;color:#111827 !important;border:1px solid #d1d5db !important}
+#pmPlanTab .notes-box .btn-secondary{background:#fff !important;color:#374151 !important;border:1px solid #d1d5db !important}
+#pmPlanTab .save-now-hint{color:#9ca3af !important}
+
+@media (max-width:900px){
+  #pmPlanTab .v4p-kpi-row{grid-template-columns:repeat(2,1fr) !important;gap:8px !important}
+  #pmPlanTab .v4p-kpi{padding:12px 14px !important}
+  #pmPlanTab .v4p-kpi .value{font-size:22px !important}
+  #pmPlanTab .v4d-section{padding:14px !important}
+  #pmPlanTab .v4d-monthly-row{grid-template-columns:repeat(6,1fr) !important}
+  #pmPlanTab .v4d-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr)) !important;gap:8px !important}
+}
 
 @media (max-width:900px){
   #pmPlanTab .plan-sheet-head{padding:12px 12px 0}
