@@ -1634,7 +1634,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   <h1>📋 보고서 결재 v3.7</h1>
   <p>점검표 통합 월별 결재 시스템 · 4단계 (작성·검토·확인·승인)</p>
   <div class="v">v3.7 · 🔒 Supabase 자동 연결 고정 (모든 PC 공통)</div>
-  <div id="hdrUserBadge" class="user-badge" style="display:none">👤 -</div>
+  <div id="hdrUserBadge" class="user-badge" onclick="apprPinLogin()" title="눌러서 다른 PIN으로 변경" style="display:none;cursor:pointer">👤 -</div>
 </div>
 
 <div class="tabs">
@@ -1726,7 +1726,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
     <button class="btn btn-ghost" onclick="closeReport()">← 목록</button>
     <button class="btn btn-info" onclick="recalcStats()">🔄 통계 재집계</button>
     <button class="btn btn-ghost" onclick="saveDraft()" id="btnDraft">💾 임시저장</button>
-    <button class="btn btn-pri" onclick="openSignModal()" id="btnSign" style="display:none">✍ 사인하기</button>
+    <button class="btn btn-pri" onclick="apprSignClick()" id="btnSign" style="display:none">✍ 결재하기</button>
     <button class="btn btn-ng" onclick="openRejectModal()" id="btnReject" style="display:none">❌ 반려</button>
     <button class="btn btn-info" onclick="printReport()">🖨 인쇄</button>
     <button class="btn btn-ghost" onclick="downloadPDF()">⬇ PDF</button>
@@ -1951,6 +1951,24 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
       <button class="btn btn-pri" style="flex:2" onclick="confirmSign()" id="btnConfirmSign">
         ✅ 사인 + 다음 결재선
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 입력 모달 (결재 시 본인 확인) -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal pin-modal">
+    <button type="button" class="pin-x" onclick="closePinPad()" aria-label="닫기">✕</button>
+    <h3 id="pinTitle">결재 PIN 입력</h3>
+    <div class="pin-who" id="pinWho"></div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-err" id="pinErr"></div>
+    <input type="password" id="pinInput" inputmode="numeric" autocomplete="off" maxlength="8" class="pin-hidden" oninput="pinSync()" onkeydown="if(event.key==='Enter')pinSubmit()">
+    <div class="pin-pad">
+      <button type="button" onclick="pinKey('1')">1</button><button type="button" onclick="pinKey('2')">2</button><button type="button" onclick="pinKey('3')">3</button>
+      <button type="button" onclick="pinKey('4')">4</button><button type="button" onclick="pinKey('5')">5</button><button type="button" onclick="pinKey('6')">6</button>
+      <button type="button" onclick="pinKey('7')">7</button><button type="button" onclick="pinKey('8')">8</button><button type="button" onclick="pinKey('9')">9</button>
+      <button type="button" class="pin-fn" onclick="pinBack()">⌫</button><button type="button" onclick="pinKey('0')">0</button><button type="button" class="pin-ok" onclick="pinSubmit()">확인</button>
     </div>
   </div>
 </div>
@@ -7623,7 +7641,7 @@ async function loadInbox(){
   const myPin = getMyPin();
   if(!myPin){
     document.getElementById('inboxList').innerHTML =
-      '<div class="empty-state"><div class="ico">👤</div>설정 탭에서 본인 PIN 입력</div>';
+      '<div class="empty-state"><div class="ico">🔑</div>PIN을 입력하면 내 결재 대기 보고서가 표시됩니다<br><button class="btn btn-pri" style="margin-top:12px;padding:10px 22px" onclick="apprPinLogin()">PIN 입력</button></div>';
     return;
   }
   try{
@@ -8588,13 +8606,92 @@ function renderApprovalBlock(){
 
 function tryStartSign(step){
   const r = currentReport;
-  const myPin = getMyPin();
-  if(!myPin){ alert('설정 탭에서 본인 PIN 입력하세요'); return; }
+  if(!r) return;
   if(r.status==='COMPLETED' || r.status==='REJECTED'){ alert('완료/반려된 보고서입니다'); return; }
   if(step !== r.current_step){ alert(`현재 ${STEP_NAMES[r.current_step]} 단계입니다`); return; }
-  if(step===1 && r.step1_pin && r.step1_pin!==myPin){ alert('다른 작성자가 진행중입니다'); return; }
-  if(step>=2 && r.next_approver_pin !== myPin){ alert('지정된 결재자가 아닙니다'); return; }
-  openSignModal();
+  // 이 단계의 결재자 (결재선 마스터 / 보고서 지정값)
+  const route = routeCache.find(rt=>rt.template_code===r.template_code) || {};
+  let expPin, expName;
+  if(step===1){
+    expPin  = r.step1_pin  || route.step1_pin  || r.next_approver_pin  || '';
+    expName = r.step1_name || route.step1_name || r.next_approver_name || '';
+  }else{
+    expPin  = r.next_approver_pin  || '';
+    expName = r.next_approver_name || '';
+  }
+  openPinPad({
+    title: `${STEP_NAMES[step]} 결재`,
+    who: expName ? `${expName} 님의 PIN을 입력하세요` : '본인 PIN을 입력하세요',
+    expectedPin: expPin,
+    onOk: function(pin, name){
+      apprSetIdentity(pin, name || expName);
+      openSignModal();
+    }
+  });
+}
+// 하단 [결재하기] 버튼
+function apprSignClick(){ if(currentReport) tryStartSign(currentReport.current_step); }
+
+// ---------------------------------------------------------
+// PIN 패드: 결재/결재함 진입 시 본인 확인 (설정 탭 로그인 없이 사용)
+// ---------------------------------------------------------
+let _pinOpt = null;
+function _pinNameOf(pin){
+  for(const rt of (routeCache||[])){
+    for(let i=1;i<=4;i++){ if(String(rt['step'+i+'_pin']||'')===String(pin) && rt['step'+i+'_name']) return rt['step'+i+'_name']; }
+  }
+  return '';
+}
+function apprSetIdentity(pin, name){
+  const c = getCfg();
+  c.my_pin = String(pin); if(name) c.my_name = name;
+  saveCfg(c);
+  const a = document.getElementById('cfgMyPin'), b = document.getElementById('cfgMyName');
+  if(a) a.value = c.my_pin; if(b) b.value = c.my_name || '';
+  try{ refreshUserBadge(); }catch(e){}
+}
+function openPinPad(opt){
+  _pinOpt = opt || {};
+  document.getElementById('pinTitle').textContent = _pinOpt.title || 'PIN 입력';
+  document.getElementById('pinWho').textContent = _pinOpt.who || '';
+  document.getElementById('pinErr').textContent = '';
+  const inp = document.getElementById('pinInput');
+  inp.value = ''; pinSync();
+  document.getElementById('pinModal').classList.add('show');
+  setTimeout(()=>{ try{ inp.focus({preventScroll:true}); }catch(e){} }, 50);
+}
+function closePinPad(){ document.getElementById('pinModal').classList.remove('show'); _pinOpt = null; }
+function pinSync(){
+  const inp = document.getElementById('pinInput');
+  inp.value = inp.value.replace(/\D/g,'').slice(0,8);
+  const n = Math.max(4, inp.value.length);
+  let h=''; for(let i=0;i<n;i++) h += `<span class="${i<inp.value.length?'on':''}"></span>`;
+  document.getElementById('pinDots').innerHTML = h;
+  document.getElementById('pinErr').textContent = '';
+}
+function pinKey(d){ const inp=document.getElementById('pinInput'); if(inp.value.length<8){ inp.value+=d; pinSync(); } }
+function pinBack(){ const inp=document.getElementById('pinInput'); inp.value=inp.value.slice(0,-1); pinSync(); }
+async function pinSubmit(){
+  if(!_pinOpt) return;
+  const pin = document.getElementById('pinInput').value;
+  const err = document.getElementById('pinErr');
+  if(!pin){ err.textContent = 'PIN을 입력하세요'; return; }
+  if(_pinOpt.expectedPin){
+    if(pin !== String(_pinOpt.expectedPin)){ err.textContent = 'PIN이 일치하지 않습니다'; document.getElementById('pinInput').value=''; setTimeout(pinSyncKeepErr, 0); return; }
+  }
+  if(!routeCache.length && isCfg()){ try{ await loadRoutes(); }catch(e){} }
+  let name = _pinOpt.expectedPin ? '' : _pinNameOf(pin);
+  if(_pinOpt.requireKnown && !name){ err.textContent = '결재선에 등록되지 않은 PIN입니다'; document.getElementById('pinInput').value=''; setTimeout(pinSyncKeepErr, 0); return; }
+  if(!_pinOpt.expectedPin && !name && !_pinOpt.requireKnown){ name = getMyName() || prompt('이름을 입력하세요') || ''; }
+  const opt = _pinOpt;
+  closePinPad();
+  if(opt.onOk) opt.onOk(pin, name);
+}
+function pinSyncKeepErr(){ const e=document.getElementById('pinErr').textContent; pinSync(); document.getElementById('pinErr').textContent=e; }
+// 결재함: PIN으로 로그인
+function apprPinLogin(){
+  openPinPad({ title:'PIN 로그인', who:'결재선에 등록된 본인 PIN을 입력하세요', requireKnown:true,
+    onOk:function(pin, name){ apprSetIdentity(pin, name); if(isCfg()) loadInbox(); } });
 }
 
 // =========================================================
@@ -9019,7 +9116,9 @@ if(typeof closeReport!=='undefined') window.closeReport = closeReport;
 if(typeof recalcStats!=='undefined') window.recalcStats = recalcStats;
 if(typeof saveDraft!=='undefined') window.saveDraft = saveDraft;
 if(typeof openSignModal!=='undefined') window.openSignModal = openSignModal;
-if(typeof tryStartSign!=='undefined') window.tryStartSign = tryStartSign;  // 결재칸(사인란) 탭으로 결재 시작
+if(typeof tryStartSign!=='undefined') window.tryStartSign = tryStartSign;
+window.apprSignClick = apprSignClick; window.apprPinLogin = apprPinLogin; window.openPinPad = openPinPad;
+window.closePinPad = closePinPad; window.pinKey = pinKey; window.pinBack = pinBack; window.pinSubmit = pinSubmit; window.pinSync = pinSync;  // 결재칸(사인란) 탭으로 결재 시작
 if(typeof openRejectModal!=='undefined') window.openRejectModal = openRejectModal;
 if(typeof printReport!=='undefined') window.printReport = printReport;
 if(typeof downloadPDF!=='undefined') window.downloadPDF = downloadPDF;
@@ -12569,6 +12668,22 @@ body > .page > .top-tabs{background:#fff !important;border:1px solid #e5e7eb !im
 .appr-app .sig-none{font-size:12px;color:var(--text3)}
 .appr-app .sig-keep{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-top:2px;cursor:pointer}
 .appr-app .sig-keep input{width:16px;height:16px;accent-color:#2563eb}
+</style>
+<style>
+/* [PIN] 결재 PIN 패드 */
+.appr-app .pin-modal{max-width:340px !important;text-align:center;position:relative}
+.appr-app .pin-x{position:absolute;top:10px;right:10px;border:0;background:#f3f4f6;width:32px;height:32px;border-radius:8px;cursor:pointer;color:#374151}
+.appr-app .pin-who{font-size:13px;color:var(--text2);margin:4px 0 16px}
+.appr-app .pin-dots{display:flex;justify-content:center;gap:12px;min-height:16px}
+.appr-app .pin-dots span{width:14px;height:14px;border-radius:50%;border:2px solid #d1d5db;box-sizing:border-box}
+.appr-app .pin-dots span.on{background:#2563eb;border-color:#2563eb}
+.appr-app .pin-err{min-height:18px;font-size:12px;color:#dc2626;font-weight:600;margin:8px 0 6px}
+.appr-app .pin-hidden{position:absolute;opacity:0;width:1px;height:1px;left:-9999px}
+.appr-app .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.appr-app .pin-pad button{height:56px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;font-size:22px;font-weight:600;color:#111827;cursor:pointer;font-family:inherit}
+.appr-app .pin-pad button:active{background:#eff6ff}
+.appr-app .pin-pad .pin-fn{font-size:18px;color:#6b7280;background:#f9fafb}
+.appr-app .pin-pad .pin-ok{background:#2563eb;border-color:#2563eb;color:#fff;font-size:16px}
 </style>
 <!-- [LIGHT-V5 END] -->
 <!-- [NAV-V6] PC 왼쪽 사이드바 메뉴 + 선 아이콘 (휴대폰은 하단 탭바 유지) -->
