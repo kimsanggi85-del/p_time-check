@@ -4395,10 +4395,34 @@ function setChkListFilter(f){
 }
 window.setChkListFilter = setChkListFilter;
 
+// PC(넓은 화면) 여부: PC는 좌측 목록 + 우측 점검, 휴대폰은 목록 → 전체화면 점검
+function csIsWide(){ return window.matchMedia('(min-width:1000px)').matches; }
+(function(){
+  try{
+    let wide = csIsWide();
+    window.matchMedia('(min-width:1000px)').addEventListener('change', ()=>{
+      const now = csIsWide();
+      if(now===wide) return;
+      wide = now;
+      const tab = document.getElementById('tab-check');
+      if(!tab || !document.getElementById('eqList')) return;
+      if(window.__csKey) showEquipment(window.__csKey); else showAllList();
+    });
+  }catch(e){}
+})();
+
 // 전체 목록 화면
 function showAllList(){
+  window.__csKey = null;
+  document.getElementById('tab-check').classList.remove('cs-detail-open');
   document.getElementById('detailPanel').classList.remove('show');
   document.getElementById('printBtn').style.display = 'none';
+  renderChkList(csIsWide() ? 'grid' : 'rows');
+  document.getElementById('eqSelect').value = '';
+}
+
+// mode: 'grid'(PC 카드) / 'rows'(휴대폰 목록) / 'side'(PC 점검화면 좌측 목록)
+function renderChkList(mode, activeKey){
   const sorted = Object.keys(DATA).sort((a,b)=>{
     const na = parseInt(a.replace('P-',''));
     const nb = parseInt(b.replace('P-',''));
@@ -4412,32 +4436,43 @@ function showAllList(){
     const c = chkCategory(k);
     (groups[c] = groups[c] || []).push(k);
   });
+  const compact = mode!=='grid';
   let cards = '';
   ['프레스','크레인','컴프레셔','기타 설비'].forEach(cat=>{
     const ks = groups[cat];
     if(!ks || !ks.length) return;
-    cards += `<div class="cs-group" data-cat="${cat}"><div class="cs-group-head">${cat}<span>${ks.length}</span></div><div class="eq-grid">`;
+    cards += `<div class="cs-group" data-cat="${cat}"><div class="cs-group-head">${cat}<span>${ks.length}</span></div><div class="${compact?'cs-rows':'eq-grid'}">`;
     ks.forEach(k=>{
       const d = DATA[k];
       const g = String(d.grade||'');
       const gradeClass = g.startsWith('A')?'grade-a':g.startsWith('B')?'grade-b':g.startsWith('C')?'grade-c':g.startsWith('D')?'grade-d':'grade-e';
       const ms = chkMonthStatus(k);
       cnt.all++; if(cnt[ms.st]!==undefined) cnt[ms.st]++;
-      let stHtml;
-      if(ms.yearMode){
-        stHtml = `<div class="cs-st"><span class="cs-pill t-${ms.st==='done'?'done':'na'}">${getChkYear()}년 체크 ${ms.done}건</span></div>`;
-      }else if(ms.st==='na'){
-        stHtml = `<div class="cs-st"><span class="cs-pill t-na">월간 항목 없음</span></div>`;
-      }else{
-        const pct = Math.round(ms.done/ms.total*100);
-        const lbl = ms.st==='done'?'완료':ms.st==='partial'?'진행중':'미점검';
-        stHtml = `<div class="cs-st"><span class="cs-pill t-${ms.st}">${lbl}</span><span class="cs-cnt">${curM}월 ${ms.done}/${ms.total}</span></div>
-          <div class="cs-bar"><i class="t-${ms.st}" style="width:${pct}%"></i></div>`;
-      }
       let name = String(d.title||'').trim();
       if(name.indexOf(k)===0) name = name.slice(k.length).trim();
       if(/^\(.*\)$/.test(name)) name = name.slice(1,-1).trim();
       name = name || d.title || '';
+      const lbl = ms.yearMode ? `${ms.done}건` : ms.st==='na' ? '항목없음' : ms.st==='done' ? '완료' : ms.st==='partial' ? '진행중' : '미점검';
+      const pillCls = ms.yearMode ? (ms.st==='done'?'done':'na') : ms.st;
+      if(compact){
+        cards += `<div class="eq-card cs-row${k===activeKey?' active':''}" data-st="${ms.st}" onclick="showEquipment('${k}')">
+          <span class="cs-dot t-${pillCls}"></span>
+          <span class="cs-row-main"><b>${k}</b><span>${name}</span></span>
+          <span class="cs-row-st">${(!ms.yearMode && ms.total)?`<em>${ms.done}/${ms.total}</em>`:''}<span class="cs-pill t-${pillCls}">${lbl}</span></span>
+          <span class="cs-search" hidden>${d.title||''}</span>
+        </div>`;
+        return;
+      }
+      let stHtml;
+      if(ms.yearMode){
+        stHtml = `<div class="cs-st"><span class="cs-pill t-${pillCls}">${getChkYear()}년 체크 ${ms.done}건</span></div>`;
+      }else if(ms.st==='na'){
+        stHtml = `<div class="cs-st"><span class="cs-pill t-na">월간 항목 없음</span></div>`;
+      }else{
+        const pct = Math.round(ms.done/ms.total*100);
+        stHtml = `<div class="cs-st"><span class="cs-pill t-${ms.st}">${lbl}</span><span class="cs-cnt">${curM}월 ${ms.done}/${ms.total}</span></div>
+          <div class="cs-bar"><i class="t-${ms.st}" style="width:${pct}%"></i></div>`;
+      }
       cards += `<div class="eq-card" data-st="${ms.st}" onclick="showEquipment('${k}')">
         <div class="cs-top"><h4>${k}</h4>${(d.grade && d.grade!=='-')?`<span class="age ${gradeClass}">${d.grade}</span>`:''}</div>
         <p class="cs-name">${name}</p>
@@ -4449,15 +4484,26 @@ function showAllList(){
     cards += `</div></div>`;
   });
   const seg = (f,label,n)=>`<button type="button" data-f="${f}" class="${chkListFilter===f?'on':''}" onclick="setChkListFilter('${f}')">${label}<b>${n}</b></button>`;
-  let h = `<div class="cs-list-head">
-    <div><div class="cs-title">설비 점검 현황</div>
-    <div class="cs-sub">${isCurYear?curM+'월 월간 점검항목 기준':getChkYear()+'년 점검 기록'} · 설비를 누르면 체크시트가 열립니다</div></div>
-    ${isCurYear?`<div class="cs-seg">${seg('all','전체',cnt.all)}${seg('todo','미점검',cnt.todo)}${seg('partial','진행중',cnt.partial)}${seg('done','완료',cnt.done)}</div>`:''}
-  </div>`;
-  h += cards;
-  document.getElementById('eqList').innerHTML = h;
-  document.getElementById('eqSelect').value = '';
+  const segHtml = isCurYear ? `<div class="cs-seg">${seg('all','전체',cnt.all)}${seg('todo','미점검',cnt.todo)}${seg('partial','진행중',cnt.partial)}${seg('done','완료',cnt.done)}</div>` : '';
+  let h;
+  if(mode==='side'){
+    h = `<div class="cs-side-head"><div class="cs-title">설비 ${cnt.all}대</div><button class="cs-back-all" onclick="showAllList()">전체 보기</button></div>${segHtml}<div class="cs-side-list">${cards}</div>`;
+  }else{
+    h = `<div class="cs-list-head">
+      <div><div class="cs-title">설비 점검 현황</div>
+      <div class="cs-sub">${isCurYear?curM+'월 월간 점검항목 기준':getChkYear()+'년 점검 기록'} · 설비를 누르면 점검 화면이 열립니다</div></div>
+      ${segHtml}
+    </div>` + cards;
+  }
+  const el = document.getElementById('eqList');
+  el.className = 'cs-mode-' + mode;
+  el.innerHTML = h;
   filterEquipment((document.getElementById('searchInput')||{}).value||'');
+  if(mode==='side' && activeKey){
+    const a = el.querySelector('.cs-row.active');
+    const box = el.querySelector('.cs-side-list');
+    if(a && box) box.scrollTop = Math.max(0, a.offsetTop - box.offsetTop - box.clientHeight/2);
+  }
 }
 
 function filterEquipment(q){
@@ -4478,7 +4524,10 @@ function showEquipment(key){
   const d = DATA[key];
   if(!d) return;
   
-  document.getElementById('eqList').innerHTML = '';
+  window.__csKey = key;
+  document.getElementById('tab-check').classList.add('cs-detail-open');
+  if(csIsWide()) renderChkList('side', key);
+  else document.getElementById('eqList').innerHTML = '';
   document.getElementById('printBtn').style.display = '';
   document.getElementById('eqSelect').value = key;
   
@@ -4549,6 +4598,7 @@ function showEquipment(key){
     <div class="approval-cell"><div class="label">승 인</div></div>
   </div>`;
   
+  const __hHead = h; h = '';
   // 이미지 (기본 + 클라우드 추가사진 병합) [PATCH v3.4]
   {
     const _base=(d.images||[]);
@@ -4566,6 +4616,7 @@ function showEquipment(key){
     }
   }
   
+  const __hPhoto = h; h = '';
   // 점검항목 섹션
   const renderSection = (title, icon, items, type)=>{
     if(!items || !items.length) return '';
@@ -4607,6 +4658,7 @@ function showEquipment(key){
   h += renderSection('반기별 점검항목', '📆', d.halfly, 'halfly');
   h += renderSection('연간 점검항목', '🗓', d.yearly, 'yearly');
   
+  const __hAnnual = h; h = '';
   // 이력 (기본 내장 이력 + 수리이력 탭에서 추가한 클라우드 이력 병합) [PATCH v3.1]
   {
     const extra = (window.__eqhData && Array.isArray(window.__eqhData[key])) ? window.__eqhData[key].map(e=>typeof e==='string'?e:(e&&e.t)||'') : [];
@@ -4623,14 +4675,16 @@ function showEquipment(key){
     ※ 등급별 년식 기준: A급 1~10년 · B급 11~20년 · C급 21~30년 · D급 31~40년 · E급 41년 이상
   </div>`;
   
+  h = csComposeDetail(key, __hHead, __hPhoto, __hAnnual, h);
   const dp = document.getElementById('detailPanel');
   dp.innerHTML = h;
   dp.classList.add('show');
   // 저장된 체크 상태 복원
   restoreChks(key);
   updateChkProgress();
+  renderChkToday(key);
   if(!dp.__csObs){
-    dp.__csObs = new MutationObserver(()=>updateChkProgress());
+    dp.__csObs = new MutationObserver(()=>{ updateChkProgress(); if(window.__csKey) renderChkToday(window.__csKey); });
     dp.__csObs.observe(dp, {subtree:true, attributes:true, attributeFilter:['class']});
   }
   window.scrollTo({top:0, behavior:'smooth'});
@@ -4846,6 +4900,98 @@ function updateChkProgress(){
     if(el.textContent!==t) el.textContent = t;
     if(el.className!==cls) el.className = cls;
   });
+}
+
+// ===== 점검 화면 구성: 이번 기간 점검(체크리스트) / 연간 기록표 / 사진 / 이력 =====
+let csPane = null;
+function csComposeDetail(key, head, photo, annual, hist){
+  const d = DATA[key] || {};
+  const isCurYear = String(getChkYear())===String(new Date().getFullYear());
+  if(!csPane || (csPane==='today' && !isCurYear)) csPane = isCurYear ? 'today' : 'annual';
+  // 사진 탭이 숨겨져 있어도 인쇄 시 바로 나오도록 지연 로딩 해제
+  photo = photo.replace(/loading="lazy"/g, 'loading="eager"');
+  const nPhoto = (photo.match(/class="image-item"/g)||[]).length;
+  const nHist = (hist.match(/<li>/g)||[]).length;
+  const tab = (k,label,extra)=>`<button type="button" data-pane="${k}" class="${csPane===k?'on':''}" onclick="csSetPane('${k}')">${label}${extra!==undefined?`<b>${extra}</b>`:''}</button>`;
+  const bar = `<div class="cs-mbar no-print"><button onclick="showAllList()">‹ 목록</button><div><b>${key}</b><span>${String(d.title||'').replace(key,'').trim()}</span></div></div>`;
+  const tabs = `<div class="cs-tabs no-print">${isCurYear?tab('today','이번 달 점검'):''}${tab('annual','연간 기록표')}${nPhoto?tab('photo','사진',nPhoto):''}${tab('hist','수리이력',nHist)}</div>`;
+  return bar + head + tabs
+    + `<div class="cs-pane no-print" data-pane="today" id="csToday"></div>`
+    + `<div class="cs-pane" data-pane="photo">${photo}</div>`
+    + `<div class="cs-pane" data-pane="annual">${annual}</div>`
+    + `<div class="cs-pane" data-pane="hist">${hist}</div>`;
+}
+function csApplyPane(){
+  const dp = document.getElementById('detailPanel');
+  if(!dp) return;
+  dp.querySelectorAll('.cs-tabs button').forEach(b=>b.classList.toggle('on', b.dataset.pane===csPane));
+  dp.querySelectorAll('.cs-pane').forEach(p=>p.classList.toggle('on', p.dataset.pane===csPane));
+}
+function csSetPane(k){ csPane = k; csApplyPane(); }
+window.csSetPane = csSetPane;
+
+// 이번 기간 체크리스트의 [점검 완료] → 연간 기록표의 해당 칸으로 기존 입력창 열기
+function csCheck(ckey){
+  const cell = Array.from(document.querySelectorAll('#detailPanel .chk-cell')).find(c=>c.getAttribute('data-key')===ckey);
+  if(cell) toggleChk(ckey, cell);
+}
+window.csCheck = csCheck;
+
+function renderChkToday(key){
+  const box = document.getElementById('csToday');
+  csApplyPane();
+  if(!box) return;
+  const d = DATA[key] || {};
+  const data = loadChks(key);
+  const groups = [
+    ['monthly','월별 점검'], ['quarterly','분기별 점검'], ['halfly','반기별 점검'], ['yearly','연간 점검']
+  ];
+  let allDone = 0, allTotal = 0, html = '';
+  groups.forEach(([type, title])=>{
+    const items = d[type] || [];
+    const pk = chkCurPeriodKey(type);
+    if(!items.length || !pk) return;
+    const pl = (getPeriods(type).find(p=>p.k===pk)||{}).label || '';
+    let rows = '', done = 0;
+    items.forEach((it, idx)=>{
+      const ckey = `${key}|${type}|${idx}|${pk}`;
+      const v = data[ckey];
+      const info = !v ? null : (typeof v==='string' ? {date:v} : v);
+      const ok = !!(info && info.date);
+      if(ok) done++;
+      const act = ok
+        ? `<button class="cs-done-btn" onclick="csCheck('${ckey}')" title="눌러서 수정/취소">✓ ${String(info.date).substring(5).replace('-','/')}${info.inspector?' · '+info.inspector:''}</button>`
+        : `<button class="cs-do-btn" onclick="csCheck('${ckey}')">점검 완료</button>`;
+      rows += `<div class="cs-item${ok?' is-done':''}">
+        <span class="cs-check">${ok?'✓':''}</span>
+        <div class="cs-item-main"><b>${it.item}</b><span>${it.std||''}</span>${info&&info.memo?`<em>메모: ${info.memo}</em>`:''}</div>
+        <span class="cs-item-period">${it.period||''}</span>
+        ${act}
+      </div>`;
+    });
+    allDone += done; allTotal += items.length;
+    const st = done===items.length ? 'done' : done ? 'partial' : 'todo';
+    html += `<div class="cs-cl-group"><div class="cs-cl-head"><span>${title}</span><small>${pl}</small><span class="cs-pill t-${st}">${done}/${items.length}</span></div>${rows}</div>`;
+  });
+  const pct = allTotal ? Math.round(allDone/allTotal*100) : 0;
+  const summary = allTotal
+    ? `<div class="cs-cl-sum"><div><b>${new Date().getMonth()+1}월 점검 진행</b><span>${allDone} / ${allTotal} 항목 완료</span></div><div class="cs-cl-bar"><i style="width:${pct}%"></i></div><strong>${pct}%</strong></div>`
+    : `<div class="cs-cl-empty">이번 기간에 해당하는 점검 항목이 없습니다.</div>`;
+  const out = summary + html;
+  if(box.__last !== out){
+    const changed = box.__last !== undefined;
+    box.__last = out; box.innerHTML = out;
+    // 점검 결과가 바뀌면 좌측 설비 목록 상태도 갱신 (PC)
+    if(changed && csIsWide() && window.__csKey===key){
+      const list = document.querySelector('#eqList .cs-side-list');
+      const top = list ? list.scrollTop : 0;
+      renderChkList('side', key);
+      const l2 = document.querySelector('#eqList .cs-side-list');
+      if(l2) l2.scrollTop = top;
+    }
+  }
+  const t = document.querySelector('#detailPanel .cs-tabs button[data-pane="today"]');
+  if(t){ const lbl = `이번 달 점검<b>${allDone}/${allTotal}</b>`; if(t.innerHTML!==lbl) t.innerHTML = lbl; }
 }
 
 // ========== 점검 체크박스 시스템 ==========
@@ -13454,5 +13600,135 @@ else setTimeout(sfBoot,300);
 }
 </style>
 <!-- [CHK-V5 END] -->
+<style>
+/* [CHK-V5b] PC 분할 화면 / 휴대폰 전용 화면 / 이번 달 점검 체크리스트 */
+@media screen{
+#tab-check .cs-pane:not(.on){display:none !important}
+#tab-check .detail-header{display:none !important}
+#tab-check .cs-mbar{display:none}
+
+/* 탭 */
+#tab-check .cs-tabs{display:flex;gap:4px;border-bottom:1px solid #e5e7eb;margin:4px 0 16px;overflow-x:auto}
+#tab-check .cs-tabs button{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#6b7280;font-size:14px;font-weight:600;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:inherit}
+#tab-check .cs-tabs button b{font-size:11px;font-weight:700;color:#6b7280;background:#f3f4f6;border-radius:999px;padding:1px 7px}
+#tab-check .cs-tabs button:hover{color:#111827}
+#tab-check .cs-tabs button.on{color:#2563eb;border-bottom-color:#2563eb}
+#tab-check .cs-tabs button.on b{background:#dbeafe;color:#1d4ed8}
+
+/* 이번 달 점검 체크리스트 */
+#tab-check .cs-cl-sum{display:flex;align-items:center;gap:16px;background:#f9fafb;border:1px solid #f0f1f3;border-radius:12px;padding:14px 18px;margin-bottom:16px}
+#tab-check .cs-cl-sum > div:first-child{display:flex;flex-direction:column;gap:2px;min-width:140px}
+#tab-check .cs-cl-sum b{font-size:14px;color:#111827}
+#tab-check .cs-cl-sum span{font-size:12px;color:#6b7280}
+#tab-check .cs-cl-bar{flex:1;height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+#tab-check .cs-cl-bar i{display:block;height:100%;background:#16a34a;border-radius:999px;transition:width .3s}
+#tab-check .cs-cl-sum strong{font-size:20px;color:#111827;min-width:52px;text-align:right}
+#tab-check .cs-cl-empty{padding:30px;text-align:center;color:#9ca3af;font-size:14px}
+#tab-check .cs-cl-group{border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden}
+#tab-check .cs-cl-head{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#fff;border-bottom:1px solid #f3f4f6;font-size:14px;font-weight:700;color:#111827}
+#tab-check .cs-cl-head small{font-size:12px;font-weight:600;color:#2563eb;background:#eff6ff;border-radius:999px;padding:1px 8px}
+#tab-check .cs-cl-head .cs-pill{margin-left:auto}
+#tab-check .cs-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f3f4f6;background:#fff}
+#tab-check .cs-item:last-child{border-bottom:0}
+#tab-check .cs-check{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #d1d5db;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff}
+#tab-check .cs-item.is-done .cs-check{background:#16a34a;border-color:#16a34a}
+#tab-check .cs-item-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#tab-check .cs-item-main b{font-size:14px;color:#111827}
+#tab-check .cs-item-main span{font-size:13px;color:#6b7280}
+#tab-check .cs-item-main em{font-style:normal;font-size:12px;color:#b45309}
+#tab-check .cs-item.is-done .cs-item-main b{color:#6b7280}
+#tab-check .cs-item-period{font-size:12px;color:#9ca3af;white-space:nowrap}
+#tab-check .cs-do-btn{flex:none;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:13px;font-weight:700;border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;white-space:nowrap}
+#tab-check .cs-do-btn:hover{background:#1d4ed8}
+#tab-check .cs-done-btn{flex:none;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;font-size:13px;font-weight:700;border-radius:8px;padding:8px 12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+#tab-check .cs-done-btn:hover{border-color:#86efac}
+
+/* 목록 행(휴대폰 목록 / PC 좌측 목록) */
+#tab-check .cs-rows{display:flex;flex-direction:column}
+#tab-check .eq-card.cs-row{flex-direction:row !important;align-items:center;gap:10px;border:0 !important;border-radius:8px !important;padding:9px 10px !important}
+#tab-check .eq-card.cs-row:hover{background:#f9fafb !important;box-shadow:none !important}
+#tab-check .eq-card.cs-row.active{background:#eff6ff !important}
+#tab-check .cs-dot{flex:none;width:8px;height:8px;border-radius:50%;background:#d1d5db}
+#tab-check .cs-dot.t-done{background:#16a34a}
+#tab-check .cs-dot.t-partial{background:#d97706}
+#tab-check .cs-dot.t-todo{background:#dc2626}
+#tab-check .cs-row-main{flex:1;min-width:0;display:flex;flex-direction:column}
+#tab-check .cs-row-main b{font-size:14px;color:#111827}
+#tab-check .cs-row-main span{font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tab-check .cs-row-st{display:flex;align-items:center;gap:6px;flex:none}
+#tab-check .cs-row-st em{font-style:normal;font-size:12px;color:#6b7280;font-weight:600}
+}
+
+/* ---------- PC: 좌측 목록 + 우측 점검 ---------- */
+@media screen and (min-width:1000px){
+  #tab-check.cs-detail-open{display:grid !important;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+  #tab-check.cs-detail-open > *{grid-column:1 / -1}
+  #tab-check.cs-detail-open > #eqList{grid-column:1;position:sticky;top:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 10px;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
+  #tab-check.cs-detail-open > #detailPanel{grid-column:2;margin:0 !important}
+  #tab-check .cs-side-head{display:flex;align-items:center;justify-content:space-between;padding:0 6px 10px}
+  #tab-check .cs-back-all{border:0;background:transparent;color:#2563eb;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  #tab-check .cs-mode-side .cs-seg{margin:0 4px 8px;display:flex}
+  #tab-check .cs-mode-side .cs-seg button{flex:1;justify-content:center;padding:5px 4px;font-size:12px}
+  #tab-check .cs-side-list{overflow-y:auto;flex:1;min-height:0}
+  #tab-check .cs-mode-side .cs-group{background:transparent !important;border:0 !important;padding:0 !important}
+  #tab-check .cs-mode-side .cs-group-head{padding:10px 6px 4px;font-size:12px;color:#6b7280}
+  #tab-check .cs-mode-side .cs-row-st em{display:none}
+}
+
+/* ---------- 휴대폰: 목록 → 전체화면 점검 ---------- */
+@media screen and (max-width:999px){
+  #tab-check .cs-mode-rows .cs-list-head{flex-direction:column;align-items:stretch}
+  #tab-check .cs-mode-rows .cs-seg{display:flex}
+  #tab-check .cs-mode-rows .cs-seg button{flex:1;justify-content:center}
+  #tab-check .cs-mode-rows .cs-group{padding:2px 8px 10px !important}
+  #tab-check .cs-mode-rows .eq-card.cs-row{padding:12px 8px !important;border-bottom:1px solid #f3f4f6 !important;border-radius:0 !important}
+  #tab-check.cs-detail-open > .chk-year-box,
+  #tab-check.cs-detail-open > .controls,
+  #tab-check.cs-detail-open > .qh-fab-wrap{display:none !important}
+  #tab-check.cs-detail-open .cs-mbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20;background:#fff;margin:-14px -14px 12px;padding:10px 12px;border-bottom:1px solid #e5e7eb;border-radius:12px 12px 0 0}
+  #tab-check .cs-mbar button{border:0;background:#f3f4f6;color:#111827;font-size:14px;font-weight:700;border-radius:8px;padding:8px 12px;font-family:inherit}
+  #tab-check .cs-mbar div{display:flex;flex-direction:column;min-width:0}
+  #tab-check .cs-mbar b{font-size:15px;color:#111827}
+  #tab-check .cs-mbar span{font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #tab-check .cs-tabs button{padding:10px 10px;font-size:13px}
+  #tab-check .cs-cl-sum{flex-wrap:wrap;gap:8px 12px;padding:12px 14px}
+  #tab-check .cs-cl-bar{order:3;flex:1 1 100%}
+  #tab-check .cs-cl-sum strong{margin-left:auto}
+  #tab-check .cs-item{flex-wrap:wrap;gap:8px 12px;padding:14px}
+  #tab-check .cs-item-period{order:2;margin-left:34px}
+  #tab-check .cs-do-btn,#tab-check .cs-done-btn{order:3;flex:1 1 100%;padding:13px;font-size:15px;border-radius:10px}
+}
+/* 공통 보정 */
+@media screen{
+  #tab-check .year-selector > span{display:none !important}
+  #tab-check .cs-row-main b{color:#111827 !important}
+  #tab-check .cs-row-main span{color:#6b7280 !important}
+  #tab-check .cs-cl-head small{color:#2563eb !important}
+}
+/* 휴대폰: 상단 영역 압축 */
+@media screen and (max-width:999px){
+  #tab-check .chk-year-box{padding:10px 12px !important}
+  #tab-check .chk-year-row{gap:6px !important}
+  #tab-check .chk-year-info,#tab-check .chk-year-hint{display:none !important}
+  #tab-check .chk-year-actions{display:flex !important;flex-wrap:nowrap !important;width:100%;gap:6px !important}
+  #tab-check .chk-year-actions .btn{flex:1 1 0;padding:7px 4px !important;font-size:12px !important;min-height:0 !important;white-space:nowrap}
+  #tab-check .controls{flex-direction:row !important;padding:10px 12px !important;gap:6px !important}
+  #tab-check .controls label,#tab-check .controls select,#tab-check #printBtn,#tab-check .controls .btn-secondary{display:none !important}
+  #tab-check .controls input{flex:1;min-height:0 !important;padding:10px 12px !important}
+  #tab-check .qh-fab-wrap{margin-bottom:10px !important}
+  #tab-check .qh-fab-wrap .qh-launch{flex:1;padding:10px 8px !important}
+  #tab-check .info-grid{grid-template-columns:1fr 1fr !important;gap:6px !important}
+  #tab-check .info-item{padding:8px 10px !important}
+  #tab-check .info-item .value{font-size:13px !important}
+  #tab-check .year-selector{gap:6px !important;padding:8px 0 !important}
+  #tab-check .year-selector .btn{padding:6px 8px !important;font-size:12px !important;min-height:0 !important}
+  #tab-check .year-selector .btn[style*="margin-left:auto"]{margin-left:0 !important}
+}
+@media print{
+  #tab-check .cs-pane{display:block !important}
+  #tab-check .cs-tabs,#tab-check .cs-mbar,#tab-check #csToday{display:none !important}
+}
+</style>
+<!-- [CHK-V5b END] -->
 </body>
 </html>
