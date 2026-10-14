@@ -1530,9 +1530,11 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   <div class="page-header no-print">
     <div>
       <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <button class="nav-burger" type="button" onclick="toggleNav(true)" aria-label="메뉴 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
         <span class="app-logo">TJ</span>
         <span class="app-name">설비보전관리</span>
         <span class="rev-badge" title="리비전 v3.8">v3.8</span>
+        <span class="nav-cur" id="navCur"></span>
       </h2>
       <div class="subtitle">(주)태진다이텍 · 프레스 설비 보전 · 정기점검 · 법정 안전검사</div>
     </div>
@@ -1547,7 +1549,9 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   </div>
 
   <!-- 상단 탭 네비게이션 -->
+  <div class="nav-backdrop no-print" onclick="toggleNav(false)"></div>
   <div class="top-tabs no-print">
+    <div class="tt-drawer-head"><span class="app-logo">TJ</span><b>설비보전관리</b><button type="button" onclick="toggleNav(false)" aria-label="메뉴 닫기">✕</button></div>
     <div class="tt-group">메뉴</div>
     <button class="top-tab" data-tab="eqhist" onclick="switchTopTab('eqhist')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><span class="tt-l">수리이력</span><span class="tt-s">수리</span></button>
     <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="tt-l">보전계획표</span><span class="tt-s">보전계획</span></button>
@@ -12133,7 +12137,7 @@ else setTimeout(sfBoot,300);
   #tab-check.cs-detail-open > .chk-year-box,
   #tab-check.cs-detail-open > .controls,
   #tab-check.cs-detail-open > .qh-fab-wrap{display:none !important}
-  #tab-check.cs-detail-open .cs-mbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20;background:#fff;margin:-14px -14px 12px;padding:10px 12px;border-bottom:1px solid #e5e7eb;border-radius:12px 12px 0 0}
+  #tab-check.cs-detail-open .cs-mbar{display:flex;align-items:center;gap:10px;position:sticky;top:58px;z-index:20;background:#fff;margin:-14px -14px 12px;padding:10px 12px;border-bottom:1px solid #e5e7eb;border-radius:12px 12px 0 0}
   #tab-check .cs-mbar button{border:0;background:#f3f4f6;color:#111827;font-size:14px;font-weight:700;border-radius:8px;padding:8px 12px;font-family:inherit}
   #tab-check .cs-mbar div{display:flex;flex-direction:column;min-width:0}
   #tab-check .cs-mbar b{font-size:15px;color:#111827}
@@ -12307,23 +12311,46 @@ body > .page > .top-tabs{background:#fff !important;border:1px solid #e5e7eb !im
 .appr-app .empty-state{color:#9ca3af !important}
 }
 
-/* ---- 휴대폰: 하단 탭바 ---- */
+/* ---- 휴대폰: 햄버거 버튼 + 왼쪽 슬라이드 메뉴 ---- */
+@media screen{ .nav-burger,.nav-backdrop,.tt-drawer-head,.nav-cur{display:none} }
 @media screen and (max-width:899px){
-  body{padding-bottom:calc(68px + env(safe-area-inset-bottom)) !important}
   body > .page{padding:8px !important}
-  body > .page > .page-header{border-radius:0 !important;border-left:0 !important;border-right:0 !important;border-bottom:1px solid #e5e7eb !important;padding:10px 14px !important;flex-direction:row !important;align-items:center !important;flex-wrap:nowrap !important;position:sticky;top:0;z-index:50;margin:-8px -8px 12px !important}
+  body > .page > .page-header{border-radius:0 !important;border-left:0 !important;border-right:0 !important;border-bottom:1px solid #e5e7eb !important;padding:10px 12px !important;flex-direction:row !important;align-items:center !important;flex-wrap:nowrap !important;gap:8px !important;position:sticky;top:0;z-index:50;margin:-8px -8px 12px !important}
   body > .page > .page-header .subtitle,body > .page > .page-header .rev-badge,body > .page > .page-header .btn:not(.btn-sm){display:none !important}
   body > .page > .page-header > div:last-child{margin-left:auto !important;flex-wrap:nowrap !important;gap:6px !important}
-  body > .page > .page-header #syncStatus{padding:4px 8px !important}
+  body > .page > .page-header #syncStatus{padding:6px !important;gap:0 !important}
+  body > .page > .page-header #syncText{display:none !important}
+  body > .page > .page-header > div:first-child{min-width:0;flex:1}
+  body > .page > .page-header h2{flex-wrap:nowrap !important;min-width:0}
   body > .page > .page-header .btn-sm{padding:5px 8px !important;font-size:12px !important}
-  body > .page > .top-tabs{position:fixed !important;left:0;right:0;bottom:0;z-index:60;margin:0 !important;border-radius:0 !important;border:0 !important;border-top:1px solid #e5e7eb !important;padding:4px 2px calc(4px + env(safe-area-inset-bottom)) !important;display:grid !important;grid-template-columns:repeat(6,1fr);box-shadow:0 -2px 10px rgba(16,24,40,.06) !important;overflow:visible}
-  .top-tab{flex-direction:column !important;justify-content:center;gap:2px !important;padding:6px 0 !important;border-bottom:0 !important;font-size:11px !important;min-height:52px !important;position:relative}
-  .top-tab .tt-l{display:none}
-  .top-tab .tt-s{display:block;font-size:11px;line-height:1.2}
-  .top-tab .tt-i{font-size:20px;line-height:1}
-  .top-tab.active{border-bottom:0 !important}
-  .top-tab.active::before{content:'';position:absolute;top:-4px;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:#2563eb}
-  .top-tab .sf-tabbadge{position:absolute;top:2px;right:18%;margin:0 !important;font-size:10px !important;padding:0 5px !important;min-width:16px}
+  .nav-burger{display:inline-flex;align-items:center;justify-content:center;flex:none;width:38px;height:38px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;color:#111827;cursor:pointer;padding:0}
+  .nav-burger svg{width:20px;height:20px}
+  body > .page > .page-header .app-name{display:none !important}
+  .nav-cur{display:inline !important;min-width:0;font-size:16px;color:#111827;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nav-backdrop{display:block;position:fixed;inset:0;background:rgba(17,24,39,.4);z-index:90;opacity:0;pointer-events:none;transition:opacity .2s}
+  body.nav-open .nav-backdrop{opacity:1;pointer-events:auto}
+  body.nav-open{overflow:hidden}
+  body > .page > .top-tabs{position:fixed !important;top:0;bottom:0;left:0;width:min(280px,82vw);z-index:100;margin:0 !important;
+    display:flex !important;flex-direction:column !important;gap:2px !important;overflow-y:auto !important;
+    background:#fff !important;border:0 !important;border-right:1px solid #e5e7eb !important;border-radius:0 !important;
+    padding:0 12px calc(16px + env(safe-area-inset-bottom)) !important;box-shadow:8px 0 24px rgba(16,24,40,.15) !important;
+    transform:translateX(-105%);transition:transform .22s ease}
+  body.nav-open > .page > .top-tabs{transform:none}
+  .tt-drawer-head{display:flex;align-items:center;gap:10px;padding:16px 4px 12px;margin-bottom:6px;border-bottom:1px solid #f3f4f6}
+  .tt-drawer-head .app-logo{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;font-weight:800}
+  .tt-drawer-head b{flex:1;font-size:16px;color:#111827}
+  .tt-drawer-head button{border:0;background:#f3f4f6;width:32px;height:32px;border-radius:8px;font-size:16px;color:#374151;cursor:pointer}
+  body > .page > .top-tabs .tt-group{display:block;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.5px;padding:6px 12px}
+  body > .page > .top-tabs .top-tab{display:flex !important;flex-direction:row !important;align-items:center;gap:12px !important;width:100%;text-align:left;
+    padding:12px !important;min-height:0 !important;border:0 !important;border-radius:10px !important;font-size:15px !important;font-weight:600 !important;
+    color:#374151 !important;background:transparent !important;position:relative}
+  body > .page > .top-tabs .top-tab.active{background:#eff6ff !important;color:#1d4ed8 !important}
+  body > .page > .top-tabs .top-tab .tt-l{display:block;flex:1}
+  body > .page > .top-tabs .top-tab .tt-s{display:none}
+  body > .page > .top-tabs .top-tab .tt-i{color:#9ca3af}
+  body > .page > .top-tabs .top-tab .tt-i svg{width:20px;height:20px}
+  body > .page > .top-tabs .top-tab.active .tt-i{color:#2563eb}
+  body > .page > .top-tabs .top-tab .sf-tabbadge{position:static;margin-left:auto !important}
   .appr-app .hdr{border-radius:12px 12px 0 0}
   .appr-app .tabs{border-radius:0 0 12px 12px}
 }
@@ -12422,12 +12449,23 @@ body > .page > .top-tabs{background:#fff !important;border:1px solid #e5e7eb !im
   body > .page > .top-tabs .top-tab .tt-l{flex:1;min-width:0}
   body > .page > .top-tabs .top-tab .sf-tabbadge{margin-left:auto !important}
 }
-@media screen and (max-width:899px){
-  .top-tab .tt-i svg{width:22px;height:22px}
-  .top-tab .tt-i{color:#9ca3af}
-  .top-tab.active .tt-i{color:#2563eb}
-}
 </style>
 <!-- [NAV-V6 END] -->
+<script>
+/* [NAV-V6] 휴대폰 햄버거 메뉴 열기/닫기 + 상단에 현재 메뉴 이름 표시 */
+(function(){
+  function cur(){
+    var a=document.querySelector('.top-tab.active .tt-l'); var el=document.getElementById('navCur');
+    if(el) el.textContent = a ? a.textContent : '';
+  }
+  window.toggleNav=function(open){ document.body.classList.toggle('nav-open', !!open); };
+  document.addEventListener('click',function(e){
+    if(e.target.closest && e.target.closest('.top-tab')){ toggleNav(false); setTimeout(cur,0); }
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') toggleNav(false); });
+  document.addEventListener('DOMContentLoaded',cur); window.addEventListener('load',cur);
+})();
+</script>
+
 </body>
 </html>
