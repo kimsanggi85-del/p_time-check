@@ -3561,14 +3561,6 @@ mark,
 
   <div id="view_plan">
     <div class="vol-tabs" id="volTabs"></div>
-    <div class="legend plan-legend">
-      <span><i class="pc-dot st-done">✓</i>완료</span>
-      <span><i class="pc-dot st-late">!</i>지연</span>
-      <span><i class="pc-dot st-now"></i>이번달</span>
-      <span><i class="pc-dot st-plan"></i>계획</span>
-      <span><i class="pc-dot st-self"></i>자체점검</span>
-      <span class="lg-hint">칸을 누르면 점검완료 등록</span>
-    </div>
     <div id="eqContent"></div>
   </div>
 
@@ -6848,10 +6840,10 @@ function renderEqTable(){
           inner = '!';
           tip = `${m}월 ${wk}${selfTag} 미실시 — 지연 (클릭하여 점검완료 + 이력등록)`;
         }else if(st==='now'){
-          inner = '';
+          inner = '●';
           tip = `${m}월 ${wk}${selfTag} 이번달 점검 대상 (클릭하여 점검완료 + 이력등록)`;
         }else if(st==='self'){
-          inner = '';
+          inner = '■';
           tip = `${m}월 ${wk} 자체점검 계획 (클릭하여 점검완료 + 이력등록)`;
         }else{
           inner = '';
@@ -6877,7 +6869,18 @@ function renderEqTable(){
 
   // 필터/검색 툴바
   const chip = (f,label,n,tone)=>`<button type="button" class="pf-chip ${tone}${planFilter===f?' on':''}" data-f="${f}" onclick="setPlanFilter('${f}')">${label}<b>${n}</b></button>`;
-  h += `<div class="plan-toolbar no-print">
+  h += `<div class="plan-sheet">
+  <div class="plan-sheet-head">
+    <div class="ps-title">${currentYear}년 설비 보전계획표<span>${list.length}대</span></div>
+    <div class="plan-legend">
+      <span><i class="pc-dot st-done">✓</i>완료</span>
+      <span><i class="pc-dot st-late">!</i>지연</span>
+      <span><i class="pc-dot st-now">●</i>이번달</span>
+      <span><i class="pc-dot st-plan"></i>계획</span>
+      <span><i class="pc-dot st-self">■</i>자체점검</span>
+    </div>
+  </div>
+  <div class="plan-toolbar no-print">
     <div class="pf-chips">
       ${chip('all','전체',list.length,'t-all')}
       ${chip('late','지연',cntLate,'t-late')}
@@ -6911,7 +6914,7 @@ function renderEqTable(){
     h += rows;
     h += `<tr id="pfEmpty" style="display:none"><td colspan="29" style="padding:28px;text-align:center;color:var(--muted)">조건에 맞는 설비가 없습니다.</td></tr>`;
   }
-  h += `</tbody></table></div>`;
+  h += `</tbody></table></div></div>`;
   h += `<div class="notes-box"><h4>
     <span>📝 ${currentYear}년 특이사항</span>
     <button class="btn btn-sm btn-secondary" onclick="editNotes()">✏️ 편집</button>
@@ -12901,84 +12904,98 @@ else setTimeout(sfBoot,300);
 <!-- [PATCH v3.8 END] -->
 
 <!-- ============================================================
-     [PLAN-V5] 보전계획표 한눈에 보기 - 미니멀 상태 표시, 옅은 격자, 필터/검색
+     [PLAN-V5] 보전계획표 - 라이트 SaaS 스타일 (흰 시트 + 연한 색 배지, 필터/검색)
      ============================================================ -->
 <style>
-/* 범례 */
-#pmPlanTab .plan-legend{gap:18px;align-items:center;margin-bottom:12px;font-size:13px}
-#pmPlanTab .plan-legend > span{display:inline-flex;align-items:center;gap:6px;color:#cbd5e1}
-#pmPlanTab .plan-legend .lg-hint{color:#64748b !important;margin-left:auto;font-size:12px}
+/* 시트(흰 카드) */
+#pmPlanTab .plan-sheet{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+  margin:16px 0;overflow:hidden;color:#111827}
+#pmPlanTab .plan-sheet-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 20px 0}
+#pmPlanTab .ps-title{font-size:16px;font-weight:700;color:#111827;letter-spacing:-.2px}
+#pmPlanTab .ps-title span{margin-left:8px;font-size:12px;font-weight:600;color:#6b7280;background:#f3f4f6;border-radius:999px;padding:2px 8px;vertical-align:middle}
+#pmPlanTab .plan-legend{display:flex;gap:14px;margin-left:auto;font-size:12px;color:#4b5563;flex-wrap:wrap}
+#pmPlanTab .plan-legend > span{display:inline-flex;align-items:center;gap:6px}
 
-/* 상태 표시 (원형 점) */
-#pmPlanTab .pc-dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;
-  box-sizing:border-box;font-size:11px;font-weight:800;font-style:normal;line-height:1;vertical-align:middle;transition:transform .12s}
-#pmPlanTab .pc-dot.st-done{background:#22c55e;color:#0f172a}
-#pmPlanTab .pc-dot.st-late{background:#ef4444;color:#fff}
-#pmPlanTab .pc-dot.st-now{border:2px solid #f59e0b;background:radial-gradient(#f59e0b 0 3px,transparent 3.5px)}
-#pmPlanTab .pc-dot.st-plan{border:2px solid #64748b}
-#pmPlanTab .pc-dot.st-self{border:2px solid #a78bfa;border-radius:4px}
+/* 상태 배지 (연한 배경 + 진한 글자) */
+#pmPlanTab .pc-dot{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;box-sizing:border-box;
+  font-size:11px;font-weight:800;font-style:normal;line-height:1;vertical-align:middle;transition:transform .12s,box-shadow .12s}
+#pmPlanTab .pc-dot.st-done{background:#dcfce7;color:#15803d}
+#pmPlanTab .pc-dot.st-late{background:#fee2e2;color:#b91c1c}
+#pmPlanTab .pc-dot.st-now{background:#fef3c7;color:#b45309;font-size:9px}
+#pmPlanTab .pc-dot.st-plan{background:#fff;border:1.5px solid #d1d5db}
+#pmPlanTab .pc-dot.st-self{background:#ede9fe;color:#6d28d9;font-size:8px}
 
-/* 표: 옅은 가로선 위주 */
-#pmPlanTab .eq-table-wrap{border:1px solid #273449 !important;border-radius:10px}
-#pmPlanTab .eq-table th{background:#172133 !important;color:#94a3b8 !important;border:0 !important;border-bottom:1px solid #273449 !important;font-weight:600 !important}
-#pmPlanTab .eq-table thead tr:first-child th{color:#cbd5e1 !important;font-size:12px !important}
-#pmPlanTab .eq-table thead th.wk{font-size:10px !important;color:#64748b !important;padding:4px 1px !important;font-weight:500 !important}
-#pmPlanTab .eq-table td{border:0 !important;border-bottom:1px solid #1f2b3d !important;vertical-align:middle;height:34px}
-#pmPlanTab .eq-table tbody tr:nth-child(even){background:transparent !important}
-#pmPlanTab .eq-table tbody tr:hover td{background:rgba(148,163,184,.06) !important}
-#pmPlanTab .eq-table th.m-start,
-#pmPlanTab .eq-table td.m-start{border-left:1px solid #273449 !important}
-#pmPlanTab .eq-table td.plan-cell{padding:0 !important}
-#pmPlanTab .eq-table td.plan-cell.clickable:hover .pc-dot{transform:scale(1.25)}
-#pmPlanTab .eq-table tbody td[class^="grade-"]{display:table-cell !important;vertical-align:middle !important;font-weight:700}
-#pmPlanTab .eq-table td.eq-id{color:#e2e8f0 !important;font-weight:700}
-#pmPlanTab .eq-table td.eq-name{color:#94a3b8 !important}
+/* 툴바: 세그먼트 + 검색 */
+#pmPlanTab .plan-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 20px}
+#pmPlanTab .pf-chips{display:inline-flex;background:#f3f4f6;border-radius:8px;padding:3px;gap:2px}
+#pmPlanTab .pf-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:0;background:transparent;
+  color:#4b5563;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+#pmPlanTab .pf-chip b{font-weight:600;color:#9ca3af;font-size:12px}
+#pmPlanTab .pf-chip:hover{color:#111827}
+#pmPlanTab .pf-chip.on{background:#fff;color:#111827;box-shadow:0 1px 2px rgba(16,24,40,.1)}
+#pmPlanTab .pf-chip.on b{color:#4b5563}
+#pmPlanTab .pf-chip.t-late b{color:#dc2626}
+#pmPlanTab .pf-search{margin-left:auto;width:200px;padding:7px 12px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#111827;font-size:13px;font-family:inherit}
+#pmPlanTab .plan-sheet input.pf-search{background:#fff !important;color:#111827 !important;border:1px solid #d1d5db !important}
+#pmPlanTab .pf-search::placeholder{color:#9ca3af}
+#pmPlanTab .plan-sheet input.pf-search:focus{outline:none;border-color:#2563eb !important;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+
+/* 표 */
+#pmPlanTab .plan-sheet .eq-table-wrap{border:0 !important;border-top:1px solid #e5e7eb !important;border-radius:0 !important;background:#fff !important}
+#pmPlanTab .plan-sheet .eq-table{background:#fff !important;color:#111827 !important}
+#pmPlanTab .plan-sheet .eq-table th{background:#f9fafb !important;color:#6b7280 !important;border:0 !important;border-bottom:1px solid #e5e7eb !important;font-weight:600 !important}
+#pmPlanTab .plan-sheet .eq-table thead tr:first-child th{color:#374151 !important;font-size:12px !important}
+#pmPlanTab .plan-sheet .eq-table thead th.wk{font-size:10px !important;color:#9ca3af !important;padding:4px 1px !important;font-weight:500 !important}
+#pmPlanTab .plan-sheet .eq-table td{background:#fff !important;color:#374151 !important;border:0 !important;border-bottom:1px solid #f3f4f6 !important;vertical-align:middle;height:38px}
+#pmPlanTab .plan-sheet .eq-table tbody tr:hover td{background:#f9fafb !important}
+#pmPlanTab .plan-sheet .eq-table th.m-start,
+#pmPlanTab .plan-sheet .eq-table td.m-start{border-left:1px solid #f0f1f3 !important}
+#pmPlanTab .plan-sheet .eq-table td.plan-cell{padding:0 !important}
+#pmPlanTab .plan-sheet .eq-table td.plan-cell.clickable:hover .pc-dot{transform:scale(1.15);box-shadow:0 0 0 2px #fff,0 0 0 4px #bfdbfe}
+#pmPlanTab .plan-sheet .eq-table td.eq-id{color:#111827 !important;font-weight:700}
+#pmPlanTab .plan-sheet .eq-table td.eq-name{color:#6b7280 !important}
+#pmPlanTab .plan-sheet .eq-table tbody td[class^="grade-"]{display:table-cell !important;vertical-align:middle !important;font-weight:700}
+#pmPlanTab .plan-sheet .eq-table tbody td.grade-a{color:#15803d !important}
+#pmPlanTab .plan-sheet .eq-table tbody td.grade-b{color:#1d4ed8 !important}
+#pmPlanTab .plan-sheet .eq-table tbody td.grade-c{color:#b45309 !important}
+#pmPlanTab .plan-sheet .eq-table tbody td.grade-d{color:#c2410c !important}
+#pmPlanTab .plan-sheet .eq-table tbody td.grade-e{color:#b91c1c !important}
 @media (min-width:901px){
   #pmPlanTab .eq-table col.c-wk{width:33px}
   #pmPlanTab .eq-table col.c-year{width:44px}
   #pmPlanTab .eq-table col.c-prog{width:88px}
 }
 
-/* 현재월: 은은한 배경 + 파란 글자 */
-#pmPlanTab .eq-table td.cur-month{background:rgba(59,130,246,.07) !important}
-#pmPlanTab .eq-table thead th.cur-month{background:#1a2a45 !important;color:#60a5fa !important}
-#pmPlanTab .eq-table thead tr:first-child th.cur-month{box-shadow:inset 0 3px 0 #3b82f6}
+/* 현재월 */
+#pmPlanTab .plan-sheet .eq-table td.cur-month{background:#f5f9ff !important}
+#pmPlanTab .plan-sheet .eq-table tbody tr:hover td.cur-month{background:#eaf2ff !important}
+#pmPlanTab .plan-sheet .eq-table thead th.cur-month{background:#eff6ff !important;color:#2563eb !important}
+#pmPlanTab .plan-sheet .eq-table thead tr:first-child th.cur-month{box-shadow:inset 0 2px 0 #2563eb}
 
 /* 설비번호 고정 */
-#pmPlanTab .eq-table tbody td.eq-id{position:sticky;left:0;z-index:1;background:#1e293b !important}
-#pmPlanTab .eq-table thead tr:first-child th:nth-child(1){position:sticky;left:0;z-index:3}
+#pmPlanTab .plan-sheet .eq-table tbody td.eq-id{position:sticky;left:0;z-index:1}
+#pmPlanTab .plan-sheet .eq-table thead tr:first-child th:nth-child(1){position:sticky;left:0;z-index:3}
 
 /* 진행률 */
-#pmPlanTab .pc-prog{padding:0 8px;text-align:left}
-#pmPlanTab .pc-prog .txt{font-size:12px;font-weight:700;color:#e2e8f0;white-space:nowrap}
-#pmPlanTab .pc-prog .txt span{color:#64748b;font-weight:500}
-#pmPlanTab .pc-prog .txt em{font-style:normal;font-size:10px;font-weight:700;color:#f87171;margin-left:6px}
-#pmPlanTab .pc-prog .bar{height:3px;background:#273449;border-radius:2px;margin-top:5px;overflow:hidden}
-#pmPlanTab .pc-prog .bar i{display:block;height:100%}
-
-/* 필터(세그먼트) / 검색 */
-#pmPlanTab .plan-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0 10px}
-#pmPlanTab .pf-chips{display:inline-flex;background:#172133;border:1px solid #273449;border-radius:8px;padding:3px;gap:2px}
-#pmPlanTab .pf-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:0;background:transparent;
-  color:#94a3b8;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-#pmPlanTab .pf-chip b{font-weight:700;color:#64748b;font-size:12px}
-#pmPlanTab .pf-chip:hover{color:#e2e8f0}
-#pmPlanTab .pf-chip.on{background:#273449;color:#f1f5f9}
-#pmPlanTab .pf-chip.on b{color:#cbd5e1}
-#pmPlanTab .pf-chip.t-late b{color:#f87171}
-#pmPlanTab .pf-search{margin-left:auto;width:180px;padding:7px 12px;border-radius:8px;border:1px solid #273449;background:#172133;color:#e2e8f0;font-size:13px;font-family:inherit}
-#pmPlanTab .pf-search:focus{outline:none;border-color:#3b82f6}
+#pmPlanTab .pc-prog{padding:0 10px;text-align:left}
+#pmPlanTab .pc-prog .txt{font-size:12px;font-weight:700;color:#111827;white-space:nowrap}
+#pmPlanTab .pc-prog .txt span{color:#9ca3af;font-weight:500}
+#pmPlanTab .pc-prog .txt em{font-style:normal;font-size:10px;font-weight:600;color:#b91c1c;background:#fee2e2;border-radius:999px;padding:1px 6px;margin-left:6px}
+#pmPlanTab .pc-prog .bar{height:4px;background:#f3f4f6;border-radius:999px;margin-top:5px;overflow:hidden}
+#pmPlanTab .pc-prog .bar i{display:block;height:100%;border-radius:999px}
 
 @media (max-width:900px){
-  #pmPlanTab .pc-dot{width:14px;height:14px;font-size:9px}
-  #pmPlanTab .eq-table td{height:30px}
-  #pmPlanTab .plan-legend{gap:10px}
-  #pmPlanTab .plan-legend .lg-hint{margin-left:0;width:100%}
+  #pmPlanTab .plan-sheet-head{padding:12px 12px 0}
+  #pmPlanTab .plan-legend{margin-left:0;gap:10px}
+  #pmPlanTab .plan-toolbar{padding:10px 12px}
   #pmPlanTab .pf-search{margin-left:0;flex:1 1 100%;width:auto}
+  #pmPlanTab .pc-dot{width:16px;height:16px;font-size:9px;border-radius:4px}
+  #pmPlanTab .plan-sheet .eq-table td{height:30px}
   #pmPlanTab .pc-prog{padding:0 4px}
-  #pmPlanTab .pc-prog .txt em{display:block;margin:2px 0 0}
+  #pmPlanTab .pc-prog .txt em{display:inline-block;margin:2px 0 0}
 }
 @media print{
+  #pmPlanTab .plan-sheet{box-shadow:none;border-color:#999}
   #pmPlanTab .pc-dot{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #pmPlanTab .plan-toolbar{display:none !important}
   #pmPlanTab .eq-table tbody tr[data-eq]{display:table-row !important}
