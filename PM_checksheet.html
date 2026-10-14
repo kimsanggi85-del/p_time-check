@@ -1518,1572 +1518,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
    ============================================================ */
 
 
-/* ============================================================
-   [DARK-THEME] 전체 페이지 다크 테마 통일 (v4-DASHBOARD 색상과 일치)
-   - 팔레트: #0f172a(외곽) / #1e293b(카드) / #334155(헤더,서브)
-   - 텍스트: #f1f5f9(주) / #cbd5e1(보조) / #94a3b8(약한)
-   - 인쇄 시 자동으로 라이트 테마 복원
-   ============================================================ */
-:root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --card2:#334155;
-  --text:#f1f5f9;
-  --muted:#94a3b8;
-  --accent:#3b82f6;
-  --blue:#3b82f6;
-  --green:#22c55e;
-  --orange:#f59e0b;
-  --red:#ef4444;
-  --border:#334155;
-  --radius:12px;
-}
-body{background:#0f172a !important;color:#f1f5f9 !important}
-.page{background:transparent !important;color:#f1f5f9}
-
-/* 페이지 헤더 */
-.page-header{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  border-radius:12px;
-  color:#f1f5f9 !important;
-  padding:14px 18px;
-}
-.page-header h1,.page-header h2{color:#f1f5f9 !important}
-.page-header .subtitle,.subtitle{color:#94a3b8 !important}
-
-/* 클라우드 동기화 상태 뱃지 */
-#syncStatus{
-  background:#334155 !important;
-  color:#cbd5e1 !important;
-}
-#syncDot{background:#64748b}
-
-/* 상단 탭 네비게이션 */
-.top-tabs{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  border-radius:10px;
-  padding:6px;
-  margin:14px 0;
-}
-.top-tab{
-  background:transparent !important;
-  color:#cbd5e1 !important;
-  border:none !important;
-  font-weight:500;
-}
-.top-tab:hover{
-  background:#334155 !important;
-  color:#f1f5f9 !important;
-}
-.top-tab.active{
-  background:#3b82f6 !important;
-  color:#fff !important;
-}
-.top-tabs-spacer{background:transparent}
-
-/* 서브 탭 (점검계획/점검기록 등) */
-.sub-tabs,.tabs,.tab-list{
-  background:#1e293b !important;
-  border-bottom:1px solid #334155 !important;
-}
-.sub-tab,.tab,.tab-btn{
-  background:transparent !important;
-  color:#94a3b8 !important;
-  border-color:#334155 !important;
-}
-.sub-tab:hover,.tab:hover,.tab-btn:hover{
-  color:#f1f5f9 !important;
-  background:#334155 !important;
-}
-.sub-tab.active,.tab.active,.tab-btn.active{
-  color:#3b82f6 !important;
-  border-bottom-color:#3b82f6 !important;
-  background:transparent !important;
-}
-
-/* KPI 카드 영역 */
-.v4p-kpi-row{
-  background:transparent !important;
-}
-.v4p-kpi-card,
-[class*="kpi-"],
-[class*="-kpi"]{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#f1f5f9 !important;
-}
-.v4p-kpi-card .label,
-.v4p-kpi-card .kpi-label{color:#94a3b8 !important}
-.v4p-kpi-card .value,
-.v4p-kpi-card .kpi-value{color:#f1f5f9 !important}
-
-/* 12개월 보전계획표 */
-.eq-table-wrap{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  border-radius:10px;
-  padding:14px;
-  overflow-x:auto;
-}
-.eq-table{
-  background:transparent !important;
-  color:#e2e8f0 !important;
-  border-collapse:separate;
-  border-spacing:0;
-}
-.eq-table th,.eq-table td{
-  background:transparent !important;
-  border-color:#334155 !important;
-  color:#e2e8f0 !important;
-}
-.eq-table thead th,.eq-table th{
-  background:#334155 !important;
-  color:#f1f5f9 !important;
-  font-weight:600;
-}
-.eq-table tbody tr:hover{
-  background:rgba(255,255,255,0.03) !important;
-}
-.eq-table tbody td{
-  background:transparent !important;
-}
-
-/* 점검계획 셀 상태 (예정/완료/지연 등) - 변수 기반 색상은 유지하되 텍스트만 보정 */
-.eq-table .planned,
-.eq-table .scheduled{
-  background:rgba(59,130,246,0.15) !important;
-  color:#60a5fa !important;
-}
-.eq-table .done,
-.eq-table .completed{
-  background:rgba(34,197,94,0.15) !important;
-  color:#4ade80 !important;
-}
-.eq-table .overdue,
-.eq-table .late{
-  background:rgba(239,68,68,0.18) !important;
-  color:#f87171 !important;
-}
-
-/* 점검 기준 체크시트 */
-.check-table,
-.checksheet,
-table.check-table{
-  background:#1e293b !important;
-  color:#e2e8f0 !important;
-}
-.check-table th,
-.check-table td,
-.checksheet th,
-.checksheet td{
-  border-color:#334155 !important;
-  color:#e2e8f0 !important;
-  background:transparent !important;
-}
-.check-table thead th,
-.checksheet thead th{
-  background:#334155 !important;
-  color:#f1f5f9 !important;
-}
-.check-table tbody tr:nth-child(even){
-  background:rgba(255,255,255,0.02) !important;
-}
-
-/* 일반 표 (범용) */
-table{color:#e2e8f0}
-table th{background:#334155;color:#f1f5f9;border-color:#475569 !important}
-table td{border-color:#334155 !important}
-
-/* 폼 요소 (입력/선택/텍스트영역) */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="email"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-input[type="password"],
-select,
-textarea{
-  background:#0f172a !important;
-  border:1px solid #475569 !important;
-  color:#f1f5f9 !important;
-  border-radius:6px;
-}
-input:focus,select:focus,textarea:focus{
-  border-color:#3b82f6 !important;
-  outline:none;
-  box-shadow:0 0 0 2px rgba(59,130,246,0.25) !important;
-}
-input::placeholder,textarea::placeholder{color:#64748b !important}
-input[type="checkbox"],input[type="radio"]{
-  accent-color:#3b82f6;
-}
-
-/* 라벨 */
-label{color:#cbd5e1}
-
-/* 버튼 - 기본 톤 + 의미별 색상 보존 */
-.btn{
-  background:#334155 !important;
-  border:1px solid #475569 !important;
-  color:#f1f5f9 !important;
-}
-.btn:hover{
-  background:#475569 !important;
-  border-color:#64748b !important;
-}
-.btn-primary,.btn-pri{
-  background:#3b82f6 !important;
-  border-color:#2563eb !important;
-  color:#fff !important;
-}
-.btn-primary:hover,.btn-pri:hover{
-  background:#2563eb !important;
-}
-.btn-secondary{
-  background:#475569 !important;
-  border-color:#64748b !important;
-  color:#f1f5f9 !important;
-}
-.btn-secondary:hover{
-  background:#64748b !important;
-}
-.btn-ghost{
-  background:transparent !important;
-  border:1px solid #475569 !important;
-  color:#cbd5e1 !important;
-}
-.btn-ghost:hover{
-  background:#334155 !important;
-  color:#f1f5f9 !important;
-}
-.btn-info{
-  background:#0ea5e9 !important;
-  border-color:#0284c7 !important;
-  color:#fff !important;
-}
-.btn-info:hover{background:#0284c7 !important}
-.btn-ok,.btn-save-now{
-  background:#22c55e !important;
-  border-color:#16a34a !important;
-  color:#fff !important;
-}
-.btn-ok:hover,.btn-save-now:hover{background:#16a34a !important}
-.btn-ng,.btn-danger{
-  background:#ef4444 !important;
-  border-color:#dc2626 !important;
-  color:#fff !important;
-}
-.btn-ng:hover,.btn-danger:hover{background:#dc2626 !important}
-
-/* 모달 */
-.modal-overlay{
-  background:rgba(0,0,0,0.7) !important;
-}
-.modal,.modal-box{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#f1f5f9 !important;
-}
-.modal h1,.modal h2,.modal h3,
-.modal-box h1,.modal-box h2,.modal-box h3{
-  color:#f1f5f9 !important;
-}
-.modal-close{
-  color:#94a3b8 !important;
-  background:transparent !important;
-}
-.modal-close:hover{color:#f1f5f9 !important}
-
-/* 동기화 설정 패널 */
-#syncSettings,
-[id*="settings"],
-[id*="Settings"]{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#f1f5f9 !important;
-}
-
-/* 일반 텍스트/링크 */
-h1,h2,h3,h4,h5,h6{color:#f1f5f9}
-p{color:#e2e8f0}
-a{color:#60a5fa}
-a:hover{color:#93c5fd}
-hr{border-color:#334155 !important}
-
-/* 카드/패널 공통 */
-.card,.panel,.box,
-[class*="-card"]:not(.v4d-card):not(.v4d-card-row):not(.v4d-card-head):not(.v4d-card-title):not(.v4d-card-grade),
-[class*="-panel"],
-[class*="-box"]:not(.modal-box){
-  background:#1e293b;
-  border-color:#334155;
-  color:#f1f5f9;
-}
-
-/* 코드/pre */
-code,pre,kbd,samp{
-  background:#0f172a !important;
-  color:#cbd5e1 !important;
-  border:1px solid #334155 !important;
-}
-
-/* 스크롤바 (Webkit) */
-*::-webkit-scrollbar{width:10px;height:10px}
-*::-webkit-scrollbar-track{background:#0f172a}
-*::-webkit-scrollbar-thumb{background:#334155;border-radius:5px}
-*::-webkit-scrollbar-thumb:hover{background:#475569}
-
-/* ─────────────────────────────────────────────
-   #pmPlanTab 스코프 다크 테마 override (12개월 보전계획표 등)
-   ───────────────────────────────────────────── */
-#pmPlanTab{
-  --bg:#0f172a !important;
-  --card:#1e293b !important;
-  --card2:#334155 !important;
-  --text:#f1f5f9 !important;
-  --muted:#94a3b8 !important;
-  --accent:#3b82f6 !important;
-  --accent2:#60a5fa !important;
-  --blue:#3b82f6 !important;
-  --green:#22c55e !important;
-  --red:#ef4444 !important;
-  --border:#334155 !important;
-  background:transparent !important;
-  color:#f1f5f9 !important;
-}
-#pmPlanTab .page-header{
-  background:transparent !important;
-  border-bottom-color:#334155 !important;
-}
-#pmPlanTab .page-header h2{color:#60a5fa !important}
-#pmPlanTab .page-header .subtitle{color:#94a3b8 !important}
-
-/* 연도 선택기 */
-#pmPlanTab .year-selector{
-  background:#1e293b !important;
-  border-color:#334155 !important;
-}
-#pmPlanTab .year-selector label{color:#94a3b8 !important}
-#pmPlanTab .year-selector select{
-  background:transparent !important;
-  color:#60a5fa !important;
-}
-#pmPlanTab .year-selector select option{background:#1e293b;color:#f1f5f9}
-
-/* 메인 탭 (점검계획/체크시트/보전이력 등) */
-#pmPlanTab .main-tab{
-  background:#1e293b !important;
-  color:#cbd5e1 !important;
-  border-color:#334155 !important;
-}
-#pmPlanTab .main-tab:hover{
-  background:#334155 !important;
-  color:#f1f5f9 !important;
-}
-#pmPlanTab .main-tab.active{
-  background:#3b82f6 !important;
-  color:#fff !important;
-  border-color:#3b82f6 !important;
-}
-
-/* 호기(vol) 탭 */
-#pmPlanTab .vol-tab{
-  background:#1e293b !important;
-  color:#cbd5e1 !important;
-  border-color:#334155 !important;
-}
-#pmPlanTab .vol-tab:hover{
-  background:#334155 !important;
-}
-#pmPlanTab .vol-tab.active{
-  background:#3b82f6 !important;
-  color:#fff !important;
-  border-color:#3b82f6 !important;
-}
-
-/* 범례 */
-#pmPlanTab .legend{color:#cbd5e1 !important}
-
-/* 12개월 표 */
-#pmPlanTab .eq-table-wrap{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-}
-#pmPlanTab .eq-table{
-  background:transparent !important;
-  color:#e2e8f0 !important;
-}
-#pmPlanTab .eq-table th{
-  background:#334155 !important;
-  color:#f1f5f9 !important;
-  border-color:#475569 !important;
-}
-#pmPlanTab .eq-table td{
-  background:transparent !important;
-  color:#e2e8f0 !important;
-  border-color:#334155 !important;
-}
-#pmPlanTab .eq-table tbody tr:nth-child(even){
-  background:rgba(255,255,255,0.02) !important;
-}
-#pmPlanTab .eq-table tbody tr:hover,
-#pmPlanTab .eq-table tbody tr:hover td,
-#pmPlanTab .eq-table tr:hover td{
-  background:rgba(59,130,246,0.12) !important;
-}
-/* NOW 컬럼 강조 */
-#pmPlanTab .eq-table th.now-month,
-#pmPlanTab .eq-table td.now-month,
-#pmPlanTab .eq-table .now-col{
-  background:rgba(59,130,246,0.15) !important;
-  color:#93c5fd !important;
-}
-/* 진행률 셀 */
-#pmPlanTab .eq-table .progress-cell,
-#pmPlanTab .eq-table .pct{
-  color:#cbd5e1 !important;
-}
-#pmPlanTab .eq-table .grade{
-  color:#94a3b8 !important;
-}
-
-/* ─── 셀 마커 기호 강조 (다크 배경에서 □/■/▣ 가 묻혀 보이는 문제) ───
-   색은 원래 형광색 그대로 두고, 굵게·크게·글로우로 또렷하게 */
-#pmPlanTab .plan-cell .plan,
-#pmPlanTab .eq-table .plan{
-  color:#2563eb !important;
-  font-weight:900 !important;
-  font-size:1.3em !important;
-  text-shadow:0 0 2px rgba(37,99,235,0.9), 0 0 1px rgba(37,99,235,0.9) !important;
-}
-#pmPlanTab .plan-cell .self,
-#pmPlanTab .eq-table .self{
-  color:#dc2626 !important;
-  font-weight:900 !important;
-  font-size:1.3em !important;
-  text-shadow:0 0 2px rgba(220,38,38,0.9), 0 0 1px rgba(220,38,38,0.9) !important;
-}
-#pmPlanTab .plan-cell .done,
-#pmPlanTab .eq-table .done{
-  color:#16a34a !important;
-  font-weight:900 !important;
-  font-size:1.3em !important;
-  text-shadow:0 0 2px rgba(22,163,74,0.9), 0 0 1px rgba(22,163,74,0.9) !important;
-}
-
-/* 폼/버튼/입력 (#pmPlanTab 내부) */
-#pmPlanTab input,
-#pmPlanTab select,
-#pmPlanTab textarea{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#f1f5f9 !important;
-}
-#pmPlanTab .btn{
-  background:#334155 !important;
-  border-color:#475569 !important;
-  color:#f1f5f9 !important;
-}
-#pmPlanTab .btn:hover{background:#475569 !important}
-#pmPlanTab .btn.btn-primary,
-#pmPlanTab .btn.btn-pri{
-  background:#3b82f6 !important;
-  border-color:#2563eb !important;
-  color:#fff !important;
-}
-
-/* KPI 카드 영역 */
-#pmPlanTab .v4p-kpi-row,
-#pmPlanTab [class*="kpi"]{
-  color:#f1f5f9 !important;
-}
-#pmPlanTab [class*="kpi-card"],
-#pmPlanTab .v4p-kpi-card{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#f1f5f9 !important;
-}
-
-/* ─────────────────────────────────────────────
-   12개월 보전계획표 분리 박스 (.v4plan-section)
-   ───────────────────────────────────────────── */
-.v4plan-section{
-  margin:16px 0 24px;
-  padding:20px;
-  background:#1e293b;
-  border-radius:12px;
-  border:1px solid #334155;
-}
-.v4plan-section-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:12px 20px;
-  margin-bottom:14px;
-}
-.v4plan-section-title{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  color:#f1f5f9;
-  font-size:16px;
-  font-weight:700;
-}
-.v4plan-section-title .ico{font-size:20px}
-.v4plan-section-sub{
-  color:#94a3b8;
-  font-size:12px;
-  font-weight:500;
-  margin-top:2px;
-}
-.v4plan-toggle{
-  background:transparent;
-  border:1px solid #334155;
-  color:#cbd5e1;
-  font-size:12px;
-  padding:5px 12px;
-  border-radius:6px;
-  cursor:pointer;
-  transition:all .15s;
-}
-.v4plan-toggle:hover{
-  background:#334155;
-  color:#f1f5f9;
-}
-.v4plan-body{
-  transition:all .2s;
-}
-
-/* ─────────────────────────────────────────────
-   인쇄 시 라이트 테마로 복원 (인쇄/PDF용)
-   ───────────────────────────────────────────── */
-
-/* NOW 컬럼(현재월) 다크 강제 - 라이트 #e0f2fe 덮어쓰기 */
-#pmPlanTab .eq-table th.v4p-current-month,
-#pmPlanTab .eq-table td.v4p-current-month{
-  background:rgba(59,130,246,0.18) !important;
-  color:#bfdbfe !important;
-}
-#pmPlanTab .eq-table thead tr:first-child th.v4p-current-month{
-  background:#1d4ed8 !important;
-  color:#fff !important;
-}
-#pmPlanTab .eq-table thead tr:first-child th.v4p-current-month::after{
-  color:#fff !important;
-}
-
-/* 글자색 톤다운 (핸드폰 가독성 - 너무 새하얗지 않게) */
-body,
-#pmPlanTab,
-#pmPlanTab .eq-table td,
-.v4d-card-row .v4d-label{
-  color:#cbd5e1 !important;
-}
-h1,h2,h3,h4,h5,h6,
-.v4d-section-title,
-.v4plan-section-title,
-.page-header h1,
-.page-header h2{
-  color:#e2e8f0 !important;
-}
-.v4d-card-title,
-.v4d-summary-item .num{
-  color:#e2e8f0 !important;
-}
-#pmPlanTab .eq-table th,
-.eq-table th,
-table th{
-  color:#e2e8f0 !important;
-}
-
-/* 글로벌 라이트 영역 다크화 (#fff, #fafafa, #f8f9fb 등 하드코딩 잡기) */
-.controls,
-.detail-panel,
-.history-list,
-.eq-card,
-.info-grid,
-.image-item{
-  background:#1e293b !important;
-  border-color:#334155 !important;
-  color:#cbd5e1 !important;
-}
-.controls select,
-.controls input{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-}
-.btn-secondary{
-  background:#334155 !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-}
-
-/* 체크시트 영역 (.check-table, .chk-cell) */
-.check-table{
-  background:#1e293b !important;
-  color:#cbd5e1 !important;
-}
-.check-table th{
-  background:#334155 !important;
-  color:#e2e8f0 !important;
-  border-color:#475569 !important;
-}
-.check-table td{
-  background:transparent !important;
-  color:#cbd5e1 !important;
-  border-color:#334155 !important;
-}
-.chk-cell{
-  background:#334155 !important;
-  border:1px solid #475569 !important;
-  color:#cbd5e1 !important;
-}
-.chk-cell:hover{
-  background:#475569 !important;
-}
-.chk-cell.checked,
-.chk-cell.ok{
-  background:rgba(34,197,94,0.2) !important;
-  border-color:#22c55e !important;
-  color:#4ade80 !important;
-}
-.chk-cell.ng{
-  background:rgba(239,68,68,0.2) !important;
-  border-color:#ef4444 !important;
-  color:#f87171 !important;
-}
-
-/* 보전이력관리 영역 (.history-list, .history-item) */
-.history-list,
-.history-item,
-.hist-table-wrap,
-.hist-table{
-  background:#1e293b !important;
-  color:#cbd5e1 !important;
-  border-color:#334155 !important;
-}
-.hist-table th{
-  background:#334155 !important;
-  color:#e2e8f0 !important;
-  border-color:#475569 !important;
-}
-.hist-table td{
-  background:transparent !important;
-  color:#cbd5e1 !important;
-  border-color:#334155 !important;
-}
-.hist-table tbody tr:nth-child(even){
-  background:rgba(255,255,255,0.02) !important;
-}
-.hist-table tbody tr:hover,
-.hist-table tbody tr:hover td{
-  background:rgba(59,130,246,0.12) !important;
-}
-
-/* 모달 헤더/본문 라이트 배경 */
-.modal h1,.modal h2,.modal h3,
-.modal-box h1,.modal-box h2,.modal-box h3,
-.modal-header,
-[class*="modal-"][class*="header"]{
-  background:#334155 !important;
-  color:#e2e8f0 !important;
-  border-color:#475569 !important;
-}
-.modal-body,
-[class*="modal-"][class*="body"]{
-  background:#1e293b !important;
-  color:#cbd5e1 !important;
-}
-.modal-search,
-[class*="modal-"][class*="search"]{
-  background:#0f172a !important;
-  color:#e2e8f0 !important;
-  border-color:#475569 !important;
-}
-
-/* eq-card 호버 (설비카드) */
-.eq-card:hover{
-  background:#334155 !important;
-  border-color:#475569 !important;
-}
-
-/* legend 범례 색상 */
-.legend,
-#pmPlanTab .legend{
-  color:#cbd5e1 !important;
-}
-
-/* ─────────────────────────────────────────────
-   보전이력관리(.mh-*, .hist-*) 영역 다크화
-   ───────────────────────────────────────────── */
-.mh-summary,
-.mh-summary-card,
-#pmPlanTab .mh-summary-card{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.mh-summary-card .label,
-.mh-summary-card .num,
-.mh-summary-card *{
-  color:#e2e8f0 !important;
-}
-.mh-form-box,
-.mh-form-overlay,
-.mh-form-grid,
-#pmPlanTab .mh-form-box{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.mh-form-overlay{
-  background:rgba(0,0,0,0.7) !important;
-}
-.mh-form-title{
-  color:#e2e8f0 !important;
-}
-.mh-form-field label{
-  color:#cbd5e1 !important;
-}
-.mh-input,
-#pmPlanTab .mh-input{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-}
-.mh-input:focus{
-  border-color:#3b82f6 !important;
-  outline:none;
-}
-.mh-input option{
-  background:#1e293b;
-  color:#e2e8f0;
-}
-.mh-badge{
-  background:#334155 !important;
-  color:#cbd5e1 !important;
-}
-
-/* 보전이력 테이블 */
-.mh-table,
-#pmPlanTab .mh-table{
-  background:#1e293b !important;
-  color:#cbd5e1 !important;
-}
-.mh-table th,
-#pmPlanTab .mh-table th{
-  background:#334155 !important;
-  color:#e2e8f0 !important;
-  border-color:#475569 !important;
-}
-.mh-table td,
-#pmPlanTab .mh-table td{
-  background:transparent !important;
-  color:#cbd5e1 !important;
-  border-color:#334155 !important;
-}
-.mh-table tbody tr:nth-child(even){
-  background:rgba(255,255,255,0.02) !important;
-}
-.mh-table tbody tr:hover,
-.mh-table tbody tr:hover td{
-  background:rgba(59,130,246,0.12) !important;
-}
-
-/* 빠른조회 버튼, 컨트롤 */
-.hist-btn,
-.hist-field input[type="date"],
-.hist-row,
-.hist-grid{
-  background:#334155 !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-}
-.hist-btn:hover{
-  background:#475569 !important;
-}
-.hist-btn.delete{
-  background:#7f1d1d !important;
-  border-color:#991b1b !important;
-  color:#fecaca !important;
-}
-.hist-btn.delete:hover{
-  background:#991b1b !important;
-}
-.hist-field label,
-.hist-field{
-  color:#cbd5e1 !important;
-}
-.hist-field input[type="date"]{
-  background:#0f172a !important;
-}
-.hist-empty{
-  background:#1e293b !important;
-  border:1px dashed #475569 !important;
-  color:#94a3b8 !important;
-}
-
-/* 보전이력 KPI 카드 (193 총 보전건수 등) */
-.hist-summary,
-.hist-summary-card,
-.mh-stat,
-.mh-kpi{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.hist-summary-card .num,
-.hist-summary .num,
-.mh-stat .num,
-.mh-kpi .num{
-  color:#e2e8f0 !important;
-}
-.hist-summary-card .label,
-.hist-summary .label,
-.mh-stat .label,
-.mh-kpi .label{
-  color:#94a3b8 !important;
-}
-.hist-table-wrap{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-}
-
-/* ─────────────────────────────────────────────
-   설정(.settings-*, .set-*) 영역 다크화
-   ───────────────────────────────────────────── */
-.settings-section,
-#pmPlanTab .settings-section{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.settings-section h2,
-.settings-section h3,
-.settings-section .title,
-.settings-section legend{
-  color:#e2e8f0 !important;
-}
-.settings-actions{
-  background:transparent !important;
-}
-
-/* 설비 관리표 */
-.set-table,
-#pmPlanTab .set-table{
-  background:#1e293b !important;
-  color:#cbd5e1 !important;
-}
-.set-table th,
-#pmPlanTab .set-table th{
-  background:#334155 !important;
-  color:#e2e8f0 !important;
-  border-color:#475569 !important;
-}
-.set-table td,
-#pmPlanTab .set-table td{
-  background:transparent !important;
-  color:#cbd5e1 !important;
-  border-color:#334155 !important;
-}
-.set-table tbody tr:nth-child(even){
-  background:rgba(255,255,255,0.02) !important;
-}
-.set-table tbody tr:hover,
-.set-table tbody tr:hover td{
-  background:rgba(59,130,246,0.12) !important;
-}
-
-/* 안내 박스 (점검 년도 안내문 등) */
-[class*="notice"],
-[class*="info-box"],
-[class*="alert"]:not(.alert-danger):not(.alert-warning):not(.alert-success),
-.guide-text,
-.help-text,
-.notes-box,
-#pmPlanTab .notes-box{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-
-/* 데이터 관리/백업 영역 */
-[class*="backup"],
-[class*="data-mgr"],
-.year-mgr,
-.year-manage,
-[id*="legacy"]:not(:has(script)){
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-
-/* 디테일 패널/항목 */
-.detail-item,
-#pmPlanTab .detail-item{
-  background:#334155 !important;
-  border:1px solid #475569 !important;
-  color:#cbd5e1 !important;
-}
-.detail-item label,
-.detail-item .label{
-  color:#94a3b8 !important;
-}
-.detail-item .value{
-  color:#e2e8f0 !important;
-}
-
-/* 진행률 바 */
-.progress-bar,
-#pmPlanTab .progress-bar{
-  background:#334155 !important;
-}
-.progress-bar-fill{
-  background:#3b82f6 !important;
-}
-
-/* 점검계획 편집 셀 */
-.mp-cell,
-.pe-month,
-.pe-week-row,
-#pmPlanTab .mp-cell,
-#pmPlanTab .pe-month{
-  background:#334155 !important;
-  border-color:#475569 !important;
-  color:#cbd5e1 !important;
-}
-.pe-week-row select,
-#pmPlanTab .pe-week-row select{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-}
-
-/* 등급 레전드 */
-.grade-legend,
-#pmPlanTab .grade-legend{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.grade-c{color:#fbbf24 !important}
-.grade-d{color:#fb923c !important}
-.grade-e{color:#f87171 !important}
-
-/* ─────────────────────────────────────────────
-   설비 카드(.eq-card) 텍스트 가독성 강화
-   ───────────────────────────────────────────── */
-.eq-card{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.eq-card:hover{
-  border-color:#475569 !important;
-  background:#334155 !important;
-}
-.eq-card.active{
-  background:#1e293b !important;
-  border-color:#3b82f6 !important;
-}
-.eq-card h4{
-  color:#60a5fa !important;
-  font-weight:700;
-}
-.eq-card p,
-.eq-card div,
-.eq-card span:not(.age):not([class*="grade"]){
-  color:#cbd5e1 !important;
-}
-.eq-card .age,
-.eq-card .year,
-.eq-card .meta,
-.eq-card small{
-  color:#94a3b8 !important;
-}
-
-/* ─────────────────────────────────────────────
-   등급 배지(grade-a/b/c/d/e) 다크 친화 색상
-   ───────────────────────────────────────────── */
-.grade-a,
-#pmPlanTab .grade-a{
-  background:rgba(34,197,94,0.2) !important;
-  color:#4ade80 !important;
-}
-.grade-b,
-#pmPlanTab .grade-b{
-  background:rgba(59,130,246,0.2) !important;
-  color:#60a5fa !important;
-}
-.grade-c,
-#pmPlanTab .grade-c{
-  background:rgba(245,158,11,0.22) !important;
-  color:#fcd34d !important;
-}
-.grade-d,
-#pmPlanTab .grade-d{
-  background:rgba(249,115,22,0.22) !important;
-  color:#fdba74 !important;
-}
-.grade-e,
-#pmPlanTab .grade-e{
-  background:rgba(239,68,68,0.22) !important;
-  color:#fca5a5 !important;
-}
-/* 등급 배지 공통 스타일 (가독성 향상) */
-[class^="grade-"]:not(.grade-legend){
-  font-weight:700 !important;
-  padding:3px 8px !important;
-  border-radius:6px !important;
-  display:inline-block;
-}
-
-/* ─────────────────────────────────────────────
-   점검 년도 안내문(.chk-year-*) 다크화
-   ───────────────────────────────────────────── */
-.chk-year-box{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-  border-radius:10px !important;
-}
-.chk-year-row{
-  color:#cbd5e1 !important;
-}
-.chk-year-label{
-  color:#e2e8f0 !important;
-}
-.chk-year-info{
-  color:#94a3b8 !important;
-}
-.chk-year-hint{
-  background:#0f172a !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-  padding:12px 14px !important;
-  border-radius:8px !important;
-  line-height:1.7 !important;
-}
-.chk-year-hint b{
-  color:#e2e8f0 !important;
-}
-.chk-year-actions{
-  background:transparent !important;
-}
-
-/* ─────────────────────────────────────────────
-   체크시트 상세화면(#detailPanel) 가독성 수정
-   ① 점검 년도 바·결재란·섹션 제목: 밝은 파스텔 → 다크 가독성
-   ② 점검/교체 주기 열: 글자가 한 글자씩 세로로 밀리는 현상 방지
-   ───────────────────────────────────────────── */
-
-/* ① 점검 년도 선택 바 (.year-selector) 다크화 */
-.detail-panel .year-selector{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  border-radius:8px !important;
-  color:#e2e8f0 !important;
-}
-.detail-panel .year-selector label,
-.detail-panel .year-selector label b{color:#e2e8f0 !important}
-.detail-panel .year-selector span{color:#94a3b8 !important}
-.detail-panel .year-selector select{
-  background:#0f172a !important;
-  border:1px solid #475569 !important;
-  color:#e2e8f0 !important;
-}
-.detail-panel .year-selector select option{background:#1e293b;color:#e2e8f0}
-
-/* ① 결재란(담당/검토/승인) 라벨 가독성 */
-.detail-panel .approval{border-color:#475569 !important}
-.detail-panel .approval-cell .label{
-  color:#e2e8f0 !important;
-  border-bottom-color:#475569 !important;
-}
-
-/* ① 섹션 제목(📅 …항목 (N건)) 파스텔 → 다크 그라데이션 + 밝은 글자 */
-.detail-panel .check-section h3{
-  background:linear-gradient(90deg,rgba(59,130,246,0.22),transparent) !important;
-  color:#93c5fd !important;
-  border-left:4px solid #3b82f6 !important;
-}
-
-/* ① 설비 수리/보전 이력 제목(📝) 앰버 파스텔 → 다크 그라데이션 + 밝은 글자 */
-.detail-panel .history-section h3{
-  background:linear-gradient(90deg,rgba(217,119,6,0.24),transparent) !important;
-  color:#fcd34d !important;
-  border-left:4px solid #d97706 !important;
-}
-
-/* ① 등급별 년식 기준 안내 박스 밝은 바탕 → 다크 가독성 */
-.detail-panel .grade-note{
-  margin-top:20px !important;
-  padding:12px 14px !important;
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  border-radius:8px !important;
-  font-size:13px !important;
-  color:#cbd5e1 !important;
-  text-align:center !important;
-}
-
-/* ② 점검/교체 주기 열·헤더: 한글 낱자 분리 방지 + 최소폭 확보 */
-.check-table th{word-break:keep-all !important}
-.check-table td.period{
-  word-break:keep-all !important;
-  white-space:normal !important;
-  min-width:66px !important;
-  line-height:1.45 !important;
-  padding:8px 6px !important;
-}
-.check-table thead tr:first-child th:last-child{
-  min-width:66px !important;
-  word-break:keep-all !important;
-}
-
-/* ─────────────────────────────────────────────
-   보고서결재(.appr-app) 입력 가독성 강화
-   ───────────────────────────────────────────── */
-.appr-app input::placeholder,
-.appr-app textarea::placeholder,
-.appr-app select::placeholder{
-  color:#64748b !important;
-  opacity:1;
-}
-.appr-app input,
-.appr-app select,
-.appr-app textarea{
-  color:#e2e8f0 !important;
-}
-.appr-app label,
-.appr-app .form-label,
-.appr-app .label{
-  color:#cbd5e1 !important;
-}
-.appr-app select option{
-  background:#1e293b;
-  color:#e2e8f0;
-}
-.appr-app .muted,
-.appr-app [class*="hint"],
-.appr-app [class*="note"]{
-  color:#94a3b8 !important;
-}
-
-/* ─────────────────────────────────────────────
-   KPI 카드(.v4p-kpi) 가독성 + 텍스트 겹침 해결
-   ───────────────────────────────────────────── */
-.v4p-kpi{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  min-height:88px !important;
-  padding:14px 16px 14px 22px !important;
-  display:flex !important;
-  flex-direction:column !important;
-  justify-content:space-between !important;
-  gap:4px !important;
-}
-.v4p-kpi .label{
-  color:#cbd5e1 !important;
-  font-size:13px !important;
-  margin-bottom:0 !important;
-}
-.v4p-kpi .label .ico{
-  background:rgba(255,255,255,0.08) !important;
-}
-.v4p-kpi .value{
-  font-size:24px !important;
-  line-height:1.1 !important;
-  margin-top:2px !important;
-  margin-bottom:2px !important;
-}
-.v4p-kpi[data-tone="plan"]   .value{color:#60a5fa !important}
-.v4p-kpi[data-tone="done"]   .value{color:#4ade80 !important}
-.v4p-kpi[data-tone="late"]   .value{color:#f87171 !important}
-.v4p-kpi[data-tone="soon"]   .value{color:#fbbf24 !important}
-.v4p-kpi[data-tone="plan"]   .label .ico{color:#60a5fa !important;background:rgba(59,130,246,0.18) !important}
-.v4p-kpi[data-tone="done"]   .label .ico{color:#4ade80 !important;background:rgba(34,197,94,0.18) !important}
-.v4p-kpi[data-tone="late"]   .label .ico{color:#f87171 !important;background:rgba(239,68,68,0.18) !important}
-.v4p-kpi[data-tone="soon"]   .label .ico{color:#fbbf24 !important;background:rgba(245,158,11,0.18) !important}
-.v4p-kpi .sub{
-  font-size:11px !important;
-  color:#94a3b8 !important;
-  margin-top:0 !important;
-  line-height:1.4 !important;
-}
-.v4p-kpi::before{
-  width:3px !important;
-}
-
-/* ─────────────────────────────────────────────
-   1~이전월 월별 실적 미니 라인(.v4d-monthly-row)
-   ───────────────────────────────────────────── */
-.v4d-monthly-row{
-  display:grid;
-  grid-template-columns:repeat(12, 1fr);
-  gap:6px;
-  margin:14px 0 16px;
-  padding:12px 14px;
-  background:rgba(0,0,0,0.25);
-  border:1px solid #334155;
-  border-radius:10px;
-}
-.v4d-monthly-cell{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
-  padding:8px 4px;
-  background:#1e293b;
-  border:1px solid #334155;
-  border-radius:7px;
-  font-size:11px;
-  color:#cbd5e1;
-  min-height:54px;
-  transition:transform .15s;
-}
-.v4d-monthly-cell:hover{
-  transform:translateY(-1px);
-  border-color:#475569;
-}
-.v4d-monthly-cell.is-now{
-  background:#1d4ed8;
-  border-color:#3b82f6;
-  color:#fff;
-  font-weight:600;
-}
-.v4d-monthly-cell.is-future{
-  opacity:0.55;
-}
-.v4d-monthly-cell .m{
-  font-size:11px;
-  color:#94a3b8;
-  font-weight:500;
-}
-.v4d-monthly-cell.is-now .m{color:#bfdbfe}
-.v4d-monthly-cell .v{
-  font-size:14px;
-  font-weight:700;
-  color:#e2e8f0;
-}
-.v4d-monthly-cell.is-now .v{color:#fff}
-.v4d-monthly-cell .badge{
-  font-size:9px;
-  padding:1px 5px;
-  border-radius:8px;
-  font-weight:600;
-}
-.v4d-monthly-cell.t-done .badge{background:rgba(34,197,94,0.25);color:#4ade80}
-.v4d-monthly-cell.t-late .badge{background:rgba(239,68,68,0.25);color:#f87171}
-.v4d-monthly-cell.t-partial .badge{background:rgba(245,158,11,0.25);color:#fbbf24}
-.v4d-monthly-cell.t-none .badge{background:rgba(100,116,139,0.2);color:#94a3b8}
-
-@media (max-width:720px){
-  .v4d-monthly-row{
-    grid-template-columns:repeat(6, 1fr);
-    gap:5px;
-  }
-}
-
-/* ─────────────────────────────────────────────
-   설정/조회(.stg-*) 영역 다크화 (눈부심 방지)
-   ───────────────────────────────────────────── */
-.stg-panel{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  border-left-width:4px !important;
-  color:#cbd5e1 !important;
-}
-.stg-title{
-  color:#e2e8f0 !important;
-}
-.stg-hint{
-  color:#94a3b8 !important;
-}
-.stg-hint code{
-  background:#0f172a !important;
-  color:#cbd5e1 !important;
-}
-.stg-field label{
-  color:#cbd5e1 !important;
-}
-.stg-input{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-}
-.stg-input:focus{
-  border-color:#3b82f6 !important;
-  box-shadow:0 0 0 2px rgba(59,130,246,0.25) !important;
-}
-.stg-input[readonly]{
-  background:#0a1426 !important;
-  color:#94a3b8 !important;
-}
-.stg-list{
-  background:transparent !important;
-}
-.stg-item{
-  background:#0f172a !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.stg-item:hover{
-  background:#1e293b !important;
-}
-.stg-empty{
-  background:#0f172a !important;
-  border:1px dashed #475569 !important;
-  color:#94a3b8 !important;
-  padding:14px !important;
-  border-radius:8px !important;
-  text-align:center !important;
-}
-.stg-btn{
-  background:#334155 !important;
-  border:1px solid #475569 !important;
-  color:#e2e8f0 !important;
-}
-.stg-btn:hover{
-  background:#475569 !important;
-}
-.stg-btn.danger{
-  color:#f87171 !important;
-  border-color:rgba(239,68,68,0.4) !important;
-  background:rgba(239,68,68,0.1) !important;
-}
-.stg-btn.danger:hover{
-  background:rgba(239,68,68,0.2) !important;
-}
-
-/* .appr-app 영역의 입력 요소 더 어둡게 (눈부심 방지) */
-.appr-app input[type=text],
-.appr-app input[type=date],
-.appr-app input[type=time],
-.appr-app input[type=number],
-.appr-app input[type=email],
-.appr-app input[type=password],
-.appr-app input[type=search],
-.appr-app select,
-.appr-app textarea{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-  color-scheme:dark;
-}
-.appr-app input:focus,
-.appr-app select:focus,
-.appr-app textarea:focus{
-  border-color:#3b82f6 !important;
-  box-shadow:0 0 0 2px rgba(59,130,246,0.2) !important;
-}
-
-/* .appr-app 카드 배경 미세 조정 (덜 부담스럽게) */
-.appr-app .card{
-  background:#1e293b !important;
-  border-color:#334155 !important;
-}
-.appr-app .card-title{
-  color:#e2e8f0 !important;
-}
-.appr-app label{
-  color:#cbd5e1 !important;
-}
-.appr-app .muted,
-.appr-app small,
-.appr-app .hint{
-  color:#94a3b8 !important;
-}
-.appr-app code{
-  background:#0f172a !important;
-  color:#cbd5e1 !important;
-  padding:2px 6px !important;
-  border-radius:4px !important;
-}
-.appr-app .btn-secondary{
-  background:#334155 !important;
-  border:1px solid #475569 !important;
-  color:#e2e8f0 !important;
-}
-.appr-app .btn-secondary:hover{
-  background:#475569 !important;
-}
-
-/* ─────────────────────────────────────────────
-   점검자 관리(.v4-inspector-*) 영역 다크화
-   ───────────────────────────────────────────── */
-.v4-inspector-manage{
-  background:#1e293b !important;
-  border:1px solid #334155 !important;
-  color:#cbd5e1 !important;
-}
-.v4-inspector-manage h4{
-  color:#e2e8f0 !important;
-}
-.v4-inspector-manage h4 span{
-  color:#94a3b8 !important;
-}
-.v4-inspector-list{
-  background:transparent !important;
-}
-.v4-inspector-card{
-  background:#334155 !important;
-  border:1px solid #475569 !important;
-  color:#e2e8f0 !important;
-}
-.v4-inspector-card .remove-btn{
-  color:#94a3b8 !important;
-}
-.v4-inspector-card .remove-btn:hover{
-  background:rgba(239,68,68,0.2) !important;
-  color:#f87171 !important;
-}
-.v4-inspector-form input{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-}
-.v4-inspector-form input::placeholder{
-  color:#64748b !important;
-}
-.v4-inspector-form input:focus{
-  border-color:#3b82f6 !important;
-  box-shadow:0 0 0 2px rgba(59,130,246,0.2) !important;
-}
-
-/* 모달의 점검자 선택 칩 (.v4-inspector-pick) */
-.v4-inspector-pick:hover{
-  transform:translateY(-1px);
-  filter:brightness(1.15);
-  box-shadow:0 3px 8px rgba(0,0,0,0.3);
-}
-.v4-inspector-pick.selected{
-  outline:2px solid #fff;
-  outline-offset:2px;
-  transform:scale(1.05);
-}
-.v4-inspector-pick.ini-color-0{background:linear-gradient(135deg, #3b82f6, #1d4ed8)}
-.v4-inspector-pick.ini-color-1{background:linear-gradient(135deg, #10b981, #047857)}
-.v4-inspector-pick.ini-color-2{background:linear-gradient(135deg, #f59e0b, #b45309)}
-.v4-inspector-pick.ini-color-3{background:linear-gradient(135deg, #ef4444, #b91c1c)}
-.v4-inspector-pick.ini-color-4{background:linear-gradient(135deg, #8b5cf6, #6d28d9)}
-.v4-inspector-pick.ini-color-5{background:linear-gradient(135deg, #ec4899, #be185d)}
-.v4-inspector-pick.ini-color-6{background:linear-gradient(135deg, #14b8a6, #0f766e)}
-.v4-inspector-pick.ini-color-7{background:linear-gradient(135deg, #6366f1, #4338ca)}
-
-/* 폼 입력 요소 글로벌 강제 (어디에 있든 다크) */
-.controls input,
-.controls select,
-.controls textarea,
-input[type="date"],
-input[type="time"],
-input[type="month"],
-input[type="datetime-local"]{
-  background:#0f172a !important;
-  border-color:#475569 !important;
-  color:#e2e8f0 !important;
-  color-scheme:dark;
-}
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator{
-  filter:invert(0.8);
-}
-select option{
-  background:#1e293b;
-  color:#e2e8f0;
-}
-
-/* 안내문 약한 텍스트 가독성 향상 */
-.muted,
-[class*="muted"],
-[class*="hint"],
-[class*="caption"],
-small,
-.note,
-.subtitle{
-  color:#94a3b8 !important;
-}
-ul li,
-ol li{
-  color:#cbd5e1 !important;
-}
-
-/* 일반 카드/박스/패널 (와일드 포괄) */
-[class*="-card"]:not(.v4d-card):not(.v4d-card-row):not(.v4d-card-head):not(.v4d-card-title):not(.v4d-card-grade):not(.appr-app *):not(.btn),
-[class*="-box"]:not(.modal-box):not(.appr-app *){
-  background:#1e293b;
-  border-color:#334155;
-}
-
-/* 코드/태그/마크 */
-mark,
-.tag,
-.chip,
-[class*="badge"]:not(.v4d-badge):not(.mh-badge){
-  background:#334155 !important;
-  color:#cbd5e1 !important;
-}
-
-/* ─────────────────────────────────────────────
-   인쇄 시 라이트 테마로 복원 (인쇄/PDF용)
-   ───────────────────────────────────────────── */
-@media print{
-  body{background:#fff !important;color:#000 !important}
-  .page,.page-header,.eq-table-wrap,.check-table,.checksheet,
-  .modal,.modal-box,.card,.panel,
-  table th,table td,
-  .v4plan-section,.v4plan-body{
-    background:#fff !important;
-    color:#000 !important;
-    border-color:#999 !important;
-  }
-  .v4plan-section-head,.v4plan-section-title,.v4plan-section-title *{
-    color:#000 !important;
-  }
-  /* #pmPlanTab 인쇄 시 라이트 복원 */
-  #pmPlanTab{
-    --bg:#fff !important;
-    --card:#fff !important;
-    --text:#000 !important;
-    --muted:#666 !important;
-    --border:#999 !important;
-    background:#fff !important;
-    color:#000 !important;
-  }
-  #pmPlanTab *{color:#000 !important}
-  #pmPlanTab .eq-table th,
-  #pmPlanTab .eq-table td{
-    background:#fff !important;
-    color:#000 !important;
-    border-color:#999 !important;
-  }
-  #pmPlanTab .eq-table thead th{background:#e5e7eb !important}
-  .eq-table th,.eq-table td,
-  .check-table th,.check-table td{
-    background:#fff !important;
-    color:#000 !important;
-    border-color:#999 !important;
-  }
-  .eq-table thead th,.check-table thead th{
-    background:#e5e7eb !important;
-    color:#000 !important;
-  }
-  h1,h2,h3,h4,h5,h6,p,label,
-  .subtitle{color:#000 !important}
-  .btn{background:#fff !important;color:#000 !important;border-color:#999 !important}
-  /* 카드 대시보드는 인쇄 시 숨김 유지 */
-  .v4d-section{display:none !important}
-}
-/* ============================================================
-   [DARK-THEME END]
-   ============================================================ */
+/* [DARK-THEME] 제거됨 — 전체 라이트 테마로 전환 (LIGHT-V5 블록 참고) */
 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -3095,10 +1530,13 @@ mark,
   <div class="page-header no-print">
     <div>
       <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span>🔧 설비정기점검 기준 및 체크시트</span>
+        <button class="nav-burger" type="button" onclick="toggleNav(true)" aria-label="메뉴 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <span class="app-logo">TJ</span>
+        <span class="app-name">설비보전관리</span>
         <span class="rev-badge" title="리비전 v3.8">v3.8</span>
+        <span class="nav-cur" id="navCur"></span>
       </h2>
-      <div class="subtitle">(주)태진다이텍 · 2026 프레스 설비 정기점검 매뉴얼 · 🛡️ 법정 안전검사 관리 · ☁️ 클라우드 동기화</div>
+      <div class="subtitle">(주)태진다이텍 · 프레스 설비 보전 · 정기점검 · 법정 안전검사</div>
     </div>
     <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <span id="syncStatus" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:#f3f4f6;font-size:13px;font-weight:600;color:#6b7280" title="클릭하면 수동으로 동기화합니다">
@@ -3111,30 +1549,33 @@ mark,
   </div>
 
   <!-- 상단 탭 네비게이션 -->
+  <div class="nav-backdrop no-print" onclick="toggleNav(false)"></div>
   <div class="top-tabs no-print">
-    <button class="top-tab" data-tab="eqhist" onclick="switchTopTab('eqhist')">🔧 수리이력</button>
-    <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')">📋 보전계획표</button>
-    <button class="top-tab" data-tab="check" onclick="switchTopTab('check')">📋 설비정기점검 기준 및 체크시트</button>
-    <button class="top-tab" data-tab="safety" onclick="switchTopTab('safety')">🛡️ 안전검사</button>
-    <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')">⚙️ 설정/조회</button>
-    <button class="top-tab" data-tab="approval" onclick="switchTopTab('approval')">📋 보고서결재</button>
+    <div class="tt-drawer-head"><span class="app-logo">TJ</span><b>설비보전관리</b><button type="button" onclick="toggleNav(false)" aria-label="메뉴 닫기">✕</button></div>
+    <div class="tt-group">메뉴</div>
+    <button class="top-tab" data-tab="eqhist" onclick="switchTopTab('eqhist')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><span class="tt-l">수리이력</span><span class="tt-s">수리</span></button>
+    <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="tt-l">보전계획표</span><span class="tt-s">보전계획</span></button>
+    <button class="top-tab" data-tab="check" onclick="switchTopTab('check')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span><span class="tt-l">정기점검 기준·체크시트</span><span class="tt-s">체크시트</span></button>
+    <button class="top-tab" data-tab="safety" onclick="switchTopTab('safety')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="tt-l">안전검사</span><span class="tt-s">안전검사</span></button>
+    <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span><span class="tt-l">설정/조회</span><span class="tt-s">설정</span></button>
+    <button class="top-tab" data-tab="approval" onclick="switchTopTab('approval')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span><span class="tt-l">보고서결재</span><span class="tt-s">결재</span></button>
   </div>
 
   <!-- 수리이력 탭 [PATCH v3.1] -->
   <div id="tab-eqhist" class="tab-pane no-print">
-    <div class="settings-section" style="border:1px solid #d97706;background:rgba(217,119,6,0.06);border-radius:12px;padding:18px;margin-top:4px">
-      <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 10px">🔧 설비 수리/보전 이력 관리 <span id="eqhStatus" style="font-size:13px;color:#94a3b8;font-weight:500;margin-left:auto"></span></h3>
-      <div style="font-size:13px;color:#94a3b8;line-height:1.6;margin-bottom:12px">
+    <div class="settings-section eqh-card">
+      <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 6px">설비 수리/보전 이력 <span id="eqhStatus" style="font-size:13px;color:#94a3b8;font-weight:500;margin-left:auto"></span></h3>
+      <div class="eqh-desc">
         설비를 선택하고 이력을 추가하면 클라우드(kv_store)에 저장되어 모든 PC/폰에서 공유되며, 체크시트 상세화면의 「📝 설비 수리/보전 이력」에도 함께 표시됩니다.<br>
-        <span style="color:#64748b">※ 회색 항목은 프로그램에 내장된 기본 이력(수정 불가), 주황 항목은 추가 이력(수정/삭제 가능)입니다.</span>
+        <span class="eqh-desc2">‘기본’은 프로그램에 내장된 이력(수정 불가), ‘추가’는 직접 등록한 이력(수정·삭제 가능)입니다.</span>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-        <select id="eqhSelect" onchange="eqhRenderList()" style="padding:9px 12px;border:1px solid #475569;border-radius:8px;background:#0f172a;color:#e2e8f0;font-size:14px;min-width:220px"></select>
+        <select id="eqhSelect" onchange="eqhRenderList()" class="eqh-input" style="min-width:220px"></select>
         <button class="btn btn-sm btn-secondary" onclick="eqhLoad(false)">⬇ 새로고침</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-        <input type="text" id="eqhNewText" placeholder="예) 2026.08.19일 클러치 라이닝 교체" style="flex:1;min-width:240px;padding:10px 12px;border:1px solid #475569;border-radius:8px;background:#0f172a;color:#e2e8f0;font-size:14px" onkeydown="if(event.key==='Enter')eqhAdd()">
-        <button class="btn btn-primary" onclick="eqhAdd()">➕ 이력 추가</button>
+        <input type="text" id="eqhNewText" placeholder="예) 2026.08.19일 클러치 라이닝 교체" class="eqh-input" style="flex:1;min-width:240px" onkeydown="if(event.key==='Enter')eqhAdd()">
+        <button class="btn btn-primary" onclick="eqhAdd()">+ 이력 추가</button>
       </div>
       <div id="eqhList"></div>
     </div>
@@ -5601,14 +4042,15 @@ function eqhRenderList(){
   var k=sel.value;if(!k){box.innerHTML='';return;}
   var base=(DATA[k]&&DATA[k].history)||[];
   var extra=window.__eqhData[k]||[];
-  var h='<ul class="history-list">';
-  base.forEach(function(t){
-    h+='<li style="color:#94a3b8">'+_esc(t)+' <span style="font-size:11px;color:#64748b">(기본)</span></li>';
+  var h='<div class="eqh-count">전체 '+(base.length+extra.length)+'건 · 추가 '+extra.length+'건</div><ul class="eqh-tl">';
+  extra.slice().reverse().forEach(function(t,ri){
+    var i=extra.length-1-ri;
+    h+='<li class="eqh-extra"><span class="eqh-tag t-extra">추가</span><span class="eqh-t">'+_esc(t)+'</span>'
+      +'<button class="btn btn-sm btn-secondary" onclick="eqhEdit('+i+')">수정</button>'
+      +'<button class="btn btn-sm btn-secondary eqh-del" onclick="eqhDel('+i+')">삭제</button></li>';
   });
-  extra.forEach(function(t,i){
-    h+='<li style="display:flex;align-items:center;gap:8px"><span style="flex:1;color:#fbbf24">'+_esc(t)+'</span>'
-      +'<button class="btn btn-sm btn-secondary" onclick="eqhEdit('+i+')">✏</button>'
-      +'<button class="btn btn-sm btn-secondary" onclick="eqhDel('+i+')" style="color:var(--red)">🗑</button></li>';
+  base.forEach(function(t){
+    h+='<li class="eqh-base"><span class="eqh-tag">기본</span><span class="eqh-t">'+_esc(t)+'</span></li>';
   });
   h+='</ul>';
   if(!base.length&&!extra.length)h='<div style="padding:20px;text-align:center;color:var(--muted)">등록된 이력이 없습니다.</div>';
@@ -12828,14 +11270,17 @@ function sfRender(){
     return da-db;
   });
 
+  var mc='';  // 휴대폰용 카드 목록
   if(!rows.length){
     h+='<tr><td colspan="16" style="padding:26px;color:#6b7280">해당 조건의 설비가 없습니다.</td></tr>';
+    mc+='<div class="sf-c-empty">해당 조건의 설비가 없습니다.</div>';
   } else {
     var lastCat='', no=0;
     rows.forEach(function(it){
       if(it.cat!==lastCat){
         lastCat=it.cat; no=0;
         h+='<tr class="g-head"><td colspan="16">▪ '+E(it.cat)+'</td></tr>';
+        mc+='<div class="sf-c-group">'+E(it.cat)+'</div>';
       }
       no++;
       var s=stOf(it);
@@ -12865,9 +11310,16 @@ function sfRender(){
          +'<button class="btn btn-secondary btn-sm" onclick="sfOpenEdit(\''+it.id+'\')" title="수정">✏</button> '
          +'<button class="btn btn-secondary btn-sm" style="color:#f87171" onclick="sfDel(\''+it.id+'\')" title="삭제">🗑</button>'
        +'</td></tr>';
+      mc+='<div class="sf-c'+((s.k==='sold'||s.k==='exempt')?' off':'')+' t-'+s.k+'" onclick="sfOpenEdit(\''+it.id+'\')">'
+       +'<div class="sf-c-top"><b>'+E(it.mno)+'</b><span>'+E(it.name)+' · '+E(it.spec)+'</span><span class="sf-bdg '+s.c+'">'+E(s.t)+'</span></div>'
+       +'<div class="sf-c-info"><span><i>차기검사</i><b style="'+ndStyle+'">'+nd+'</b></span><span><i>최근검사</i>'+E(it.lastDate||'-')+'</span><span><i>설치장소</i>'+E(it.place||'-')+'</span></div>'
+       +'<div class="sf-c-act"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();sfDone(\''+it.id+'\')">검사완료 처리</button>'
+       +'<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();sfOpenEdit(\''+it.id+'\')">수정</button></div>'
+       +'</div>';
     });
   }
   h+='</tbody></table></div>';
+  h+='<div class="sf-cards sf-noprint">'+mc+'</div>';
 
   h+='<div class="sf-hint">'
    +'• <b>차기검사일자</b> 기준으로 D-Day를 자동 계산합니다 — 만료(빨강) / 임박 '+SF_URG+'일 이내(주황) / 주의 '+SF_WARN+'일 이내(노랑) / 정상(초록)<br>'
@@ -13661,7 +12113,7 @@ else setTimeout(sfBoot,300);
 
 /* ---------- PC: 좌측 목록 + 우측 점검 ---------- */
 @media screen and (min-width:1000px){
-  #tab-check.cs-detail-open{display:grid !important;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+  #tab-check.cs-detail-open.active{display:grid !important;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
   #tab-check.cs-detail-open > *{grid-column:1 / -1}
   #tab-check.cs-detail-open > #eqList{grid-column:1;position:sticky;top:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 10px;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
   #tab-check.cs-detail-open > #detailPanel{grid-column:2;margin:0 !important}
@@ -13685,7 +12137,7 @@ else setTimeout(sfBoot,300);
   #tab-check.cs-detail-open > .chk-year-box,
   #tab-check.cs-detail-open > .controls,
   #tab-check.cs-detail-open > .qh-fab-wrap{display:none !important}
-  #tab-check.cs-detail-open .cs-mbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20;background:#fff;margin:-14px -14px 12px;padding:10px 12px;border-bottom:1px solid #e5e7eb;border-radius:12px 12px 0 0}
+  #tab-check.cs-detail-open .cs-mbar{display:flex;align-items:center;gap:10px;position:sticky;top:58px;z-index:20;background:#fff;margin:-14px -14px 12px;padding:10px 12px;border-bottom:1px solid #e5e7eb;border-radius:12px 12px 0 0}
   #tab-check .cs-mbar button{border:0;background:#f3f4f6;color:#111827;font-size:14px;font-weight:700;border-radius:8px;padding:8px 12px;font-family:inherit}
   #tab-check .cs-mbar div{display:flex;flex-direction:column;min-width:0}
   #tab-check .cs-mbar b{font-size:15px;color:#111827}
@@ -13730,5 +12182,290 @@ else setTimeout(sfBoot,300);
 }
 </style>
 <!-- [CHK-V5b END] -->
+<!-- ============================================================
+     [LIGHT-V5] 전체 라이트 테마: 앱 상단바/메뉴(PC 상단 · 휴대폰 하단 탭바), 수리이력, 안전검사, 설정, 보고서결재
+     ============================================================ -->
+<style>
+@media screen{
+html,body{background:#f5f6f8 !important;color:#111827}
+body{font-family:'Pretendard','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* ---- 앱 상단바 ---- */
+body > .page > .page-header{background:#fff !important;border:1px solid #e5e7eb !important;border-bottom:0 !important;border-radius:12px 12px 0 0 !important;padding:14px 20px !important;margin:0 !important;box-shadow:none !important}
+body > .page > .page-header h2{font-size:17px !important;color:#111827 !important;margin:0 !important;gap:8px !important}
+body > .page > .page-header .app-logo{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;font-weight:800;letter-spacing:-.5px}
+body > .page > .page-header .app-name{font-weight:800;letter-spacing:-.3px;color:#111827}
+body > .page > .page-header .rev-badge{background:#f3f4f6 !important;color:#6b7280 !important;font-size:11px !important;font-weight:600 !important;border-radius:999px !important;padding:2px 8px !important;border:0 !important}
+body > .page > .page-header .subtitle{color:#6b7280 !important;font-size:12px !important;margin-top:2px !important}
+body > .page > .page-header .btn{border-radius:8px !important;font-size:13px !important;padding:6px 12px !important;background:#fff !important;border:1px solid #d1d5db !important;color:#374151 !important;box-shadow:none !important;min-height:0 !important}
+body > .page > .page-header #syncStatus{background:#f3f4f6 !important;color:#4b5563 !important;font-size:12px !important;padding:5px 10px !important}
+
+/* ---- PC 메뉴: 상단바 아래 밑줄 탭 ---- */
+body > .page > .top-tabs{background:#fff !important;border:1px solid #e5e7eb !important;border-top:1px solid #f3f4f6 !important;border-radius:0 0 12px 12px !important;padding:0 12px !important;margin:0 0 16px !important;gap:2px !important;box-shadow:0 1px 2px rgba(16,24,40,.04) !important;overflow-x:auto;flex-wrap:nowrap !important}
+.top-tab{display:inline-flex !important;align-items:center;gap:6px;background:transparent !important;border:0 !important;border-bottom:2px solid transparent !important;border-radius:0 !important;color:#6b7280 !important;font-size:14px !important;font-weight:600 !important;padding:12px 14px !important;margin:0 !important;white-space:nowrap;box-shadow:none !important;flex:none !important}
+.top-tab:hover{color:#111827 !important;background:transparent !important}
+.top-tab.active{color:#2563eb !important;border-bottom-color:#2563eb !important;background:transparent !important}
+.top-tab .tt-i{font-size:15px;filter:grayscale(1);opacity:.75}
+.top-tab.active .tt-i{filter:none;opacity:1}
+.top-tab .tt-s{display:none}
+#sfGlobalBanner .in{background:#fef2f2 !important;border:1px solid #fecaca !important;border-left:4px solid #ef4444 !important;color:#991b1b !important}
+#sfGlobalBanner .in b{color:#7f1d1d !important}
+
+/* 공통 버튼/입력 */
+.btn-primary{background:#2563eb !important;border-color:#2563eb !important;color:#fff !important}
+.btn-secondary{background:#fff !important;border:1px solid #d1d5db !important;color:#374151 !important}
+.btn-danger{background:#dc2626 !important;border-color:#dc2626 !important;color:#fff !important}
+
+/* ---- 수리이력 ---- */
+#tab-eqhist .eqh-card{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:12px !important;padding:20px !important;box-shadow:0 1px 2px rgba(16,24,40,.06) !important;margin:0 !important}
+#tab-eqhist h3{font-size:17px !important;color:#111827 !important}
+#tab-eqhist .eqh-desc{font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:14px}
+#tab-eqhist .eqh-desc2{color:#9ca3af}
+#tab-eqhist .eqh-input{padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#111827;font-size:14px;font-family:inherit}
+#tab-eqhist .eqh-input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+#tab-eqhist .eqh-count{font-size:12px;color:#6b7280;margin:4px 0 8px}
+#tab-eqhist .eqh-tl{list-style:none;margin:0;padding:0 0 0 16px;border-left:2px solid #e5e7eb}
+#tab-eqhist .eqh-tl li{position:relative;display:flex;align-items:center;gap:10px;padding:9px 0 9px 14px;font-size:14px;color:#374151;border-bottom:1px solid #f3f4f6}
+#tab-eqhist .eqh-tl li::before{content:'';position:absolute;left:-23px;top:50%;margin-top:-6px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #d1d5db}
+#tab-eqhist .eqh-tl li.eqh-extra::before{border-color:#2563eb;background:#dbeafe}
+#tab-eqhist .eqh-t{flex:1;min-width:0}
+#tab-eqhist .eqh-base .eqh-t{color:#6b7280}
+#tab-eqhist .eqh-tag{flex:none;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;background:#f3f4f6;color:#6b7280}
+#tab-eqhist .eqh-tag.t-extra{background:#dbeafe;color:#1d4ed8}
+#tab-eqhist .eqh-del{color:#dc2626 !important}
+
+/* ---- 안전검사 ---- */
+#tab-safety .sf-wrap{color:#111827}
+#tab-safety .sf-kpi .k{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.06);text-align:left;padding:14px 16px}
+#tab-safety .sf-kpi .k:hover{box-shadow:0 4px 12px rgba(16,24,40,.08);border-color:#d1d5db}
+#tab-safety .sf-kpi .k.on{outline:2px solid #2563eb}
+#tab-safety .sf-kpi .k .n{font-size:28px}
+#tab-safety .sf-kpi .k .l{color:#6b7280}
+#tab-safety .sf-bar{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.06);padding:12px 16px}
+#tab-safety .sf-bar select,#tab-safety .sf-bar input{background:#fff;color:#111827;border:1px solid #d1d5db}
+#tab-safety .sf-bar select option{background:#fff;color:#111827}
+#tab-safety .sf-bar .btn{border-radius:8px;font-size:13px;padding:7px 12px;box-shadow:none}
+#tab-safety .sf-tblwrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.06)}
+#tab-safety .sf-tbl{background:#fff;color:#374151}
+#tab-safety .sf-tbl th{background:#f9fafb;color:#6b7280;border:0;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:12px}
+#tab-safety .sf-tbl td{border:0;border-bottom:1px solid #f3f4f6;color:#374151}
+#tab-safety .sf-tbl td.mno{color:#2563eb}
+#tab-safety .sf-tbl td.dim{color:#9ca3af}
+#tab-safety .sf-tbl tbody tr:hover td{background:#f9fafb}
+#tab-safety .sf-tbl tr.g-head td{background:#f3f4f6;color:#374151;font-size:13px}
+#tab-safety .sf-tbl th.sf-act{background:#f9fafb}
+#tab-safety .sf-tbl td.sf-act{background:#fff;box-shadow:-8px 0 12px -8px rgba(16,24,40,.12)}
+#tab-safety .sf-tbl tbody tr:hover td.sf-act{background:#f9fafb}
+#tab-safety .sf-tbl tr.g-head td.sf-act{background:#f3f4f6}
+#tab-safety .sf-act .btn{background:#fff;border:1px solid #e5e7eb;border-radius:6px}
+#tab-safety .sf-b-exp{background:#fee2e2;color:#b91c1c}
+#tab-safety .sf-b-urg{background:#ffedd5;color:#c2410c}
+#tab-safety .sf-b-warn{background:#fef3c7;color:#b45309}
+#tab-safety .sf-b-ok{background:#dcfce7;color:#15803d}
+#tab-safety .sf-b-off{background:#f3f4f6;color:#6b7280}
+#tab-safety .sf-alarm{background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #ef4444}
+#tab-safety .sf-alarm h4{color:#b91c1c}
+#tab-safety .sf-alarm ul{color:#7f1d1d}
+#tab-safety .sf-alarm b{color:#7f1d1d}
+#tab-safety .sf-hint{background:#fff;border:1px solid #e5e7eb;color:#6b7280}
+#tab-safety .sf-hint b{color:#374151}
+#tab-safety .sf-hint code{background:#f3f4f6;color:#1d4ed8}
+.sf-mdl{background:rgba(17,24,39,.45) !important}
+.sf-mdl .box{background:#fff !important;border:1px solid #e5e7eb !important;color:#111827 !important;box-shadow:0 20px 40px rgba(16,24,40,.2)}
+.sf-mdl h3{color:#111827 !important}
+.sf-fg label{color:#6b7280 !important}
+.sf-fg input,.sf-fg select,.sf-fg textarea{background:#fff !important;color:#111827 !important;border:1px solid #d1d5db !important}
+.sf-fg select option{background:#fff !important;color:#111827 !important}
+
+/* ---- 설정/조회 ---- */
+#tab-settings .settings-section,#tab-settings .stg-card,#tab-settings [class*="stg-sec"]{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:12px !important;box-shadow:0 1px 2px rgba(16,24,40,.06) !important}
+
+/* ---- 보고서결재 ---- */
+.appr-app{--bg:#f5f6f8;--surface:#fff;--surface2:#f9fafb;--border:#e5e7eb;--accent:#2563eb;--accent2:#1d4ed8;
+  --ok:#16a34a;--ok-bg:#dcfce7;--ng:#dc2626;--ng-bg:#fee2e2;--info:#0284c7;--info-bg:#e0f2fe;
+  --text:#111827;--text2:#6b7280;--text3:#9ca3af;background:transparent !important;color:#111827 !important;min-height:0 !important}
+.appr-app .hdr{background:#fff !important;border:1px solid #e5e7eb;border-bottom:0;border-radius:12px 12px 0 0;text-align:left !important;padding:16px 20px 12px !important}
+.appr-app .hdr h1{color:#111827 !important;font-size:17px !important}
+.appr-app .hdr p,.appr-app .hdr .v{color:#6b7280 !important}
+.appr-app .user-badge{background:#dcfce7 !important;color:#15803d !important}
+.appr-app .tabs{background:#fff !important;border:1px solid #e5e7eb !important;border-top:1px solid #f3f4f6 !important;border-radius:0 0 12px 12px;margin-bottom:16px}
+.appr-app .tab{color:#6b7280 !important;font-size:13px !important}
+.appr-app .tab.on{color:#2563eb !important;border-bottom-color:#2563eb !important;background:transparent !important}
+.appr-app .form-wrap{max-width:none !important;padding:0 !important}
+.appr-app .card{background:#fff !important;border:1px solid #e5e7eb !important;border-radius:12px !important;box-shadow:0 1px 2px rgba(16,24,40,.06);padding:18px !important}
+.appr-app .card-title{color:#111827 !important;font-size:15px !important}
+.appr-app .card-title::before{display:none}
+.appr-app input[type=text],.appr-app input[type=date],.appr-app input[type=password],.appr-app select,.appr-app textarea{background:#fff !important;border:1px solid #d1d5db !important;color:#111827 !important}
+.appr-app .btn-pri{background:#2563eb !important}
+.appr-app .btn-ghost{background:#fff !important;color:#374151 !important;border:1px solid #d1d5db !important}
+.appr-app .btn-info{background:#2563eb !important}
+.appr-app .inbox-item,.appr-app .tpl-card{background:#fff !important;border:1px solid #e5e7eb !important}
+.appr-app .inbox-item:hover,.appr-app .tpl-card:hover{border-color:#93c5fd !important}
+.appr-app .badge.draft{background:#f3f4f6 !important;color:#6b7280 !important}
+.appr-app .badge.reviewing{background:#e0f2fe !important;color:#0369a1 !important}
+.appr-app .badge.confirming{background:#f3e8ff !important;color:#7e22ce !important}
+.appr-app .badge.approving{background:#fef3c7 !important;color:#b45309 !important}
+.appr-app .badge.completed{background:#dcfce7 !important;color:#15803d !important}
+.appr-app .badge.rejected{background:#fee2e2 !important;color:#b91c1c !important}
+.appr-app .tpl-tag{background:#e0f2fe !important;color:#0369a1 !important}
+.appr-app .empty-state{color:#9ca3af !important}
+}
+
+/* ---- 휴대폰: 햄버거 버튼 + 왼쪽 슬라이드 메뉴 ---- */
+@media screen{ .nav-burger,.nav-backdrop,.tt-drawer-head,.nav-cur{display:none} }
+@media screen and (max-width:899px){
+  body > .page{padding:8px !important}
+  body > .page > .page-header{border-radius:0 !important;border-left:0 !important;border-right:0 !important;border-bottom:1px solid #e5e7eb !important;padding:10px 12px !important;flex-direction:row !important;align-items:center !important;flex-wrap:nowrap !important;gap:8px !important;position:sticky;top:0;z-index:50;margin:-8px -8px 12px !important}
+  body > .page > .page-header .subtitle,body > .page > .page-header .rev-badge,body > .page > .page-header .btn:not(.btn-sm){display:none !important}
+  body > .page > .page-header > div:last-child{margin-left:auto !important;flex-wrap:nowrap !important;gap:6px !important}
+  body > .page > .page-header #syncStatus{padding:6px !important;gap:0 !important}
+  body > .page > .page-header #syncText{display:none !important}
+  body > .page > .page-header > div:first-child{min-width:0;flex:1}
+  body > .page > .page-header h2{flex-wrap:nowrap !important;min-width:0}
+  body > .page > .page-header .btn-sm{padding:5px 8px !important;font-size:12px !important}
+  .nav-burger{display:inline-flex;align-items:center;justify-content:center;flex:none;width:38px;height:38px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;color:#111827;cursor:pointer;padding:0}
+  .nav-burger svg{width:20px;height:20px}
+  body > .page > .page-header .app-name{display:none !important}
+  .nav-cur{display:inline !important;min-width:0;font-size:16px;color:#111827;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nav-backdrop{display:block;position:fixed;inset:0;background:rgba(17,24,39,.4);z-index:90;opacity:0;pointer-events:none;transition:opacity .2s}
+  body.nav-open .nav-backdrop{opacity:1;pointer-events:auto}
+  body.nav-open{overflow:hidden}
+  body > .page > .top-tabs{position:fixed !important;top:0;bottom:0;left:0;width:min(280px,82vw);z-index:100;margin:0 !important;
+    display:flex !important;flex-direction:column !important;gap:2px !important;overflow-y:auto !important;
+    background:#fff !important;border:0 !important;border-right:1px solid #e5e7eb !important;border-radius:0 !important;
+    padding:0 12px calc(16px + env(safe-area-inset-bottom)) !important;box-shadow:8px 0 24px rgba(16,24,40,.15) !important;
+    transform:translateX(-105%);transition:transform .22s ease}
+  body.nav-open > .page > .top-tabs{transform:none}
+  .tt-drawer-head{display:flex;align-items:center;gap:10px;padding:16px 4px 12px;margin-bottom:6px;border-bottom:1px solid #f3f4f6}
+  .tt-drawer-head .app-logo{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;font-weight:800}
+  .tt-drawer-head b{flex:1;font-size:16px;color:#111827}
+  .tt-drawer-head button{border:0;background:#f3f4f6;width:32px;height:32px;border-radius:8px;font-size:16px;color:#374151;cursor:pointer}
+  body > .page > .top-tabs .tt-group{display:block;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.5px;padding:6px 12px}
+  body > .page > .top-tabs .top-tab{display:flex !important;flex-direction:row !important;align-items:center;gap:12px !important;width:100%;text-align:left;
+    padding:12px !important;min-height:0 !important;border:0 !important;border-radius:10px !important;font-size:15px !important;font-weight:600 !important;
+    color:#374151 !important;background:transparent !important;position:relative}
+  body > .page > .top-tabs .top-tab.active{background:#eff6ff !important;color:#1d4ed8 !important}
+  body > .page > .top-tabs .top-tab .tt-l{display:block;flex:1}
+  body > .page > .top-tabs .top-tab .tt-s{display:none}
+  body > .page > .top-tabs .top-tab .tt-i{color:#9ca3af}
+  body > .page > .top-tabs .top-tab .tt-i svg{width:20px;height:20px}
+  body > .page > .top-tabs .top-tab.active .tt-i{color:#2563eb}
+  body > .page > .top-tabs .top-tab .sf-tabbadge{position:static;margin-left:auto !important}
+  .appr-app .hdr{border-radius:12px 12px 0 0}
+  .appr-app .tabs{border-radius:0 0 12px 12px}
+}
+</style>
+<style>
+/* ---- 보전계획 탭 내부 머리글 / 하위 탭 ---- */
+@media screen{
+#pmPlanTab #maintenancePage{padding:0 !important;max-width:none !important}
+#pmPlanTab #maintenancePage > .page-header{background:#fff !important;border:1px solid #e5e7eb !important;border-bottom:0 !important;border-radius:12px 12px 0 0 !important;padding:16px 20px 10px !important;margin:0 !important;box-shadow:none !important}
+#pmPlanTab #maintenancePage > .page-header h2{font-size:17px !important;color:#111827 !important}
+#pmPlanTab #maintenancePage > .page-header .subtitle{font-size:12px !important;color:#6b7280 !important}
+#pmPlanTab .main-tabs{display:flex !important;gap:2px !important;background:#fff !important;border:1px solid #e5e7eb !important;border-top:0 !important;border-radius:0 0 12px 12px !important;padding:0 12px !important;margin:0 0 16px !important;box-shadow:0 1px 2px rgba(16,24,40,.04) !important}
+#pmPlanTab .main-tab{flex:none !important;background:transparent !important;border:0 !important;border-bottom:2px solid transparent !important;border-radius:0 !important;color:#6b7280 !important;font-size:14px !important;font-weight:600 !important;padding:10px 12px !important;min-height:0 !important;box-shadow:none !important}
+#pmPlanTab .main-tab:hover{color:#111827 !important}
+#pmPlanTab .main-tab.active{color:#2563eb !important;border-bottom-color:#2563eb !important;background:transparent !important}
+
+/* ---- 설정/조회 패널 ---- */
+#tab-settings .stg-panel,#tab-settings .v4-inspector-manage{background:#fff !important;border:1px solid #e5e7eb !important;border-left-width:1px !important;border-radius:12px !important;box-shadow:0 1px 2px rgba(16,24,40,.06) !important}
+#tab-settings .stg-panel::before{display:none !important}
+#tab-settings .stg-title,#tab-settings .v4-inspector-manage h4{color:#111827 !important}
+#tab-settings .hist-btn,#tab-settings .stg-btn-primary{background:#2563eb !important;color:#fff !important;border:1px solid #2563eb !important;box-shadow:none !important;background-image:none !important}
+#tab-settings .hist-btn.excel{background:#fff !important;color:#15803d !important;border:1px solid #bbf7d0 !important}
+#tab-settings .hist-btn.delete{background:#fff !important;color:#dc2626 !important;border:1px solid #fecaca !important}
+#tab-settings .stg-btn{background:#fff !important;color:#374151 !important;border:1px solid #d1d5db !important;box-shadow:none !important}
+#tab-settings .v4-btn-primary{background:#2563eb !important;background-image:none !important;box-shadow:none !important}
+}
+</style>
+<style>
+/* ---- 안전검사: 휴대폰 카드 목록 ---- */
+@media screen{ #tab-safety .sf-cards{display:none} }
+@media screen and (max-width:899px){
+  #tab-safety .sf-tblwrap{display:none !important}
+  #tab-safety .sf-cards{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+  #tab-safety .sf-c-group{background:#f9fafb;color:#374151;font-size:13px;font-weight:700;padding:8px 14px;border-bottom:1px solid #f3f4f6}
+  #tab-safety .sf-c{padding:12px 14px;border-bottom:1px solid #f3f4f6;cursor:pointer}
+  #tab-safety .sf-c.off{opacity:.55}
+  #tab-safety .sf-c.t-exp{box-shadow:inset 4px 0 0 #dc2626}
+  #tab-safety .sf-c.t-urg{box-shadow:inset 4px 0 0 #ea580c}
+  #tab-safety .sf-c.t-warn{box-shadow:inset 4px 0 0 #ca8a04}
+  #tab-safety .sf-c-top{display:flex;align-items:center;gap:8px}
+  #tab-safety .sf-c-top b{font-size:15px;color:#2563eb}
+  #tab-safety .sf-c-top span:nth-child(2){flex:1;min-width:0;font-size:13px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #tab-safety .sf-c-info{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:8px;font-size:13px;color:#374151}
+  #tab-safety .sf-c-info span{display:flex;flex-direction:column}
+  #tab-safety .sf-c-info span:last-child{grid-column:1 / -1}
+  #tab-safety .sf-c-info i{font-style:normal;font-size:11px;color:#9ca3af}
+  #tab-safety .sf-c-act{display:flex;gap:6px;margin-top:10px}
+  #tab-safety .sf-c-act .btn{flex:1;padding:8px !important;font-size:13px !important;border-radius:8px !important}
+  #tab-safety .sf-c-empty{padding:24px;text-align:center;color:#9ca3af}
+  #tab-safety .sf-kpi{grid-template-columns:repeat(3,1fr) !important;gap:6px !important}
+  #tab-safety .sf-kpi .k{padding:10px !important}
+  #tab-safety .sf-kpi .k .n{font-size:22px !important}
+  #tab-safety .sf-kpi .k .l{font-size:11px !important}
+  #tab-safety .sf-bar .btn{flex:1 1 30%}
+}
+</style>
+<!-- [LIGHT-V5 END] -->
+<!-- [NAV-V6] PC 왼쪽 사이드바 메뉴 + 선 아이콘 (휴대폰은 하단 탭바 유지) -->
+<style>
+@media screen{
+  .top-tab .tt-i{filter:none !important;opacity:1 !important;display:inline-flex;align-items:center;justify-content:center}
+  .top-tab .tt-i svg{width:18px;height:18px;display:block}
+  .top-tabs .tt-group{display:none}
+}
+@media screen and (min-width:900px){
+  body > .page{max-width:none !important;margin:0 !important;padding:24px 32px 40px 288px !important}
+  body > .page > .tab-pane,body > .page > #sfGlobalBanner{max-width:1360px;margin-left:auto;margin-right:auto}
+
+  /* 사이드바 본체 (상단 로고, 하단 상태/버튼) */
+  body > .page > .page-header{position:fixed !important;top:0;left:0;bottom:0;width:256px;z-index:40;
+    display:flex !important;flex-direction:column !important;align-items:stretch !important;flex-wrap:nowrap !important;gap:0 !important;
+    background:#fff !important;border:0 !important;border-right:1px solid #e5e7eb !important;border-radius:0 !important;
+    padding:18px 16px 16px !important;margin:0 !important}
+  body > .page > .page-header h2{gap:10px !important}
+  body > .page > .page-header .app-logo{width:32px;height:32px;border-radius:9px;font-size:13px}
+  body > .page > .page-header .app-name{font-size:16px}
+  body > .page > .page-header .rev-badge{margin-left:auto}
+  body > .page > .page-header .subtitle{font-size:11.5px !important;line-height:1.5;margin:8px 0 0 !important;padding-bottom:14px;border-bottom:1px solid #f3f4f6}
+  body > .page > .page-header > div:last-child{margin:auto 0 0 !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:8px !important;padding-top:14px;border-top:1px solid #f3f4f6}
+  body > .page > .page-header #syncStatus{justify-content:center;border-radius:8px !important;padding:8px 10px !important}
+  body > .page > .page-header .btn{width:100%;justify-content:center;padding:8px 10px !important}
+
+  /* 메뉴 목록 */
+  body > .page > .top-tabs{position:fixed !important;top:118px;left:0;width:256px;z-index:41;
+    display:flex !important;flex-direction:column !important;gap:2px !important;overflow:visible !important;
+    background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;padding:0 12px !important;margin:0 !important}
+  body > .page > .top-tabs .tt-group{display:block;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.5px;padding:6px 12px 6px}
+  body > .page > .top-tabs .top-tab{display:flex !important;align-items:center;gap:10px !important;width:100%;text-align:left;
+    padding:9px 12px !important;border:0 !important;border-radius:8px !important;font-size:14px !important;font-weight:600 !important;
+    color:#4b5563 !important;background:transparent !important;white-space:normal !important;line-height:1.35}
+  body > .page > .top-tabs .top-tab:hover{background:#f3f4f6 !important;color:#111827 !important}
+  body > .page > .top-tabs .top-tab.active{background:#eff6ff !important;color:#1d4ed8 !important}
+  body > .page > .top-tabs .top-tab .tt-i{flex:none;width:20px;color:#9ca3af}
+  body > .page > .top-tabs .top-tab:hover .tt-i{color:#4b5563}
+  body > .page > .top-tabs .top-tab.active .tt-i{color:#2563eb}
+  body > .page > .top-tabs .top-tab .tt-l{flex:1;min-width:0}
+  body > .page > .top-tabs .top-tab .sf-tabbadge{margin-left:auto !important}
+}
+</style>
+<!-- [NAV-V6 END] -->
+<script>
+/* [NAV-V6] 휴대폰 햄버거 메뉴 열기/닫기 + 상단에 현재 메뉴 이름 표시 */
+(function(){
+  function cur(){
+    var a=document.querySelector('.top-tab.active .tt-l'); var el=document.getElementById('navCur');
+    if(el) el.textContent = a ? a.textContent : '';
+  }
+  window.toggleNav=function(open){ document.body.classList.toggle('nav-open', !!open); };
+  document.addEventListener('click',function(e){
+    if(e.target.closest && e.target.closest('.top-tab')){ toggleNav(false); setTimeout(cur,0); }
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') toggleNav(false); });
+  document.addEventListener('DOMContentLoaded',cur); window.addEventListener('load',cur);
+})();
+</script>
+
 </body>
 </html>
