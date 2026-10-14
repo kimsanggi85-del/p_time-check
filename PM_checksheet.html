@@ -2896,7 +2896,7 @@ function renderChkList(mode, activeKey){
       const lbl = ms.yearMode ? `${ms.done}건` : ms.st==='na' ? '항목없음' : ms.st==='done' ? '완료' : ms.st==='partial' ? '진행중' : '미점검';
       const pillCls = ms.yearMode ? (ms.st==='done'?'done':'na') : ms.st;
       if(compact){
-        cards += `<div class="eq-card cs-row${k===activeKey?' active':''}" data-st="${ms.st}" onclick="showEquipment('${k}')">
+        cards += `<div class="eq-card cs-row${k===activeKey?' active':''}" data-st="${ms.st}" data-key="${k}" onclick="showEquipment('${k}')">
           <span class="cs-dot t-${pillCls}"></span>
           <span class="cs-row-main"><b>${k}</b><span>${name}</span></span>
           <span class="cs-row-st">${(!ms.yearMode && ms.total)?`<em>${ms.done}/${ms.total}</em>`:''}<span class="cs-pill t-${pillCls}">${lbl}</span></span>
@@ -2967,7 +2967,13 @@ function showEquipment(key){
   
   window.__csKey = key;
   document.getElementById('tab-check').classList.add('cs-detail-open');
-  if(csIsWide()) renderChkList('side', key);
+  if(csIsWide()){
+    // 좌측 목록이 이미 있으면 다시 그리지 않고 선택 표시만 바꿈 (목록 스크롤 위치 유지)
+    const _list = document.getElementById('eqList');
+    if(_list.classList.contains('cs-mode-side') && _list.querySelector('.cs-row')){
+      _list.querySelectorAll('.cs-row').forEach(r=>r.classList.toggle('active', r.dataset.key===key));
+    }else renderChkList('side', key);
+  }
   else document.getElementById('eqList').innerHTML = '';
   document.getElementById('printBtn').style.display = '';
   document.getElementById('eqSelect').value = key;
@@ -3128,7 +3134,11 @@ function showEquipment(key){
     dp.__csObs = new MutationObserver(()=>{ updateChkProgress(); if(window.__csKey) renderChkToday(window.__csKey); });
     dp.__csObs.observe(dp, {subtree:true, attributes:true, attributeFilter:['class']});
   }
-  window.scrollTo({top:0, behavior:'smooth'});
+  // PC 분할 화면: 점검 화면 윗부분이 화면 밖에 있을 때만 그 위치로 이동 (페이지 맨 위로 튀지 않게)
+  if(csIsWide()){
+    const _t = dp.getBoundingClientRect().top;
+    if(_t < 0) window.scrollBy({top:_t-12, behavior:'smooth'});
+  }else window.scrollTo({top:0, behavior:'smooth'});
 }
 
 // ====================================================================
