@@ -1548,12 +1548,13 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 
   <!-- 상단 탭 네비게이션 -->
   <div class="top-tabs no-print">
-    <button class="top-tab" data-tab="eqhist" onclick="switchTopTab('eqhist')"><span class="tt-i">🔧</span><span class="tt-l">수리이력</span><span class="tt-s">수리</span></button>
-    <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')"><span class="tt-i">📅</span><span class="tt-l">보전계획표</span><span class="tt-s">보전계획</span></button>
-    <button class="top-tab" data-tab="check" onclick="switchTopTab('check')"><span class="tt-i">✅</span><span class="tt-l">설비정기점검 기준 및 체크시트</span><span class="tt-s">체크시트</span></button>
-    <button class="top-tab" data-tab="safety" onclick="switchTopTab('safety')"><span class="tt-i">🛡️</span><span class="tt-l">안전검사</span><span class="tt-s">안전검사</span></button>
-    <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')"><span class="tt-i">⚙️</span><span class="tt-l">설정/조회</span><span class="tt-s">설정</span></button>
-    <button class="top-tab" data-tab="approval" onclick="switchTopTab('approval')"><span class="tt-i">📝</span><span class="tt-l">보고서결재</span><span class="tt-s">결재</span></button>
+    <div class="tt-group">메뉴</div>
+    <button class="top-tab" data-tab="eqhist" onclick="switchTopTab('eqhist')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><span class="tt-l">수리이력</span><span class="tt-s">수리</span></button>
+    <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="tt-l">보전계획표</span><span class="tt-s">보전계획</span></button>
+    <button class="top-tab" data-tab="check" onclick="switchTopTab('check')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span><span class="tt-l">정기점검 기준·체크시트</span><span class="tt-s">체크시트</span></button>
+    <button class="top-tab" data-tab="safety" onclick="switchTopTab('safety')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="tt-l">안전검사</span><span class="tt-s">안전검사</span></button>
+    <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span><span class="tt-l">설정/조회</span><span class="tt-s">설정</span></button>
+    <button class="top-tab" data-tab="approval" onclick="switchTopTab('approval')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span><span class="tt-l">보고서결재</span><span class="tt-s">결재</span></button>
   </div>
 
   <!-- 수리이력 탭 [PATCH v3.1] -->
@@ -12108,7 +12109,7 @@ else setTimeout(sfBoot,300);
 
 /* ---------- PC: 좌측 목록 + 우측 점검 ---------- */
 @media screen and (min-width:1000px){
-  #tab-check.cs-detail-open{display:grid !important;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+  #tab-check.cs-detail-open.active{display:grid !important;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
   #tab-check.cs-detail-open > *{grid-column:1 / -1}
   #tab-check.cs-detail-open > #eqList{grid-column:1;position:sticky;top:12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 10px;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
   #tab-check.cs-detail-open > #detailPanel{grid-column:2;margin:0 !important}
@@ -12380,5 +12381,53 @@ body > .page > .top-tabs{background:#fff !important;border:1px solid #e5e7eb !im
 }
 </style>
 <!-- [LIGHT-V5 END] -->
+<!-- [NAV-V6] PC 왼쪽 사이드바 메뉴 + 선 아이콘 (휴대폰은 하단 탭바 유지) -->
+<style>
+@media screen{
+  .top-tab .tt-i{filter:none !important;opacity:1 !important;display:inline-flex;align-items:center;justify-content:center}
+  .top-tab .tt-i svg{width:18px;height:18px;display:block}
+  .top-tabs .tt-group{display:none}
+}
+@media screen and (min-width:900px){
+  body > .page{max-width:none !important;margin:0 !important;padding:24px 32px 40px 288px !important}
+  body > .page > .tab-pane,body > .page > #sfGlobalBanner{max-width:1360px;margin-left:auto;margin-right:auto}
+
+  /* 사이드바 본체 (상단 로고, 하단 상태/버튼) */
+  body > .page > .page-header{position:fixed !important;top:0;left:0;bottom:0;width:256px;z-index:40;
+    display:flex !important;flex-direction:column !important;align-items:stretch !important;flex-wrap:nowrap !important;gap:0 !important;
+    background:#fff !important;border:0 !important;border-right:1px solid #e5e7eb !important;border-radius:0 !important;
+    padding:18px 16px 16px !important;margin:0 !important}
+  body > .page > .page-header h2{gap:10px !important}
+  body > .page > .page-header .app-logo{width:32px;height:32px;border-radius:9px;font-size:13px}
+  body > .page > .page-header .app-name{font-size:16px}
+  body > .page > .page-header .rev-badge{margin-left:auto}
+  body > .page > .page-header .subtitle{font-size:11.5px !important;line-height:1.5;margin:8px 0 0 !important;padding-bottom:14px;border-bottom:1px solid #f3f4f6}
+  body > .page > .page-header > div:last-child{margin:auto 0 0 !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:8px !important;padding-top:14px;border-top:1px solid #f3f4f6}
+  body > .page > .page-header #syncStatus{justify-content:center;border-radius:8px !important;padding:8px 10px !important}
+  body > .page > .page-header .btn{width:100%;justify-content:center;padding:8px 10px !important}
+
+  /* 메뉴 목록 */
+  body > .page > .top-tabs{position:fixed !important;top:118px;left:0;width:256px;z-index:41;
+    display:flex !important;flex-direction:column !important;gap:2px !important;overflow:visible !important;
+    background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;padding:0 12px !important;margin:0 !important}
+  body > .page > .top-tabs .tt-group{display:block;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.5px;padding:6px 12px 6px}
+  body > .page > .top-tabs .top-tab{display:flex !important;align-items:center;gap:10px !important;width:100%;text-align:left;
+    padding:9px 12px !important;border:0 !important;border-radius:8px !important;font-size:14px !important;font-weight:600 !important;
+    color:#4b5563 !important;background:transparent !important;white-space:normal !important;line-height:1.35}
+  body > .page > .top-tabs .top-tab:hover{background:#f3f4f6 !important;color:#111827 !important}
+  body > .page > .top-tabs .top-tab.active{background:#eff6ff !important;color:#1d4ed8 !important}
+  body > .page > .top-tabs .top-tab .tt-i{flex:none;width:20px;color:#9ca3af}
+  body > .page > .top-tabs .top-tab:hover .tt-i{color:#4b5563}
+  body > .page > .top-tabs .top-tab.active .tt-i{color:#2563eb}
+  body > .page > .top-tabs .top-tab .tt-l{flex:1;min-width:0}
+  body > .page > .top-tabs .top-tab .sf-tabbadge{margin-left:auto !important}
+}
+@media screen and (max-width:899px){
+  .top-tab .tt-i svg{width:22px;height:22px}
+  .top-tab .tt-i{color:#9ca3af}
+  .top-tab.active .tt-i{color:#2563eb}
+}
+</style>
+<!-- [NAV-V6 END] -->
 </body>
 </html>
