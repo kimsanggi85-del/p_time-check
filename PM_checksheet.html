@@ -10145,9 +10145,17 @@ if(typeof apprInit!=='undefined') window.apprInit = apprInit;
     var planTab = document.getElementById('pmPlanTab');
     if(!planTab) { setTimeout(attachObserver, 400); return; }
     try{
+      // 보전계획표(표) 자체가 새로 그려질 때만 반응.
+      // KPI/대시보드 재렌더로 추가되는 노드에 반응하면 무한 재렌더(카드 깜빡임)가 발생하므로 제외
       var mo = new MutationObserver(function(muts){
         for(var i=0;i<muts.length;i++){
-          if(muts[i].addedNodes && muts[i].addedNodes.length){ onTableMutate(); break; }
+          var added = muts[i].addedNodes || [];
+          for(var j=0;j<added.length;j++){
+            var nd = added[j];
+            if(nd.nodeType===1 && (nd.matches('.eq-table, .eq-table-wrap, .plan-sheet') || nd.querySelector('.eq-table'))){
+              onTableMutate(); return;
+            }
+          }
         }
       });
       mo.observe(planTab, {childList:true, subtree:true});
