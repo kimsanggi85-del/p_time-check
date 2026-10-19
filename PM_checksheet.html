@@ -3633,6 +3633,8 @@ function _getTgToken(){return(typeof TELEGRAM_BOT_TOKEN!=='undefined'?TELEGRAM_B
 function _esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
 // --- 로컬 저장소 ---
+// ntfy 알림 클릭 시 열 링크 — 현재 앱 주소(http/https일 때만, #·? 제외)
+function ntfyClickUrl(){try{var u=location.href.split('#')[0].split('?')[0];return /^https?:\/\//i.test(u)?u:'';}catch(e){return '';}}
 function getNtfyRules(){try{return JSON.parse(localStorage.getItem('ntfy_rules')||'[]')}catch(e){return[]}}
 function setNtfyRules(r){localStorage.setItem('ntfy_rules',JSON.stringify(r))}
 function getTgRules(){try{return JSON.parse(localStorage.getItem('tg_rules')||'[]')}catch(e){return[]}}
@@ -3745,6 +3747,8 @@ function buildSettings(){
       '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">발송 마감 (이 시각 이후 미발송)</label>'+
         '<input id="pmnCfgEnd" type="number" min="1" max="24" class="stg-input" placeholder="18"></div>'+
     '</div>'+
+    '<div style="margin-top:8px"><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">알림 클릭 시 열 링크 (비우면 현재 앱 주소)</label>'+
+      '<input id="pmnCfgLink" class="stg-input" placeholder="https://..."></div>'+
     '<div class="stg-action-bar" style="margin-top:12px">'+
       '<button class="stg-btn-primary" onclick="pmnSaveCfg()">💾 서버에 저장</button>'+
       '<button class="stg-btn" onclick="pmnLoadCfg()">⬇ 불러오기</button>'+
@@ -3877,6 +3881,7 @@ function pmnFillForm(c){
   if(g('pmnCfgDue'))     g('pmnCfgDue').value=(c.due_day!=null)?c.due_day:20;
   if(g('pmnCfgHour'))    g('pmnCfgHour').value=(c.send_hour!=null)?c.send_hour:8;
   if(g('pmnCfgEnd'))     g('pmnCfgEnd').value=(c.end_hour!=null)?c.end_hour:18;
+  if(g('pmnCfgLink'))    g('pmnCfgLink').value=c.click_url||ntfyClickUrl();
 }
 function pmnLoadCfg(silent){
   fetch(_getSbUrl()+'/rest/v1/kv_store?select=value&key=eq.'+encodeURIComponent(PMN_CFG_KEY)+'&limit=1',{headers:_sbHeaders()})
@@ -3894,8 +3899,10 @@ function pmnSaveCfg(){
     notice_day: parseInt(document.getElementById('pmnCfgNotice').value,10)||10,
     due_day: parseInt(document.getElementById('pmnCfgDue').value,10)||20,
     send_hour: Math.min(23, Math.max(0, parseInt(document.getElementById('pmnCfgHour').value,10)||0)),
-    end_hour: Math.min(24, Math.max(1, parseInt(document.getElementById('pmnCfgEnd').value,10)||18))
+    end_hour: Math.min(24, Math.max(1, parseInt(document.getElementById('pmnCfgEnd').value,10)||18)),
+    click_url: ((document.getElementById('pmnCfgLink')||{}).value||'').trim()||ntfyClickUrl()
   };
+  if(cfg.click_url&&!/^https?:\/\//i.test(cfg.click_url)){_pmnStatus('❌ 링크는 http:// 또는 https:// 로 시작해야 합니다',false);return;}
   if(cfg.end_hour<=cfg.send_hour){_pmnStatus('❌ 발송 마감은 발송 시각보다 늦어야 합니다',false);return;}
   var hdrs=Object.assign({},_sbHeaders(),{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'});
   fetch(_getSbUrl()+'/rest/v1/kv_store?on_conflict=key',{
@@ -4181,12 +4188,12 @@ function sendNtfy(cond,bodyKo,ngFlag){
   rules.forEach(function(r){
     try{fetch('https://ntfy.sh/'+r.topic,{
       method:'POST',
-      headers:{
+      headers:Object.assign({
         'Title':ngFlag?'PM Check NG Alert':'PM Check Saved',
         'Tags':ngFlag?'warning,rotating_light':'white_check_mark,memo',
         'Priority':ngFlag?'high':'default',
         'Content-Type':'text/plain; charset=utf-8'
-      },
+      },ntfyClickUrl()?{'Click':ntfyClickUrl()}:{}),
       body:bodyKo
     });}catch(e){}
   });
@@ -11823,16 +11830,19 @@ function sfPushNow(){
 }
 function sfNtfyPost(topic,title,body,prio){
   // ntfy JSON 발행 방식 — HTTP 헤더는 ISO-8859-1만 허용하므로 한글 제목은 JSON 바디로 전송
-  return fetch('https://ntfy.sh/',{
-    method:'POST',
-    headers:{'Content-Type':'application/json; charset=utf-8'},
-    body: JSON.stringify({
+  var payload={
       topic: topic,
       title: title,
       message: body,
       priority: (prio==='urgent'?5:(prio==='high'?4:3)),
       tags: (prio==='urgent'?['rotating_light','warning']:(prio==='high'?['warning','bell']:['bell','memo']))
-    })
+  };
+  var link=ntfyClickUrl();
+  if(link) payload.click=link; // 알림 클릭 시 앱 열기
+  return fetch('https://ntfy.sh/',{
+    method:'POST',
+    headers:{'Content-Type':'application/json; charset=utf-8'},
+    body: JSON.stringify(payload)
   });
 }
 function sfSend(al){
