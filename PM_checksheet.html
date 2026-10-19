@@ -3653,8 +3653,10 @@ function _getTgToken(){return(typeof TELEGRAM_BOT_TOKEN!=='undefined'?TELEGRAM_B
 function _esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
 // --- 로컬 저장소 ---
-// ntfy 알림 클릭 시 열 링크 — 현재 앱 주소(http/https일 때만, #·? 제외)
-function ntfyClickUrl(){try{var u=location.href.split('#')[0].split('?')[0];return /^https?:\/\//i.test(u)?u:'';}catch(e){return '';}}
+// ntfy 알림 클릭 시 열 링크 — 현재 앱 주소(http/https일 때만, #·? 제외), 로컬 파일로 열었으면 GitHub Pages 주소
+var NTFY_APP_URL='https://kimsanggi85-del.github.io/p_time-check/PM_checksheet.html';
+function ntfyClickUrl(){try{var u=location.href.split('#')[0].split('?')[0];return /^https?:\/\//i.test(u)?u:NTFY_APP_URL;}catch(e){return NTFY_APP_URL;}}
+function _pmnClickQ(){var v=((document.getElementById('pmnCfgLink')||{}).value||'').trim()||ntfyClickUrl();return '&click='+encodeURIComponent(v);}
 function getNtfyRules(){try{return JSON.parse(localStorage.getItem('ntfy_rules')||'[]')}catch(e){return[]}}
 function setNtfyRules(r){localStorage.setItem('ntfy_rules',JSON.stringify(r))}
 function getTgRules(){try{return JSON.parse(localStorage.getItem('tg_rules')||'[]')}catch(e){return[]}}
@@ -3950,7 +3952,7 @@ function pmnSaveCfg(){
 }
 function pmnTestSend(){
   _pmnStatus('발송 중...');_pmnBusy(true);
-  fetch(PMN_FN_URL+'?test=1',{headers:{'Authorization':'Bearer '+_getSbKey()}})
+  fetch(PMN_FN_URL+'?test=1'+_pmnClickQ(),{headers:{'Authorization':'Bearer '+_getSbKey()}})
     .then(function(r){return r.json();})
     .then(function(j){_pmnStatus(j.ok?'✅ 테스트 발송 완료 (ntfy 앱 확인)':'❌ 발송 실패',j.ok);})
     .catch(function(e){_pmnStatus('❌ '+e.message,false);}).then(function(){_pmnBusy(false);});
@@ -3958,7 +3960,7 @@ function pmnTestSend(){
 function pmnSendNow(){
   if(!confirm('지금 미점검 현황을 확인해 ntfy로 바로 발송합니다.\n(저장된 설정 기준 · 이상 없으면 발송하지 않음)\n계속하시겠습니까?'))return;
   _pmnStatus('점검 후 발송 중...');_pmnBusy(true);
-  fetch(PMN_FN_URL+'?force=1',{headers:{'Authorization':'Bearer '+_getSbKey()}})
+  fetch(PMN_FN_URL+'?force=1'+_pmnClickQ(),{headers:{'Authorization':'Bearer '+_getSbKey()}})
     .then(function(r){return r.json();})
     .then(function(j){
       if(!j.ok)throw new Error(j.error||'발송 실패');
