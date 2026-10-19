@@ -295,6 +295,26 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
 .stg-panel.gray{border-left-color:var(--muted)}
 .stg-panel.green{border-left-color:var(--green)}
 .stg-panel.slate{border-left-color:#475569}
+.pmn-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px}
+.pmn-head{font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--text);margin-bottom:10px}
+.pmn-stat{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:12px}
+.pmn-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:5px;background:#dcfce7;color:#166534}
+.pmn-badge.off{background:#f1f5f9;color:#64748b}
+.pmn-stat label{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--text);cursor:pointer}
+.pmn-lbl{font-size:13px;font-weight:600;color:var(--muted);display:block;margin:10px 0 5px}
+.pmn-items{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:12px}
+.pmn-items .ttl{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px}
+.pmn-items label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);padding:5px 0;cursor:pointer}
+.pmn-items label small{color:var(--muted)}
+.pmn-more{margin-top:10px;font-size:13px}
+.pmn-more summary{cursor:pointer;color:var(--muted);font-weight:600}
+.pmn-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.pmn-btns button{padding:11px 8px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;border:1px solid #1e293b;background:#fff;color:#0f172a;font-family:inherit}
+.pmn-btns button.pri{background:#0f172a;color:#fff}
+.pmn-btns button:disabled{opacity:.5;cursor:wait}
+.pmn-help{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}
+.pmn-help code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px}
+@media(max-width:600px){.pmn-btns{grid-template-columns:1fr}}
 .stg-title{font-size:17px;font-weight:800;margin-bottom:10px;color:var(--text)}
 .stg-hint{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5}
 .stg-hint code{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px;color:#0f172a}
@@ -3727,36 +3747,38 @@ function buildSettings(){
   // [v4] 알림 4개 섹션(ntfy/텔레그램/디스코드/메일) 삭제됨
 
   // [v4.1] 미점검 자동알림 (서버 Edge Function: pm-uncheck-notify)
-  h+='<div class="stg-panel" style="border-color:#f59e0b">'+
-    '<div class="stg-title">🔔 미점검 자동알림 (서버)</div>'+
-    '<div class="stg-hint">서버가 <b>한국시간 기준 하루 1회</b>(발송 시각 이후 첫 확인 시) <b>보전계획표 미완료</b> + <b>체크시트 미점검</b> 설비를 ntfy로 자동 발송합니다. 발송 시간대 밖(야간·새벽)에는 보내지 않습니다. '+
-      '브라우저를 꺼도 동작합니다. (당월 계획 대상 설비 기준)</div>'+
-    '<div class="stg-row r3" style="margin-top:8px">'+
-      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">사용</label>'+
-        '<select id="pmnCfgEnabled" class="stg-input"><option value="1">✅ 사용</option><option value="0">⛔ 중지</option></select></div>'+
-      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">ntfy 토픽</label>'+
-        '<input id="pmnCfgTopic" class="stg-input" placeholder="taejincall"></div>'+
-      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">안내 시작일 (매월)</label>'+
-        '<input id="pmnCfgNotice" type="number" min="1" max="28" class="stg-input" placeholder="10"></div>'+
+  var _pmnHourOpts='';for(var _hh=0;_hh<24;_hh++)_pmnHourOpts+='<option value="'+_hh+'">매일 '+(_hh<10?'0':'')+_hh+'시</option>';
+  var _pmnL='class="pmn-lbl"';
+  h+='<div class="pmn-box">'+
+    '<div class="pmn-head">NTFY 미점검 알림</div>'+
+    '<div class="pmn-stat"><span id="pmnBadge" class="pmn-badge">감시 중</span>'+
+      '<label><input type="checkbox" id="pmnCfgEnabled" checked onchange="pmnBadge()"> 사용</label>'+
+      '<span id="pmnStatus">확인 중...</span></div>'+
+    '<label '+_pmnL+'>토픽명</label>'+
+    '<input id="pmnCfgTopic" class="stg-input" placeholder="taejincall" autocomplete="off">'+
+    '<label '+_pmnL+'>발송 시각 <span style="font-weight:400">(한국시간 · 하루 1회)</span></label>'+
+    '<select id="pmnCfgHour" class="stg-input">'+_pmnHourOpts+'</select>'+
+    '<div class="pmn-items"><div class="ttl">알림 항목</div>'+
+      '<label><input type="checkbox" id="pmnItemPlan" checked> <b>보전계획표 미완료</b> <small>(당월 계획 w2/w4 완료체크 없음)</small></label>'+
+      '<label><input type="checkbox" id="pmnItemChk" checked> <b>체크시트 미점검</b> <small>(당월 계획 설비 중 점검기록 없음)</small></label>'+
     '</div>'+
-    '<div class="stg-row r3" style="margin-top:8px">'+
-      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">기준일 (경과 시 독촉)</label>'+
-        '<input id="pmnCfgDue" type="number" min="1" max="31" class="stg-input" placeholder="20"></div>'+
-      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">발송 시각 (한국시간, 시)</label>'+
-        '<input id="pmnCfgHour" type="number" min="0" max="23" class="stg-input" placeholder="8"></div>'+
-      '<div><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">발송 마감 (이 시각 이후 미발송)</label>'+
-        '<input id="pmnCfgEnd" type="number" min="1" max="24" class="stg-input" placeholder="18"></div>'+
+    '<details class="pmn-more"><summary>세부 설정 (안내 시작일 · 기준일 · 발송 마감 · 클릭 링크)</summary>'+
+      '<div class="stg-row r3" style="grid-template-columns:1fr 1fr 1fr">'+
+        '<div><label '+_pmnL+'>안내 시작일 (매월)</label><input id="pmnCfgNotice" type="number" min="1" max="28" class="stg-input" placeholder="10"></div>'+
+        '<div><label '+_pmnL+'>기준일 (경과 시 독촉)</label><input id="pmnCfgDue" type="number" min="1" max="31" class="stg-input" placeholder="20"></div>'+
+        '<div><label '+_pmnL+'>발송 마감 (이 시각 이후 미발송)</label><input id="pmnCfgEnd" type="number" min="1" max="24" class="stg-input" placeholder="18"></div>'+
+      '</div>'+
+      '<label '+_pmnL+'>알림 클릭 시 열 링크 (비우면 현재 앱 주소)</label><input id="pmnCfgLink" class="stg-input" placeholder="https://...">'+
+    '</details>'+
+    '<div class="pmn-btns">'+
+      '<button class="pri" onclick="pmnSaveCfg()">설정 저장</button>'+
+      '<button onclick="pmnTestSend()">테스트 발송</button>'+
+      '<button onclick="pmnSendNow()">지금 점검하고 발송</button>'+
     '</div>'+
-    '<div style="margin-top:8px"><label style="font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">알림 클릭 시 열 링크 (비우면 현재 앱 주소)</label>'+
-      '<input id="pmnCfgLink" class="stg-input" placeholder="https://..."></div>'+
-    '<div class="stg-action-bar" style="margin-top:12px">'+
-      '<button class="stg-btn-primary" onclick="pmnSaveCfg()">💾 서버에 저장</button>'+
-      '<button class="stg-btn" onclick="pmnLoadCfg()">⬇ 불러오기</button>'+
-      '<button class="stg-btn" onclick="pmnTestSend()">📨 테스트 발송</button>'+
-      '<button class="stg-btn" onclick="pmnDryRun()">👁 현재 미점검 확인</button>'+
-      '<span id="pmnStatus" class="stg-status"></span>'+
-    '</div>'+
-    '<div id="pmnDryResult" style="margin-top:10px"></div>'+
+    '<div class="pmn-help">휴대폰 <b>ntfy</b> 앱에서 위 토픽을 구독하면, 당월 <b>보전계획표 미완료</b>·<b>체크시트 미점검</b> 설비가 있을 때 알림이 옵니다. '+
+      '알림은 <b>한국시간 기준 하루 1회</b>, 정한 시각이 지나면 모든 항목을 <b>한 건으로 묶어</b> 보냅니다 (이상 없으면 발송 안 함). '+
+      '서버가 발송하므로 <b>앱·브라우저를 꺼도</b> 동작하며, 알림을 누르면 이 앱이 열립니다. '+
+      '토픽명은 아무나 구독할 수 있으니 <b>추측하기 어려운 이름</b>을 쓰세요 (예: <code>taejin_pm_x7q2</code>).</div>'+
   '</div>';
 
   // 6. Supabase 설정
@@ -3871,71 +3893,93 @@ function buildSettings(){
 // --- [v4.1] 미점검 자동알림 (서버 pm-uncheck-notify) ---
 var PMN_CFG_KEY='pm:pm_ntfy_cfg';
 var PMN_FN_URL='https://ebthltdmxpzlkfwvdloz.supabase.co/functions/v1/pm-uncheck-notify';
-function _pmnStatus(msg,ok){var st=document.getElementById('pmnStatus');if(!st)return;st.textContent=msg;st.style.color=ok?'var(--green)':'var(--red)';}
+function _pmnStatus(msg,ok){var st=document.getElementById('pmnStatus');if(!st)return;st.textContent=msg;st.style.color=ok===false?'var(--red)':'';}
+function pmnBadge(){
+  var on=(document.getElementById('pmnCfgEnabled')||{}).checked, b=document.getElementById('pmnBadge');
+  if(b){b.textContent=on?'감시 중':'중지';b.className='pmn-badge'+(on?'':' off');}
+}
+function _pmnBusy(on){document.querySelectorAll('.pmn-btns button').forEach(function(b){b.disabled=on;});}
 function pmnFillForm(c){
   c=c||{};
   var g=function(id){return document.getElementById(id);};
-  if(g('pmnCfgEnabled')) g('pmnCfgEnabled').value=(c.enabled===false)?'0':'1';
+  var it=c.items||{};
+  if(g('pmnCfgEnabled')) g('pmnCfgEnabled').checked=(c.enabled!==false);
   if(g('pmnCfgTopic'))   g('pmnCfgTopic').value=c.topic||'taejincall';
   if(g('pmnCfgNotice'))  g('pmnCfgNotice').value=(c.notice_day!=null)?c.notice_day:10;
   if(g('pmnCfgDue'))     g('pmnCfgDue').value=(c.due_day!=null)?c.due_day:20;
   if(g('pmnCfgHour'))    g('pmnCfgHour').value=(c.send_hour!=null)?c.send_hour:8;
   if(g('pmnCfgEnd'))     g('pmnCfgEnd').value=(c.end_hour!=null)?c.end_hour:18;
   if(g('pmnCfgLink'))    g('pmnCfgLink').value=c.click_url||ntfyClickUrl();
+  if(g('pmnItemPlan'))   g('pmnItemPlan').checked=(it.plan!==false);
+  if(g('pmnItemChk'))    g('pmnItemChk').checked=(it.chk!==false);
+  pmnBadge();
 }
 function pmnLoadCfg(silent){
   fetch(_getSbUrl()+'/rest/v1/kv_store?select=value&key=eq.'+encodeURIComponent(PMN_CFG_KEY)+'&limit=1',{headers:_sbHeaders()})
     .then(function(r){return r.json();})
     .then(function(rows){
       pmnFillForm(rows&&rows[0]?rows[0].value:{});
-      if(!silent)_pmnStatus('✅ 설정 로드 완료',true);
+      pmnDryRun();
     })
-    .catch(function(e){pmnFillForm({});if(!silent)_pmnStatus('❌ '+e.message,false);});
+    .catch(function(e){pmnFillForm({});_pmnStatus('❌ '+e.message,false);});
 }
 function pmnSaveCfg(){
   var cfg={
-    enabled: document.getElementById('pmnCfgEnabled').value==='1',
+    enabled: document.getElementById('pmnCfgEnabled').checked,
     topic: (document.getElementById('pmnCfgTopic').value||'taejincall').trim(),
     notice_day: parseInt(document.getElementById('pmnCfgNotice').value,10)||10,
     due_day: parseInt(document.getElementById('pmnCfgDue').value,10)||20,
     send_hour: Math.min(23, Math.max(0, parseInt(document.getElementById('pmnCfgHour').value,10)||0)),
     end_hour: Math.min(24, Math.max(1, parseInt(document.getElementById('pmnCfgEnd').value,10)||18)),
-    click_url: ((document.getElementById('pmnCfgLink')||{}).value||'').trim()||ntfyClickUrl()
+    click_url: ((document.getElementById('pmnCfgLink')||{}).value||'').trim()||ntfyClickUrl(),
+    items: {plan: document.getElementById('pmnItemPlan').checked, chk: document.getElementById('pmnItemChk').checked}
   };
   if(cfg.click_url&&!/^https?:\/\//i.test(cfg.click_url)){_pmnStatus('❌ 링크는 http:// 또는 https:// 로 시작해야 합니다',false);return;}
-  if(cfg.end_hour<=cfg.send_hour){_pmnStatus('❌ 발송 마감은 발송 시각보다 늦어야 합니다',false);return;}
+  if(cfg.end_hour<=cfg.send_hour){_pmnStatus('❌ 발송 마감('+cfg.end_hour+'시)은 발송 시각보다 늦어야 합니다 — 세부 설정 확인',false);return;}
+  if(!cfg.items.plan&&!cfg.items.chk){_pmnStatus('❌ 알림 항목을 하나 이상 선택하세요',false);return;}
   var hdrs=Object.assign({},_sbHeaders(),{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'});
+  _pmnBusy(true);
   fetch(_getSbUrl()+'/rest/v1/kv_store?on_conflict=key',{
     method:'POST',headers:hdrs,
     body:JSON.stringify([{key:PMN_CFG_KEY,value:cfg}])
   }).then(function(r){
     if(!r.ok)throw new Error('HTTP '+r.status);
-    _pmnStatus('✅ 서버 저장 완료 (매일 '+cfg.send_hour+'시대 1회 · 한국시간)',true);
-  }).catch(function(e){_pmnStatus('❌ '+e.message,false);});
+    pmnBadge();
+    _pmnStatus('✅ 저장 완료 — '+(cfg.enabled?'매일 '+cfg.send_hour+'시 이후 1회 발송':'자동발송 중지'),true);
+  }).catch(function(e){_pmnStatus('❌ '+e.message,false);}).then(function(){_pmnBusy(false);});
 }
 function pmnTestSend(){
-  _pmnStatus('발송 중...',true);
+  _pmnStatus('발송 중...');_pmnBusy(true);
   fetch(PMN_FN_URL+'?test=1',{headers:{'Authorization':'Bearer '+_getSbKey()}})
     .then(function(r){return r.json();})
     .then(function(j){_pmnStatus(j.ok?'✅ 테스트 발송 완료 (ntfy 앱 확인)':'❌ 발송 실패',j.ok);})
-    .catch(function(e){_pmnStatus('❌ '+e.message,false);});
+    .catch(function(e){_pmnStatus('❌ '+e.message,false);}).then(function(){_pmnBusy(false);});
+}
+function pmnSendNow(){
+  if(!confirm('지금 미점검 현황을 확인해 ntfy로 바로 발송합니다.\n(저장된 설정 기준 · 이상 없으면 발송하지 않음)\n계속하시겠습니까?'))return;
+  _pmnStatus('점검 후 발송 중...');_pmnBusy(true);
+  fetch(PMN_FN_URL+'?force=1',{headers:{'Authorization':'Bearer '+_getSbKey()}})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(!j.ok)throw new Error(j.error||'발송 실패');
+      var n=(j.planPending||[]).length+(j.chkPending||[]).length;
+      _pmnStatus(j.sent===0?'✅ 점검 완료 · 이상 없음 (발송 안 함)':'✅ 발송 완료 · 알림 '+n+'건',true);
+    })
+    .catch(function(e){_pmnStatus('❌ '+e.message,false);}).then(function(){_pmnBusy(false);});
 }
 function pmnDryRun(){
-  var box=document.getElementById('pmnDryResult');
-  _pmnStatus('확인 중...',true);
   fetch(PMN_FN_URL+'?dry=1',{headers:{'Authorization':'Bearer '+_getSbKey()}})
     .then(function(r){return r.json();})
     .then(function(j){
       if(!j.ok)throw new Error(j.error||'조회 실패');
-      var html='<div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid #334155;border-radius:6px;font-size:13px;line-height:1.7;color:#cbd5e1">'+
-        '<b>'+j.month+'</b> · 계획 대상 '+(j.plannedIds||[]).length+'대<br>'+
-        '📋 보전계획표 미완료: '+((j.planPending||[]).length?('<span style="color:#fbbf24">'+j.planPending.join(', ')+'</span>'):'<span style="color:#34d399">없음</span>')+'<br>'+
-        '📝 체크시트 미점검: '+((j.chkPending||[]).length?('<span style="color:#fbbf24">'+j.chkPending.join(', ')+'</span>'):'<span style="color:#34d399">없음</span>')+
-        '</div>';
-      if(box)box.innerHTML=html;
-      _pmnStatus('✅ 확인 완료',true);
+      var it=(j.cfg&&j.cfg.items)||{};
+      var n=(it.plan!==false?(j.planPending||[]).length:0)+(it.chk!==false?(j.chkPending||[]).length:0);
+      var t=new Date().toLocaleTimeString('ko-KR');
+      _pmnStatus('최근 점검 '+t+' · 알림 '+n+'건 · '+(n?'미점검 있음':'이상 없음')+(j.lastSent?' · 최근 발송 '+j.lastSent:''));
+      var st=document.getElementById('pmnStatus');
+      if(st&&n){st.title='보전계획표 미완료: '+((j.planPending||[]).join(', ')||'없음')+'\n체크시트 미점검: '+((j.chkPending||[]).join(', ')||'없음');st.style.color='#b45309';}
     })
-    .catch(function(e){_pmnStatus('❌ '+e.message,false);if(box)box.innerHTML='';});
+    .catch(function(e){_pmnStatus('❌ '+e.message,false);});
 }
 
 // --- 작성자/작업자 ---
