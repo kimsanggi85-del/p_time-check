@@ -1553,7 +1553,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
         <button class="nav-burger" type="button" onclick="toggleNav(true)" aria-label="메뉴 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
         <span class="app-logo">TJ</span>
         <span class="app-name">설비보전관리</span>
-        <span class="rev-badge" title="리비전 v3.8">v3.8</span>
+        <span class="rev-badge" title="리비전 v3.9">v3.9</span>
         <span class="nav-cur" id="navCur"></span>
       </h2>
       <div class="subtitle">(주)태진다이텍 · 프레스 설비 보전 · 정기점검 · 법정 안전검사</div>
@@ -1575,6 +1575,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
     <div class="tt-group">메뉴</div>
     <button class="top-tab" data-tab="eqhist" onclick="switchTopTab('eqhist')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><span class="tt-l">수리이력</span><span class="tt-s">수리</span></button>
     <button class="top-tab active" data-tab="plan" onclick="switchTopTab('plan')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="tt-l">보전계획표</span><span class="tt-s">보전계획</span></button>
+    <button class="top-tab" data-tab="rel" onclick="switchTopTab('rel')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span><span class="tt-l">MTBF·MTTR</span><span class="tt-s">MTBF</span></button>
     <button class="top-tab" data-tab="check" onclick="switchTopTab('check')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span><span class="tt-l">정기점검 기준·체크시트</span><span class="tt-s">체크시트</span></button>
     <button class="top-tab" data-tab="safety" onclick="switchTopTab('safety')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="tt-l">안전검사</span><span class="tt-s">안전검사</span></button>
     <button class="top-tab" data-tab="settings" onclick="switchTopTab('settings')"><span class="tt-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span><span class="tt-l">설정/조회</span><span class="tt-s">설정</span></button>
@@ -1641,6 +1642,8 @@ body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;ba
   </div>
 
   <!-- 설정 탭 -->
+  <!-- 설비 신뢰성 MTBF·MTTR 탭 [v3.9] -->
+  <div id="tab-rel" class="tab-pane no-print"><div id="pmRelTab"></div></div>
   <div id="tab-settings" class="tab-pane no-print"></div>
 
 <!-- ============================================
@@ -3675,6 +3678,7 @@ function switchTopTab(name){
   document.querySelectorAll('.top-tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===name);});
   document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.toggle('active',p.id==='tab-'+name);});
   if(name==='settings') buildSettings();
+  if(name==='rel' && typeof window.pmRelRender==='function') window.pmRelRender();
   if(name==='eqhist' && typeof window.eqhInit==='function') window.eqhInit();
   if(name==='plan' && typeof window.initPmPlan==='function') window.initPmPlan();
   if(name==='check' && typeof window.renderChkYearSelect==='function') window.renderChkYearSelect();
@@ -12802,6 +12806,389 @@ body > .page > .top-tabs{background:#fff !important;border:1px solid #e5e7eb !im
   document.addEventListener('DOMContentLoaded',cur); window.addEventListener('load',cur);
 })();
 </script>
+
+<!-- ============================================================
+     [v3.9 RELIABILITY-PROD] 설비 신뢰성(MTBF·MTTR) — 생산일보 연동 · 월별 자동집계
+     - 데이터: Supabase RPC pm_reliability(p_year)
+       (생산일보 앱 kv_store 'tj_prod_daily_v1' 를 월·설비별로 실시간 집계, 읽기 전용)
+       → 생산일보에 입력되는 즉시 반영 (별도 마감·엑셀 작업 없음)
+     - 가동(분) = 근무 − 휴식 − 정지 · 고장건수 = 설비고장 건수 · 고장정지 = 고장정지(분)
+     - MTBF(H) = 가동시간 ÷ 고장건수 · MTTR(분) = 고장정지 ÷ 고장건수 · 가용도 = 가동 ÷ (가동+고장정지)
+     - 목표: 생산일보 MTBF·MTTR 화면 목표(master.relTgt) 공용, 없으면 100H / 60분
+     - 표시: ① 메뉴 「MTBF·MTTR」(#tab-rel) — KPI · 월별 그래프 · 월별표 · 설비별표
+             ② 보전계획 「월별 점검 실적」 아래 월별 행  ③ 설비 체크시트 상세 상단
+             ④ 보전이력관리 신뢰성 지표 위 안내
+     ============================================================ -->
+<style>
+#pmPlanTab .v6r-rows{border-top:1px dashed #e5e7eb;padding:8px 16px 12px}
+.v6r-cap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#111827;margin-bottom:6px}
+.v6r-cap small{font-weight:500;color:#6b7280}
+.v6r-cap .v6r-ytd{margin-left:auto;font-weight:600;color:#374151}
+.v6r-cap a{color:#2563eb;font-weight:600;cursor:pointer;text-decoration:none}
+.v6r-row{display:grid;grid-template-columns:52px repeat(12,1fr);gap:6px;align-items:center;font-size:11px;line-height:20px}
+.v6r-row>span{text-align:center;white-space:nowrap;color:#374151;font-variant-numeric:tabular-nums;border-radius:4px}
+.v6r-row>span:first-child{text-align:left;color:#6b7280;font-weight:600}
+.v6r-row .bad{background:#fef2f2;color:#b91c1c;font-weight:700}
+.v6r-tbl td.bad{color:#b91c1c;font-weight:700}
+.v6r-row .good,.v6r-tbl td.good{color:#15803d;font-weight:600}
+.v6r-row .na{color:#d1d5db}
+.v6r-row .now{outline:1px solid #93c5fd}
+#pmPlanTab .v5d-chart.v6r-on .v5d-bars{grid-template-columns:52px repeat(12,1fr)}
+#pmPlanTab .v5d-chart.v6r-on .v5d-bars::before{content:'';display:block}
+
+/* ---- 메뉴 페이지 ---- */
+#pmRelTab{max-width:1400px;margin:0 auto;color:#111827}
+#pmRelTab .v6r-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:16px}
+#pmRelTab .v6r-head h2{margin:0;font-size:18px;font-weight:800}
+#pmRelTab .v6r-head p{margin:4px 0 0;font-size:12px;color:#6b7280}
+#pmRelTab .v6r-head .v6r-ctl{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#pmRelTab select,#pmRelTab .v6r-btn{height:34px;border:1px solid #d1d5db;border-radius:8px;background:#fff;padding:0 10px;font-size:13px;color:#111827;cursor:pointer}
+#pmRelTab .v6r-btn:hover{background:#f9fafb}
+#pmRelTab .v6r-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+#pmRelTab .v6r-kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px}
+#pmRelTab .v6r-kpi small{display:block;font-size:12px;color:#6b7280;font-weight:600}
+#pmRelTab .v6r-kpi b{display:block;font-size:26px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+#pmRelTab .v6r-kpi b em{font-style:normal;font-size:13px;font-weight:600;color:#9ca3af;margin-left:2px}
+#pmRelTab .v6r-kpi span{font-size:11px;color:#9ca3af}
+#pmRelTab .v6r-kpi.bad b{color:#b91c1c}
+#pmRelTab .v6r-kpi.good b{color:#15803d}
+#pmRelTab .v6r-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-bottom:16px;align-items:start}
+#pmRelTab .v6r-panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;min-width:0;overflow:hidden}
+#pmRelTab .v6r-ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid #f3f4f6;font-size:14px;font-weight:700}
+#pmRelTab .v6r-ph small{font-weight:500;color:#6b7280}
+#pmRelTab .v6r-lg{margin-left:auto;display:flex;gap:10px;font-size:11px;font-weight:500;color:#6b7280;align-items:center}
+#pmRelTab .v6r-lg i{display:inline-block;width:10px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
+#pmRelTab svg.v6r-svg{display:block;width:100%;height:auto;padding:8px 12px 4px;box-sizing:border-box}
+#pmRelTab .v6r-scroll{overflow-x:auto}
+.v6r-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.v6r-tbl th,.v6r-tbl td{padding:7px 10px;border-bottom:1px solid #f3f4f6;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.v6r-tbl th{color:#6b7280;font-weight:600;background:#f9fafb;position:sticky;top:0}
+.v6r-tbl th:first-child,.v6r-tbl td:first-child{text-align:left}
+.v6r-tbl tr.sum td{font-weight:800;background:#f9fafb}
+.v6r-tbl tr.now td:first-child{color:#2563eb;font-weight:800}
+.v6r-tbl tr.click{cursor:pointer}
+.v6r-tbl tr.click:hover td{background:#f8fafc}
+.v6r-tbl td.na{color:#d1d5db}
+#pmRelTab .v6r-note{font-size:11px;color:#9ca3af;padding:10px 16px 14px;line-height:1.6}
+#pmRelTab .v6r-msg{padding:40px;text-align:center;color:#6b7280;font-size:13px}
+
+.v6r-eq{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:8px 0 4px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;font-size:12px;color:#374151}
+.v6r-eq b{font-variant-numeric:tabular-nums}
+.v6r-eq .bad{color:#b91c1c}
+.v6r-eq .t{font-weight:700;color:#111827}
+.v6r-eq small{color:#9ca3af}
+.v6r-mh{margin:0 0 12px;padding:10px 14px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;font-size:13px;color:#1e3a8a}
+.v6r-mh b{font-variant-numeric:tabular-nums}
+.v6r-mh a{color:#1d4ed8;font-weight:700;cursor:pointer}
+@media(max-width:1100px){
+  #pmRelTab .v6r-grid{grid-template-columns:1fr}
+  #pmRelTab .v6r-kpis{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:768px){
+  #pmPlanTab .v6r-rows{padding:8px 8px 10px}
+  .v6r-row{grid-template-columns:40px repeat(12,1fr);gap:3px;font-size:9px}
+  #pmPlanTab .v5d-chart.v6r-on .v5d-bars{grid-template-columns:40px repeat(12,1fr)}
+  #pmRelTab .v6r-kpis{grid-template-columns:repeat(2,1fr)}
+  #pmRelTab .v6r-head .v6r-ctl{margin-left:0}
+}
+</style>
+<script>
+(function(){
+  'use strict';
+  var CACHE = {};            // year -> {t, rows}
+  var TGT = null;            // {b:H, r:분}
+  var TTL = 10*60*1000;
+  var busy = {};
+  var PROD_URL = 'https://kimsanggi85-del.github.io/Daily-Production-Report/';
+  var relYear = null, relMonth = 0, relSort = 'mtbf';
+
+  function sbUrl(){ try{ return (typeof _getSbUrl==='function' && _getSbUrl()) || DEFAULT_SUPABASE_URL; }catch(e){ return ''; } }
+  function sbHdr(){ try{ return (typeof _sbHeaders==='function') ? _sbHeaders() : {'Content-Type':'application/json'}; }catch(e){ return {'Content-Type':'application/json'}; } }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function curYear(){
+    try{ if(window.__v4 && window.__v4.currentYear) return +window.__v4.currentYear; }catch(_){}
+    var y = parseInt(localStorage.getItem('cur_year_v3')||'',10);
+    return isNaN(y) ? new Date().getFullYear() : y;
+  }
+  // "P-1" / "P- 01" / "P-01" → 1  (프레스만 생산일보와 연결)
+  function eqNo(key){
+    var m = String(key||'').trim().match(/^P\s*-\s*0*(\d+)$/i);
+    return m ? parseInt(m[1],10) : null;
+  }
+  function pid(n){ return 'P- '+(n<10?'0'+n:n); }
+  function h1(min){ return (min/60).toFixed(1); }
+  function fmtB(o){ return o.mtbf==null ? (o.recs?'무고장':'-') : h1(o.mtbf); }
+  function fmtR(o){ return o.mttr==null ? '-' : String(Math.round(o.mttr)); }
+  function clsB(o){ return o.mtbf==null ? (o.recs?'good':'na') : ((o.mtbf/60)<TGT.b?'bad':'good'); }
+  function clsR(o){ return o.mttr==null ? 'na' : (o.mttr>TGT.r?'bad':'good'); }
+
+  function load(year, force){
+    var c = CACHE[year];
+    if(!force && c && Date.now()-c.t < TTL) return Promise.resolve(c.rows);
+    if(busy[year]) return busy[year];
+    var u = sbUrl();
+    if(!u) return Promise.resolve(null);
+    var pT = (TGT && !force) ? Promise.resolve() :
+      fetch(u+'/rest/v1/kv_store?select=t:value->master->relTgt&key=eq.tj_prod_daily_v1&limit=1',{headers:sbHdr()})
+        .then(function(r){ return r.ok ? r.json() : []; })
+        .then(function(j){ var t=(j&&j[0]&&j[0].t)||{}; TGT={b:+t.b||100, r:+t.r||60}; })
+        .catch(function(){ TGT={b:100,r:60}; });
+    var pR = fetch(u+'/rest/v1/rpc/pm_reliability',{method:'POST',headers:sbHdr(),body:JSON.stringify({p_year:year})})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+    busy[year] = Promise.all([pT,pR]).then(function(a){
+      CACHE[year] = {t:Date.now(), rows:a[1]||[]};
+      return CACHE[year].rows;
+    }).catch(function(e){
+      console.warn('[v3.9 RELIABILITY] 생산일보 집계 조회 실패:', e);
+      if(!TGT) TGT={b:100,r:60};
+      CACHE[year] = {t:Date.now(), rows:null};
+      return null;
+    }).then(function(r){ delete busy[year]; return r; });
+    return busy[year];
+  }
+
+  function agg(rows, filt){
+    var o = {run:0,f:0,fm:0,recs:0};
+    rows.forEach(function(r){ if(filt && !filt(r)) return; o.run+=+r.run_min||0; o.f+=+r.fails||0; o.fm+=+r.fail_min||0; o.recs+=+r.recs||0; });
+    o.mtbf = o.f ? o.run/o.f : null;      // 분
+    o.mttr = o.f ? o.fm/o.f : null;       // 분
+    o.av = (o.run+o.fm) ? o.run/(o.run+o.fm)*100 : null;
+    return o;
+  }
+  function byMonth(rows){
+    var M=[]; for(var m=1;m<=12;m++) M.push(agg(rows, (function(mm){ return function(r){ return r.month===mm; }; })(m)));
+    return M;
+  }
+  function byEq(rows){
+    var by = {};
+    rows.forEach(function(r){ var k=r.mc_no; (by[k]=by[k]||{no:k,mc:r.mc,rows:[]}).rows.push(r); });
+    return Object.keys(by).map(function(k){ var x=by[k]; var a=agg(x.rows); a.no=x.no; a.mc=x.mc; return a; });
+  }
+  function goTab(name){ var b=document.querySelector('.top-tab[data-tab="'+name+'"]'); if(b) b.click(); else if(typeof switchTopTab==='function') switchTopTab(name); }
+  window.pmRelGoEq = function(key){ goTab('check'); if(typeof showEquipment==='function') showEquipment(key); };
+  window.pmRelOpen = function(){ goTab('rel'); try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){} };
+
+  // ---------- 그래프: 월별 MTBF(막대) · MTTR(꺾은선) — 인라인 SVG ----------
+  function chartSvg(M, year){
+    var now = new Date(), isCur = (year===now.getFullYear()), curM = now.getMonth()+1;
+    var W=640, H=270, L=48, R=48, T=26, B=30, pw=W-L-R, ph=H-T-B, cw=pw/12;
+    var bv = M.map(function(o){ return (o.recs && o.mtbf!=null) ? o.mtbf/60 : null; });
+    var rv = M.map(function(o){ return (o.recs && o.mttr!=null) ? o.mttr : null; });
+    var nice = function(v){ var p=Math.pow(10,Math.floor(Math.log10(v))), n=v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; };
+    var bMax = nice(Math.max(TGT.b*1.2, Math.max.apply(null, bv.map(function(v){return v||0;}))||1));
+    var rMax = nice(Math.max(TGT.r*1.2, Math.max.apply(null, rv.map(function(v){return v||0;}))||1));
+    var yb = function(v){ return T+ph-(v/bMax)*ph; }, yr = function(v){ return T+ph-(v/rMax)*ph; };
+    var s = '<svg class="v6r-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+year+'년 월별 MTBF·MTTR">';
+    for(var g=0; g<=4; g++){
+      var gy = T+ph*g/4;
+      s += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+gy+'" y2="'+gy+'" stroke="#f3f4f6"/>'
+        + '<text x="'+(L-6)+'" y="'+(gy+4)+'" text-anchor="end" font-size="10" fill="#6b7280">'+Math.round(bMax*(4-g)/4)+'</text>'
+        + '<text x="'+(W-R+6)+'" y="'+(gy+4)+'" font-size="10" fill="#b45309">'+Math.round(rMax*(4-g)/4)+'</text>';
+    }
+    s += '<text x="4" y="12" font-size="10" font-weight="600" fill="#6b7280">MTBF(H)</text>'
+      + '<text x="'+(W-4)+'" y="12" text-anchor="end" font-size="10" font-weight="600" fill="#b45309">MTTR(분)</text>';
+    bv.forEach(function(v,i){
+      var x = L+cw*i, bw = Math.min(26, cw*0.56), bx = x+(cw-bw)/2;
+      var tip = (i+1)+'월: '+(M[i].recs ? ('고장 '+M[i].f+'건 · MTBF '+(v==null?'무고장':v.toFixed(1)+'H')+' · MTTR '+(rv[i]==null?'-':Math.round(rv[i])+'분')) : '기록 없음');
+      if(v!=null){
+        var c = v<TGT.b ? '#fca5a5' : '#86efac';
+        s += '<rect x="'+bx+'" y="'+yb(v)+'" width="'+bw+'" height="'+(T+ph-yb(v))+'" rx="3" fill="'+c+'"><title>'+tip+'</title></rect>'
+          + '<text x="'+(x+cw/2)+'" y="'+(yb(v)-4)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#374151">'+Math.round(v)+'</text>';
+      } else if(M[i].recs){
+        s += '<text x="'+(x+cw/2)+'" y="'+(T+ph-4)+'" text-anchor="middle" font-size="10" fill="#15803d"><title>'+tip+'</title>무고장</text>';
+      }
+      s += '<text x="'+(x+cw/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="11" '+(isCur&&i+1===curM?'font-weight="800" fill="#2563eb"':'fill="#6b7280"')+'>'+(i+1)+'월</text>';
+    });
+    s += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yb(TGT.b)+'" y2="'+yb(TGT.b)+'" stroke="#16a34a" stroke-dasharray="5 4" stroke-width="1.2"/>'
+      + '<text x="'+(L+4)+'" y="'+(yb(TGT.b)-4)+'" font-size="10" fill="#15803d">MTBF 목표 '+TGT.b+'H</text>'
+      + '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yr(TGT.r)+'" y2="'+yr(TGT.r)+'" stroke="#d97706" stroke-dasharray="2 4" stroke-width="1.2"/>'
+      + '<text x="'+(W-R-4)+'" y="'+(yr(TGT.r)-4)+'" text-anchor="end" font-size="10" fill="#b45309">MTTR 목표 '+TGT.r+'분</text>';
+    var pts = [];
+    rv.forEach(function(v,i){ if(v!=null) pts.push([L+cw*i+cw/2, yr(v), v, i]); });
+    if(pts.length>1) s += '<polyline fill="none" stroke="#f59e0b" stroke-width="2" points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'"/>';
+    pts.forEach(function(p){
+      s += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#fff" stroke="#f59e0b" stroke-width="2"><title>'+(p[3]+1)+'월 MTTR '+Math.round(p[2])+'분</title></circle>';
+    });
+    return s + '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+(T+ph)+'" y2="'+(T+ph)+'" stroke="#d1d5db"/></svg>';
+  }
+
+  // ---------- ① 메뉴 페이지 「MTBF·MTTR」 ----------
+  window.pmRelRender = function(force){
+    var root = document.getElementById('pmRelTab');
+    if(!root) return;
+    if(relYear==null) relYear = curYear();
+    var year = relYear, nowY = new Date().getFullYear();
+    var yOpt = ''; for(var y=nowY; y>=nowY-3; y--) yOpt += '<option value="'+y+'"'+(y===year?' selected':'')+'>'+y+'년</option>';
+    var mOpt = '<option value="0">'+year+' 누계</option>'; for(var m=1;m<=12;m++) mOpt += '<option value="'+m+'"'+(m===relMonth?' selected':'')+'>'+m+'월</option>';
+    var head = '<div class="v6r-head"><div><h2>설비 신뢰성 (MTBF · MTTR)</h2>'
+      + '<p>생산일보의 가동시간 · 설비고장 건수 · 고장정지(분)를 월별 · 설비별로 자동 집계합니다 (입력 즉시 반영) · IATF 16949 8.5.1.5 TPM</p></div>'
+      + '<div class="v6r-ctl"><select onchange="pmRelSet(\'y\',this.value)">'+yOpt+'</select>'
+      + '<button class="v6r-btn" onclick="pmRelRender(true)">↻ 새로고침</button>'
+      + '<button class="v6r-btn" onclick="window.open(\''+PROD_URL+'\',\'_blank\')">생산일보 열기 ↗</button></div></div>';
+    root.innerHTML = head + '<div class="v6r-msg">생산일보 자료를 집계하는 중…</div>';
+    load(year, !!force).then(function(rows){
+      if(relYear!==year) return;
+      if(!rows){ root.innerHTML = head + '<div class="v6r-msg">생산일보 자료를 불러오지 못했습니다. 네트워크 상태를 확인하고 새로고침하세요.</div>'; return; }
+      if(!rows.length){ root.innerHTML = head + '<div class="v6r-msg">'+year+'년 생산일보 기록이 없습니다.</div>'; return; }
+      var M = byMonth(rows), Y = agg(rows);
+      var now = new Date(), isCur = (year===now.getFullYear()), curM = now.getMonth()+1;
+      var kpi = function(cls,label,val,unit,sub){ return '<div class="v6r-kpi '+(cls||'')+'"><small>'+label+'</small><b>'+val+'<em>'+(unit||'')+'</em></b><span>'+sub+'</span></div>'; };
+      var html = head
+        + '<div class="v6r-kpis">'
+        +   kpi('', '가동시간', Math.round(Y.run/60).toLocaleString(), 'H', year+' 누계 · 설비 '+byEq(rows).length+'대')
+        +   kpi('', '설비고장', Y.f, '건', '고장정지 '+h1(Y.fm)+'H')
+        +   kpi(Y.mtbf==null?'good':clsB(Y), 'MTBF', Y.mtbf==null?'무고장':h1(Y.mtbf), Y.mtbf==null?'':'H', '목표 ≥ '+TGT.b+'H · 높을수록 양호')
+        +   kpi(Y.mttr==null?'':clsR(Y), 'MTTR', fmtR(Y), Y.mttr==null?'':'분', '목표 ≤ '+TGT.r+'분 · 낮을수록 양호')
+        +   kpi('', '가용도', Y.av==null?'-':Y.av.toFixed(1), Y.av==null?'':'%', '가동 ÷ (가동 + 고장정지)')
+        + '</div>';
+      // 그래프 + 월별표
+      var mt = '<table class="v6r-tbl"><thead><tr><th>월</th><th>가동(H)</th><th>고장(건)</th><th>고장정지(H)</th><th>MTBF(H)</th><th>MTTR(분)</th><th>가용도</th></tr></thead><tbody>';
+      M.forEach(function(o,i){
+        var m=i+1;
+        if(!o.recs){ mt += '<tr'+(isCur&&m===curM?' class="now"':'')+'><td>'+m+'월</td><td class="na" colspan="6" style="text-align:center">기록 없음</td></tr>'; return; }
+        mt += '<tr'+(isCur&&m===curM?' class="now"':'')+'><td>'+m+'월'+(isCur&&m===curM?' (진행중)':'')+'</td><td>'+h1(o.run)+'</td><td>'+o.f+'</td><td>'+h1(o.fm)+'</td>'
+          + '<td class="'+clsB(o)+'">'+fmtB(o)+'</td><td class="'+clsR(o)+'">'+fmtR(o)+'</td><td>'+(o.av==null?'-':o.av.toFixed(1)+'%')+'</td></tr>';
+      });
+      mt += '<tr class="sum"><td>누계</td><td>'+h1(Y.run)+'</td><td>'+Y.f+'</td><td>'+h1(Y.fm)+'</td><td class="'+clsB(Y)+'">'+fmtB(Y)+'</td><td class="'+clsR(Y)+'">'+fmtR(Y)+'</td><td>'+(Y.av==null?'-':Y.av.toFixed(1)+'%')+'</td></tr></tbody></table>';
+      html += '<div class="v6r-grid">'
+        + '<div class="v6r-panel"><div class="v6r-ph">월별 MTBF · MTTR 추이 <small>'+year+'</small>'
+        +   '<span class="v6r-lg"><span><i style="background:#86efac"></i>MTBF 달성</span><span><i style="background:#fca5a5"></i>MTBF 미달</span><span><i style="background:#f59e0b;height:2px"></i>MTTR</span></span></div>'
+        +   chartSvg(M, year) + '</div>'
+        + '<div class="v6r-panel"><div class="v6r-ph">월별 집계 <small>생산일보 자동집계</small></div><div class="v6r-scroll">'+mt+'</div></div>'
+        + '</div>';
+      // 설비별표
+      var sub = relMonth ? rows.filter(function(r){ return r.month===relMonth; }) : rows;
+      var E = byEq(sub);
+      E.sort(function(a,b){
+        if(relSort==='no') return a.no-b.no;
+        if(relSort==='f') return b.f-a.f || a.no-b.no;
+        if(relSort==='mttr') return (b.mttr==null?-1:b.mttr)-(a.mttr==null?-1:a.mttr) || a.no-b.no;
+        var x=a.mtbf==null?Infinity:a.mtbf, y2=b.mtbf==null?Infinity:b.mtbf; return x-y2 || a.no-b.no;
+      });
+      var sOpt = [['mtbf','MTBF 낮은 순'],['f','고장 많은 순'],['mttr','MTTR 긴 순'],['no','설비번호 순']]
+        .map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===relSort?' selected':'')+'>'+o[1]+'</option>'; }).join('');
+      var et = '<table class="v6r-tbl"><thead><tr><th>설비</th><th>일보(건)</th><th>가동(H)</th><th>고장(건)</th><th>고장정지(H)</th><th>MTBF(H)</th><th>MTTR(분)</th><th>가용도</th></tr></thead><tbody>'
+        + E.map(function(a){
+            var key = 'P-'+a.no, has = (typeof INSPECTION_DATA!=='undefined' && INSPECTION_DATA.inspection_data && INSPECTION_DATA.inspection_data[key]);
+            return '<tr'+(has?' class="click" title="체크시트 열기" onclick="pmRelGoEq(\''+key+'\')"':'')+'>'
+              + '<td><b>'+esc(pid(a.no))+'</b> <span style="color:#6b7280">'+esc(String(a.mc||'').replace(/^\s*\d+\s*/,''))+'</span></td>'
+              + '<td>'+a.recs+'</td><td>'+h1(a.run)+'</td><td>'+a.f+'</td><td>'+h1(a.fm)+'</td>'
+              + '<td class="'+clsB(a)+'">'+fmtB(a)+'</td><td class="'+clsR(a)+'">'+fmtR(a)+'</td><td>'+(a.av==null?'-':a.av.toFixed(1)+'%')+'</td></tr>';
+          }).join('')
+        + '</tbody></table>';
+      html += '<div class="v6r-panel"><div class="v6r-ph">설비별 MTBF · MTTR <small>'+(relMonth?year+'년 '+relMonth+'월':year+' 누계')+' · 행을 누르면 체크시트</small>'
+        + '<span class="v6r-lg"><select onchange="pmRelSet(\'m\',this.value)">'+mOpt+'</select><select onchange="pmRelSet(\'s\',this.value)">'+sOpt+'</select></span></div>'
+        + '<div class="v6r-scroll">'+et+'</div>'
+        + '<div class="v6r-note">※ 가동 = 근무 − 휴식 − 정지 · MTBF = 가동시간 ÷ 고장건수 · MTTR = 고장정지 ÷ 고장건수 · 가용도 = 가동 ÷ (가동 + 고장정지)<br>'
+        + '※ 고장 입력: 생산일보 「설비고장 건수 · 고장정지(분)」 또는 고장이력대장 · 목표값 변경: 생산일보 MTBF·MTTR 화면 · 빨간색 = 목표 미달</div></div>';
+      root.innerHTML = html;
+    });
+  };
+  window.pmRelSet = function(k,v){
+    if(k==='y'){ relYear=+v; relMonth=0; }
+    else if(k==='m') relMonth=+v;
+    else if(k==='s') relSort=v;
+    window.pmRelRender();
+  };
+
+  // ---------- ② 보전계획 대시보드: 월별 점검 실적 아래 ----------
+  function renderPlan(){
+    var panel = document.querySelector('#pmPlanTab .v5d-chart');
+    if(!panel || panel.querySelector('.v6r-rows')) return;
+    var year = curYear();
+    var box = document.createElement('div');
+    box.className = 'v6r-rows';
+    panel.classList.add('v6r-on');
+    box.innerHTML = '<div class="v6r-cap">설비 신뢰성 <small>생산일보 연동 · 불러오는 중…</small></div>';
+    panel.appendChild(box);
+    load(year).then(function(rows){
+      if(!box.isConnected) return;
+      if(!rows){ box.innerHTML = '<div class="v6r-cap">설비 신뢰성 <small>생산일보 자료를 불러오지 못했습니다</small></div>'; return; }
+      var now = new Date(), isCur = (year===now.getFullYear()), curM = now.getMonth()+1;
+      var M = byMonth(rows), ytd = agg(rows);
+      var cell = function(m, txt, cls){ var c=(cls||'')+(isCur && m===curM ? ' now' : ''); return '<span class="'+c.trim()+'">'+txt+'</span>'; };
+      var rF='<span>고장</span>', rB='<span>MTBF</span>', rR='<span>MTTR</span>';
+      M.forEach(function(o,i){
+        var m=i+1;
+        if(!o.recs){ rF+=cell(m,'·','na'); rB+=cell(m,'·','na'); rR+=cell(m,'·','na'); return; }
+        rF += cell(m, o.f+'건', o.f? '' : 'good');
+        rB += cell(m, o.mtbf==null?'무고장':h1(o.mtbf)+'H', clsB(o));
+        rR += cell(m, o.mttr==null?'-':Math.round(o.mttr)+'분', clsR(o));
+      });
+      box.innerHTML =
+        '<div class="v6r-cap">설비 신뢰성 (MTBF · MTTR) <small>생산일보 연동 · 목표 MTBF ≥ '+TGT.b+'H · MTTR ≤ '+TGT.r+'분</small>'
+        + '<span class="v6r-ytd">'+year+' 누계: 고장 '+ytd.f+'건 · MTBF '+(ytd.mtbf==null?'-':h1(ytd.mtbf)+'H')+' · MTTR '+(ytd.mttr==null?'-':Math.round(ytd.mttr)+'분')
+        + ' · <a onclick="pmRelOpen()">그래프·설비별 보기 →</a></span></div>'
+        + '<div class="v6r-row">'+rF+'</div><div class="v6r-row">'+rB+'</div><div class="v6r-row">'+rR+'</div>';
+    });
+  }
+
+  // ---------- ③ 설비 체크시트 상세 ----------
+  function renderEq(){
+    var dp = document.getElementById('detailPanel');
+    if(!dp || !dp.classList.contains('show') || dp.querySelector('.v6r-eq')) return;
+    var kEl = dp.querySelector('.cs-mbar b');
+    var no = eqNo(kEl && kEl.textContent);
+    var tabs = dp.querySelector('.cs-tabs');
+    if(no==null || !tabs) return;
+    var year = (typeof getChkYear==='function') ? (+getChkYear()||curYear()) : curYear();
+    var box = document.createElement('div');
+    box.className = 'v6r-eq no-print';
+    box.innerHTML = '<span class="t">설비 신뢰성</span><small>생산일보 불러오는 중…</small>';
+    tabs.parentNode.insertBefore(box, tabs);
+    load(year).then(function(rows){
+      if(!box.isConnected) return;
+      if(!rows){ box.innerHTML = '<span class="t">설비 신뢰성</span><small>생산일보 자료를 불러오지 못했습니다</small>'; return; }
+      var mine = rows.filter(function(r){ return r.mc_no===no; });
+      if(!mine.length){ box.innerHTML = '<span class="t">설비 신뢰성 '+year+'</span><small>생산일보 기록 없음</small>'; return; }
+      var a = agg(mine);
+      var lastM = Math.max.apply(null, mine.map(function(r){ return r.month; }));
+      var l = agg(mine, function(r){ return r.month===lastM; });
+      box.innerHTML = '<span class="t">설비 신뢰성 '+year+' 누계</span>'
+        + '<span>고장 <b>'+a.f+'</b>건</span>'
+        + '<span>MTBF <b class="'+(clsB(a)==='bad'?'bad':'')+'">'+(a.mtbf==null?'무고장':h1(a.mtbf)+'H')+'</b></span>'
+        + '<span>MTTR <b class="'+(clsR(a)==='bad'?'bad':'')+'">'+(a.mttr==null?'-':Math.round(a.mttr)+'분')+'</b></span>'
+        + '<span>가용도 <b>'+(a.av==null?'-':a.av.toFixed(1)+'%')+'</b></span>'
+        + '<small>'+lastM+'월: 고장 '+l.f+'건 · 가동 '+h1(l.run)+'H · 생산일보 기준</small>';
+    });
+  }
+
+  // ---------- ④ 보전이력관리 신뢰성 지표 ----------
+  function renderMaint(){
+    var wrap = document.getElementById('relWrap');
+    if(!wrap || wrap.querySelector('.v6r-mh')) return;
+    var year = curYear();
+    var box = document.createElement('div');
+    box.className = 'v6r-mh';
+    box.textContent = '생산일보 기준 MTBF·MTTR 불러오는 중…';
+    wrap.insertBefore(box, wrap.firstChild);
+    load(year).then(function(rows){
+      if(!box.isConnected) return;
+      if(!rows){ box.textContent = '생산일보 자료를 불러오지 못했습니다'; return; }
+      var a = agg(rows);
+      box.innerHTML = '🏭 <b>생산일보 기준 '+year+' 누계</b> — 가동 <b>'+h1(a.run)+'</b>H · 고장 <b>'+a.f+'</b>건 · MTBF <b>'+(a.mtbf==null?'-':h1(a.mtbf)+'H')+'</b> · MTTR <b>'+(a.mttr==null?'-':Math.round(a.mttr)+'분')+'</b> · <a onclick="pmRelOpen()">MTBF·MTTR 메뉴 →</a>'
+        + '<div style="font-size:11px;color:#3b82f6;margin-top:4px">아래 카드는 수리이력 등록 건 기준입니다. 공식 MTBF·MTTR은 생산일보(가동시간·고장정지) 기준 값을 사용하세요.</div>';
+    });
+  }
+
+  var timer = null;
+  function schedule(){
+    if(timer) return;                      // 스로틀: 잦은 DOM 변경에도 주기적으로 실행
+    timer = setTimeout(function(){
+      timer = null;
+      try{ renderPlan(); }catch(e){ console.warn('[v3.9 RELIABILITY] plan', e); }
+      try{ renderEq(); }catch(e){ console.warn('[v3.9 RELIABILITY] eq', e); }
+      try{ renderMaint(); }catch(e){ console.warn('[v3.9 RELIABILITY] maint', e); }
+    }, 150);
+  }
+  function start(){
+    new MutationObserver(schedule).observe(document.body, {childList:true, subtree:true});
+    schedule();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+<!-- [v3.9 RELIABILITY-PROD END] -->
 
 </body>
 </html>
